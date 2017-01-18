@@ -83,8 +83,9 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 		
 		JPanel horizon1 = new HorizontalPanel();
 		messageTypes = new JLabeledChoice("Message type:", new String[] { MESSAGE_TYPE_STRING, MESSAGE_TYPE_HEX_STRING, MESSAGE_TYPE_RANDOM_STR_WITH_FIX_LEN }, false, false);
-		messageTypes.setSelectedIndex(0);
 		messageTypes.addChangeListener(this);
+		messageTypes.setSelectedIndex(0);
+		
 		horizon1.add(messageTypes, BorderLayout.WEST);
 		stringLength.setVisible(false);
 		horizon1.add(stringLength);
@@ -106,11 +107,11 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		if(e.getSource() == this.messageTypes) {
-			String messageType = messageTypes.getText();
-			if(MESSAGE_TYPE_STRING.equalsIgnoreCase(messageType) || MESSAGE_TYPE_HEX_STRING.equalsIgnoreCase(messageType)) {
+			int selectedIndex = this.messageTypes.getSelectedIndex();
+			if(selectedIndex == 0 || selectedIndex == 1) {
 				stringLength.setVisible(false);
 				messagePanel.setVisible(true);
-			} else if(MESSAGE_TYPE_RANDOM_STR_WITH_FIX_LEN.equals(messageType)) {
+			} else if(selectedIndex == 2) {
 				messagePanel.setVisible(false);
 				stringLength.setVisible(true);
 			} else {
@@ -135,7 +136,22 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 	public void configure(TestElement element) {
 		super.configure(element);
 		PubSampler sampler = (PubSampler) element;
-		setupSamplerProperties(sampler);
+		
+		connUI.configure(sampler);
+		this.qosChoice.setSelectedIndex(sampler.getQOS());
+		this.topicName.setText(sampler.getTopic());
+		this.timestamp.setSelected(sampler.isAddTimestamp());
+		if(MESSAGE_TYPE_STRING.equalsIgnoreCase(sampler.getMessageType())) {
+			this.messageTypes.setSelectedIndex(0);	
+			this.messagePanel.setVisible(true);
+		} else if(MESSAGE_TYPE_HEX_STRING.equalsIgnoreCase(sampler.getMessageType())) {
+			this.messageTypes.setSelectedIndex(1);
+		} else if(MESSAGE_TYPE_RANDOM_STR_WITH_FIX_LEN.equalsIgnoreCase(sampler.getMessageType())) {
+			this.messageTypes.setSelectedIndex(2);
+		}
+		
+		stringLength.setText(String.valueOf(sampler.getMessageLength()));
+		sendMessage.setText(sampler.getMessage());
 	}
 
 	@Override
@@ -163,7 +179,7 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 		sampler.setAddTimestamp(this.timestamp.isSelected());
 		
 		sampler.setMessageType(this.messageTypes.getText());
-		sampler.setMessageLength(Integer.parseInt(this.stringLength.getText()));
+		sampler.setMessageLength(CommonConnUI.parseInt(this.stringLength.getText()));
 		sampler.setMessage(this.sendMessage.getText());
 	}
 

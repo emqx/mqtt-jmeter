@@ -1,6 +1,6 @@
 package net.xmeter.samplers;
 
-public class PubSampler extends ConnectionSampler{
+public class PubSampler extends ConnectionSampler {
 	/**
 	 * 
 	 */

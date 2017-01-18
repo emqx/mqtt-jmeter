@@ -234,20 +234,27 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	public void setupSamplerProperties(ConnectionSampler sampler) {
 		sampler.setCertFile1(certificationFilePath1.getText());
 		sampler.setCertFile2(certificationFilePath2.getText());
-		sampler.setConnKeepAlive(Integer.parseInt(connKeepAlive.getText()));
-		sampler.setConnAttamptMax(Integer.parseInt(connAttmptMax.getText()));
-		sampler.setConnKeepTime(Integer.parseInt(connKeeptime.getText()));
+		sampler.setConnKeepAlive(parseInt(connKeepAlive.getText()));
+		sampler.setConnAttamptMax(parseInt(connAttmptMax.getText()));
+		sampler.setConnKeepTime(parseInt(connKeeptime.getText()));
 		sampler.setConnPrefix(connNamePrefix.getText());
-		sampler.setConnReconnAttamptMax(Integer.parseInt(reconnAttmptMax.getText()));
-		sampler.setConnTimeout(Integer.parseInt(timeout.getText()));
+		sampler.setConnReconnAttamptMax(parseInt(reconnAttmptMax.getText()));
+		sampler.setConnTimeout(parseInt(timeout.getText()));
 		sampler.setDualSSLAuth(dualAuth.isSelected());
 		sampler.setKeyFilePassword(password.getText());
 		sampler.setKeyFileUsrName(userName.getText());
-		sampler.setPort(Integer.parseInt(serverPort.getText()));
+		sampler.setPort(parseInt(serverPort.getText()));
 		sampler.setProtocol(protocols.getText());
 		sampler.setServer(serverAddr.getText());
 		sampler.setUserNameAuth(userNameAuth.getText());
 		sampler.setPasswordAuth(passwordAuth.getText());
+	}
+	
+	public static int parseInt(String value) {
+		if(value == null || "".equals(value.trim())) {
+			return 0;
+		}
+		return Integer.parseInt(value);
 	}
 	
 	public void clearUI() {
