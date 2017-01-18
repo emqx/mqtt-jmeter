@@ -8,15 +8,17 @@ The plugin is developed and maintained by `XMeter`_ . XMeter is a professional p
 # How to use
 
 ## Connection sampler
-TODO:
+TODO
 
 
 ## Pub sampler
-TODO:
+TODO
 
 
 ## Sub sampler
-TODO:
+TODO
+
+
 
 .. _XMeter: https://www.xmeter.net
 .. _EMQReport: https://github.com/emqtt/emq-docs-cn
