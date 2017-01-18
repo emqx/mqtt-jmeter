@@ -30,4 +30,27 @@ public class PubSampler extends ConnectionSampler{
 		setProperty(ADD_TIMESTAMP, addTimestamp);
 	}
 	
+	public String getMessageType() {
+		return getPropertyAsString(MESSAGE_TYPE, MESSAGE_TYPE_RANDOM_STR_WITH_FIX_LEN);
+	}
+	
+	public void setMessageType(String messageType) {
+		setProperty(MESSAGE_TYPE, messageType);
+	}
+	
+	public int getMessageLength() {
+		return getPropertyAsInt(MESSAGE_FIX_LENGTH, DEFAULT_MESSAGE_FIX_LENGTH);
+	}
+	
+	public void setMessageLength(int length) {
+		setProperty(MESSAGE_FIX_LENGTH, length);
+	}
+
+	public String getMessage() {
+		return getPropertyAsString(MESSAGE_TO_BE_SENT, "");
+	}
+	
+	public void setMessage(String message) {
+		setProperty(MESSAGE_TO_BE_SENT, message);
+	}
 }

@@ -24,6 +24,10 @@ public interface Constants {
 	public static final String CONN_KEEP_ALIVE = "mqtt.conn_keep_alive";
 	public static final String CONN_RECONN_ATTAMPT_MAX = "mqtt.reconn_attampt_max";
 	
+	public static final String MESSAGE_TYPE = "mqtt.message_type";
+	public static final String MESSAGE_FIX_LENGTH = "mqtt.message_type_fixed_length";
+	public static final String MESSAGE_TO_BE_SENT = "mqtt.message_to_sent";
+	
 	public static final String TOPIC_NAME = "mqtt.topic_name";
 	public static final String QOS_LEVEL = "mqtt.qos_level";
 	public static final String ADD_TIMESTAMP = "mqtt.add_timestamp";
@@ -37,6 +41,10 @@ public interface Constants {
 	public static final int QOS_0 = 0;
 	public static final int QOS_1 = 1;
 	public static final int QOS_2 = 2;
+	
+	public static final String MESSAGE_TYPE_RANDOM_STR_WITH_FIX_LEN = "Random string with fixed length";
+	public static final String MESSAGE_TYPE_HEX_STRING = "Hex string";
+	public static final String MESSAGE_TYPE_STRING = "String";
 	
 	public static final int MAX_CLIENT_ID_LENGTH = 23;
 	
@@ -57,4 +65,6 @@ public interface Constants {
 	public static final int DEFAULT_CONN_RECONN_ATTAMPT_MAX = 0;
 	
 	public static final boolean DEFAULT_ADD_TIMESTAMP = false;
+	public static final int DEFAULT_MESSAGE_FIX_LENGTH = 1024;
+	
 }

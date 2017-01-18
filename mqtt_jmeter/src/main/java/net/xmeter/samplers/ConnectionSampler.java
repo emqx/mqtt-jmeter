@@ -21,9 +21,9 @@ import net.xmeter.Constants;
 import net.xmeter.Util;
 
 public class ConnectionSampler extends AbstractSampler implements Constants, TestStateListener, ThreadListener {
-	private static Logger logger = LoggingManager.getLoggerForClass();
-	private MQTT mqtt = new MQTT();
-	private FutureConnection connection = null;
+	private transient static Logger logger = LoggingManager.getLoggerForClass();
+	private transient MQTT mqtt = new MQTT();
+	private transient FutureConnection connection = null;
 	
 	/**
 	 * 
