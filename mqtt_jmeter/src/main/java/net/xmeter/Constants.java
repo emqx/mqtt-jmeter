@@ -12,6 +12,9 @@ public interface Constants {
 	public static final String KEY_FILE_USR_NAME = "mqtt.key_file_usr_name";
 	public static final String KEY_FILE_PWD = "mqtt.key_file_password";
 	
+	public static final String USER_NAME_AUTH = "mqtt.user_name";
+	public static final String PASSWORD_AUTH = "mqtt.password";
+	
 	public static final String CONN_KEEP_TIME = "mqtt.keep_time";
 	public static final String CONN_CLIENT_ID_PREFIX = "mqtt.client_id_prefix";
 

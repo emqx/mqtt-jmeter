@@ -2,7 +2,6 @@ package net.xmeter.samplers;
 
 import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.jmeter.samplers.AbstractSampler;
 import org.apache.jmeter.samplers.Entry;
@@ -23,7 +22,6 @@ import net.xmeter.Util;
 
 public class ConnectionSampler extends AbstractSampler implements Constants, TestStateListener, ThreadListener {
 	private static Logger logger = LoggingManager.getLoggerForClass();
-	private static AtomicBoolean sleepFlag = new AtomicBoolean(false);
 	private MQTT mqtt = new MQTT();
 	private FutureConnection connection = null;
 	
@@ -46,6 +44,13 @@ public class ConnectionSampler extends AbstractSampler implements Constants, Tes
 			mqtt.setClientId(clientId);
 			mqtt.setConnectAttemptsMax(getConnAttamptMax());
 			mqtt.setReconnectAttemptsMax(getConnReconnAttamptMax());
+			
+			if(!"".equals(getUserNameAuth().trim())) {
+				mqtt.setUserName(getUserNameAuth());
+			}
+			if(!"".equals(getPasswordAuth().trim())) {
+				mqtt.setPassword(getPasswordAuth());
+			}
 			
 			result.sampleStart(); 
 			connection = mqtt.futureConnection();
@@ -183,6 +188,22 @@ public class ConnectionSampler extends AbstractSampler implements Constants, Tes
 		setProperty(CONN_RECONN_ATTAMPT_MAX, connReconnAttamptMax);
 	}
 
+	public String getUserNameAuth() {
+		return getPropertyAsString(USER_NAME_AUTH, "");
+	}
+
+	public void setUserNameAuth(String userName) {
+		setProperty(USER_NAME_AUTH, userName);
+	}
+	
+	public String getPasswordAuth() {
+		return getPropertyAsString(PASSWORD_AUTH, "");
+	}
+
+	public void setPasswordAuth(String password) {
+		setProperty(PASSWORD_AUTH, password);
+	}
+	
 	@Override
 	public void testEnded() {
 		this.testEnded("local");

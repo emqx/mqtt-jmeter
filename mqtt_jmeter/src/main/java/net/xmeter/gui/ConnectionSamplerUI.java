@@ -33,6 +33,9 @@ public class ConnectionSamplerUI extends AbstractSamplerGui implements Constants
 	private final JLabeledTextField serverAddr = new JLabeledTextField("Server name or IP:");
 	private final JLabeledTextField serverPort = new JLabeledTextField("Port number:", 5);
 	private final JLabeledTextField timeout = new JLabeledTextField("Timeout(s):", 5);
+	
+	private final JLabeledTextField userNameAuth = new JLabeledTextField("User name:");
+	private final JLabeledTextField passwordAuth = new JLabeledTextField("Password:");
 
 	private JLabeledChoice protocols;
 
@@ -76,6 +79,7 @@ public class ConnectionSamplerUI extends AbstractSamplerGui implements Constants
 
 		mainPanel.add(createConnPanel());
 		mainPanel.add(createProtocolPanel());
+		mainPanel.add(createAuthentication());
 		mainPanel.add(createConnOptions());
 		
 		this.dualAuth.setVisible(false);
@@ -112,6 +116,18 @@ public class ConnectionSamplerUI extends AbstractSamplerGui implements Constants
 		optsPanel2.add(connAttmptMax);
 		optsPanel2.add(reconnAttmptMax);
 		optsPanelCon.add(optsPanel2);
+		
+		return optsPanelCon;
+	}
+	
+	private JPanel createAuthentication() {
+		JPanel optsPanelCon = new VerticalPanel();
+		optsPanelCon.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "User authentication"));
+		
+		JPanel optsPanel = new HorizontalPanel();
+		optsPanel.add(userNameAuth);
+		optsPanel.add(passwordAuth);
+		optsPanelCon.add(optsPanel);
 		
 		return optsPanelCon;
 	}
@@ -217,6 +233,8 @@ public class ConnectionSamplerUI extends AbstractSamplerGui implements Constants
 		this.serverPort.setText(String.valueOf(sampler.getPort()));
 		this.timeout.setText(String.valueOf(sampler.getConnTimeout()));
 		this.userName.setText(String.valueOf(sampler.getKeyFileUsrName()));
+		this.userNameAuth.setText(sampler.getUserNameAuth());
+		this.passwordAuth.setText(sampler.getPasswordAuth());
 	}
 
 	@Override
@@ -243,6 +261,8 @@ public class ConnectionSamplerUI extends AbstractSamplerGui implements Constants
 		sampler.setPort(Integer.parseInt(this.serverPort.getText()));
 		sampler.setProtocol(this.protocols.getText());
 		sampler.setServer(this.serverAddr.getText());
+		sampler.setUserNameAuth(this.userNameAuth.getText());
+		sampler.setPasswordAuth(this.passwordAuth.getText());
 	}
 	
 	@Override
@@ -306,6 +326,8 @@ public class ConnectionSamplerUI extends AbstractSamplerGui implements Constants
 		this.serverAddr.setText(DEFAULT_SERVER);
 		this.serverPort.setText(String.valueOf(DEFAULT_PORT));
 		this.timeout.setText(String.valueOf(DEFAULT_CONN_TIME_OUT));
+		this.userNameAuth.setText("");
+		this.passwordAuth.setText("");
 	}
 
 }
