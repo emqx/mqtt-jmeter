@@ -26,6 +26,7 @@ public interface Constants {
 	
 	public static final String TOPIC_NAME = "mqtt.topic_name";
 	public static final String QOS_LEVEL = "mqtt.qos_level";
+	public static final String ADD_TIMESTAMP = "mqtt.add_timestamp";
 	public static final String PAYLOAD_SIZE = "mqtt.payload_size";
 	
 	public static final String TIME_STAMP = "mqtt.time_stamp";
@@ -43,9 +44,17 @@ public interface Constants {
 	public static final int DEFAULT_PORT = 1883;
 	public static final int DEFAULT_CONN_TIME_OUT = 10;
 	public static final String DEFAULT_PROTOCOL = "TCP";
-	public static final String DEFAULT_CONN_PREFIX = "conn_";
+	
+	public static final String DEFAULT_TOPIC_NAME = "test_topic";
+	
+	public static final String DEFAULT_CONN_PREFIX_FOR_CONN = "conn_";
+	public static final String DEFAULT_CONN_PREFIX_FOR_PUB = "pub_";
+	public static final String DEFAULT_CONN_PREFIX_FOR_SUB = "sub_";
+	
 	public static final int DEFAULT_CONN_KEEP_ALIVE = 300;
 	public static final int DEFAULT_CONN_KEEP_TIME = 1800;
 	public static final int DEFAULT_CONN_ATTAMPT_MAX = 0;
 	public static final int DEFAULT_CONN_RECONN_ATTAMPT_MAX = 0;
+	
+	public static final boolean DEFAULT_ADD_TIMESTAMP = false;
 }

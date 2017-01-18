@@ -149,7 +149,7 @@ public class ConnectionSampler extends AbstractSampler implements Constants, Tes
 	}
 
 	public String getConnPrefix() {
-		return getPropertyAsString(CONN_CLIENT_ID_PREFIX, DEFAULT_CONN_PREFIX);
+		return getPropertyAsString(CONN_CLIENT_ID_PREFIX, DEFAULT_CONN_PREFIX_FOR_CONN);
 	}
 
 	public void setConnPrefix(String connPrefix) {
