@@ -7,15 +7,15 @@ The plugin is developed and maintained by `XMeter`_ . XMeter is a professional p
 
 # How to use
 
-## Connection samplers
+## Connection sampler
 TODO:
 
 
-## Pub samplers
+## Pub sampler
 TODO:
 
 
-## Sub samplers
+## Sub sampler
 TODO:
 
 .. _XMeter: https://www.xmeter.net
