@@ -21,6 +21,7 @@ import org.apache.jorphan.gui.JLabeledChoice;
 import org.apache.jorphan.gui.JLabeledTextField;
 
 import net.xmeter.Constants;
+import net.xmeter.samplers.AbstractMQTTSampler;
 import net.xmeter.samplers.ConnectionSampler;
 
 public class CommonConnUI implements ChangeListener, ActionListener, Constants{
@@ -204,7 +205,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		}
 	}
 	
-	public void configure(ConnectionSampler sampler) {
+	public void configure(AbstractMQTTSampler sampler) {
 		certificationFilePath1.setText(sampler.getCertFile1());
 		certificationFilePath2.setText(sampler.getCertFile2());
 		connAttmptMax.setText(String.valueOf(sampler.getConnAttamptMax()));
@@ -231,7 +232,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	}
 	
 	
-	public void setupSamplerProperties(ConnectionSampler sampler) {
+	public void setupSamplerProperties(AbstractMQTTSampler sampler) {
 		sampler.setCertFile1(certificationFilePath1.getText());
 		sampler.setCertFile2(certificationFilePath2.getText());
 		sampler.setConnKeepAlive(parseInt(connKeepAlive.getText()));

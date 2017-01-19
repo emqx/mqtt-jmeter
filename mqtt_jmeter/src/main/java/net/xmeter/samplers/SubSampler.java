@@ -1,6 +1,9 @@
 package net.xmeter.samplers;
 
-public class SubSampler extends ConnectionSampler {
+import org.apache.jmeter.samplers.Entry;
+import org.apache.jmeter.samplers.SampleResult;
+
+public class SubSampler extends AbstractMQTTSampler {
 	/**
 	 * 
 	 */
@@ -36,5 +39,10 @@ public class SubSampler extends ConnectionSampler {
 	
 	public void setDebugResponse(boolean debugResponse) {
 		setProperty(DEBUG_RESPONSE, debugResponse);
+	}
+
+	@Override
+	public SampleResult sample(Entry arg0) {
+		return null;
 	}
 }

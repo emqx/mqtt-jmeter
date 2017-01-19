@@ -1,6 +1,9 @@
 package net.xmeter.samplers;
 
-public class PubSampler extends ConnectionSampler {
+import org.apache.jmeter.samplers.Entry;
+import org.apache.jmeter.samplers.SampleResult;
+
+public class PubSampler extends AbstractMQTTSampler {
 	/**
 	 * 
 	 */
@@ -52,5 +55,10 @@ public class PubSampler extends ConnectionSampler {
 	
 	public void setMessage(String message) {
 		setProperty(MESSAGE_TO_BE_SENT, message);
+	}
+
+	@Override
+	public SampleResult sample(Entry arg0) {
+		return null;
 	}
 }
