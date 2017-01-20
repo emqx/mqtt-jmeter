@@ -56,7 +56,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants{
 	
 	private JPanel createSubOption() {
 		JPanel optsPanelCon = new VerticalPanel();
-		optsPanelCon.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Pub options"));
+		optsPanelCon.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Sub options"));
 
 		qosChoice = new JLabeledChoice("QoS Level:", new String[] { String.valueOf(QOS_0), String.valueOf(QOS_1), String.valueOf(QOS_2) }, true, false);
 
