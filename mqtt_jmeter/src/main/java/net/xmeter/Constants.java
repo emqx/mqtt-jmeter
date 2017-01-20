@@ -34,7 +34,7 @@ public interface Constants {
 	public static final String PAYLOAD_SIZE = "mqtt.payload_size";
 	
 	public static final String TIME_STAMP = "mqtt.time_stamp";
-	public static final String TIME_STAMP_SEP_FLAG = "mqtt.ts_sep_flag";
+	public static final String TIME_STAMP_SEP_FLAG = "ts_sep_flag";
 	
 	public static final String DEBUG_RESPONSE = "mqtt.debug_response";
 	

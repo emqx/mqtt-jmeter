@@ -22,7 +22,6 @@ import org.apache.jorphan.gui.JLabeledTextField;
 
 import net.xmeter.Constants;
 import net.xmeter.samplers.AbstractMQTTSampler;
-import net.xmeter.samplers.ConnectionSampler;
 
 public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private final JLabeledTextField serverAddr = new JLabeledTextField("Server name or IP:");
