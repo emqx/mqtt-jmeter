@@ -1,5 +1,7 @@
 package net.xmeter;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.SecureRandom;
@@ -12,6 +14,7 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.ssl.SSLContexts;
+import org.apache.jmeter.services.FileServer;
 
 import net.xmeter.samplers.ConnectionSampler;
 
@@ -49,9 +52,30 @@ public class Util implements Constants {
 			String CA_KEYSTORE_PASS = sampler.getKeyFilePassword();
 			String CLIENT_KEYSTORE_PASS = sampler.getKeyFileUsrName();
 
-			//TODO Locate to the correct path of files
-			InputStream is_cacert = Util.class.getResourceAsStream(sampler.getCertFile1());
-			InputStream is_client = Util.class.getResourceAsStream(sampler.getCertFile2());
+			String baseDir = FileServer.getFileServer().getBaseDir();
+			String file1 = sampler.getCertFile1();
+			
+			File theFile1 = new File(file1);
+			if(!theFile1.exists()) {
+				file1 = baseDir + file1;
+				theFile1 = new File(file1);
+				if(!theFile1.exists()) {
+					throw new RuntimeException("Cannot find file : " + sampler.getCertFile1());
+				}
+			}
+			
+			String file2 = sampler.getCertFile2();
+			File theFile2 = new File(file2);
+			if(!theFile2.exists()) {
+				file2 = baseDir + file2;
+				theFile2 = new File(file2);
+				if(!theFile2.exists()) {
+					throw new RuntimeException("Cannot find file : " + sampler.getCertFile2());
+				}
+			}
+			
+			InputStream is_cacert = new FileInputStream(theFile1);
+			InputStream is_client = new FileInputStream(theFile2);
 
 			KeyStore tks = KeyStore.getInstance(KeyStore.getDefaultType()); // jks
 			tks.load(is_cacert, CA_KEYSTORE_PASS.toCharArray());

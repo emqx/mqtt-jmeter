@@ -4,6 +4,7 @@ import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.jmeter.samplers.Entry;
+import org.apache.jmeter.samplers.Interruptible;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.testelement.TestStateListener;
 import org.apache.jmeter.testelement.ThreadListener;
@@ -18,11 +19,11 @@ import org.fusesource.mqtt.client.Topic;
 
 import net.xmeter.Util;
 
-public class ConnectionSampler extends AbstractMQTTSampler implements TestStateListener, ThreadListener {
+public class ConnectionSampler extends AbstractMQTTSampler implements TestStateListener, ThreadListener, Interruptible {
 	private transient static Logger logger = LoggingManager.getLoggerForClass();
 	private transient MQTT mqtt = new MQTT();
 	private transient FutureConnection connection = null;
-	
+	private boolean interrupt = false;
 	/**
 	 * 
 	 */
@@ -83,7 +84,8 @@ public class ConnectionSampler extends AbstractMQTTSampler implements TestStateL
 
 	@Override
 	public void testEnded(String arg0) {
-		
+		this.interrupt = true;
+		System.out.println("testEnded!!!");
 	}
 
 	@Override
@@ -99,7 +101,14 @@ public class ConnectionSampler extends AbstractMQTTSampler implements TestStateL
 	@Override
 	public void threadFinished() {
 		try {
-			TimeUnit.SECONDS.sleep(getConnKeepTime());	
+			long start = System.currentTimeMillis();
+			while((start - System.currentTimeMillis()) <= TimeUnit.SECONDS.toMillis(getConnKeepTime())) {
+				if(this.interrupt) {
+					break;
+				}
+				TimeUnit.SECONDS.sleep(1);		
+			}
+			
 			if(connection != null) {
 				connection.disconnect();
 				logger.log(Priority.INFO, MessageFormat.format("The connection {0} disconneted successfully.", connection));	
@@ -112,6 +121,13 @@ public class ConnectionSampler extends AbstractMQTTSampler implements TestStateL
 	@Override
 	public void threadStarted() {
 		
+	}
+
+	@Override
+	public boolean interrupt() {
+		this.interrupt = true;
+		System.out.println("interrupt!!!");
+		return true;
 	}
 	
 }
