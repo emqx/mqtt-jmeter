@@ -13,8 +13,11 @@ If you'd like to build binary by yourself, please clone the project and run 'mvn
 
 # How to use
 The plugin includes 3 samplers: 
+
 1) Connection sampler, which can be used for connection mock. For example, in a large scale system, there could have lots of backend connections with no data transimission except some hearbeat signal. The sampler can be used in this case.
+
 2) Pub sampler, which can be used for publish message to MQTT server.
+
 3) Sub sampler, which can be used for sub message from MQTT server.
 
 
