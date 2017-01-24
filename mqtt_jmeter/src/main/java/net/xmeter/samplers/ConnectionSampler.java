@@ -3,8 +3,11 @@ package net.xmeter.samplers;
 import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.jmeter.JMeter;
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.Interruptible;
+import org.apache.jmeter.samplers.SampleEvent;
+import org.apache.jmeter.samplers.SampleListener;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.testelement.TestStateListener;
 import org.apache.jmeter.testelement.ThreadListener;
@@ -19,7 +22,7 @@ import org.fusesource.mqtt.client.Topic;
 
 import net.xmeter.Util;
 
-public class ConnectionSampler extends AbstractMQTTSampler implements TestStateListener, ThreadListener, Interruptible {
+public class ConnectionSampler extends AbstractMQTTSampler implements TestStateListener, ThreadListener, Interruptible, SampleListener {
 	private transient static Logger logger = LoggingManager.getLoggerForClass();
 	private transient MQTT mqtt = new MQTT();
 	private transient FutureConnection connection = null;
@@ -74,8 +77,6 @@ public class ConnectionSampler extends AbstractMQTTSampler implements TestStateL
 		}
 		return result;
 	}
-
-
 	
 	@Override
 	public void testEnded() {
@@ -85,7 +86,6 @@ public class ConnectionSampler extends AbstractMQTTSampler implements TestStateL
 	@Override
 	public void testEnded(String arg0) {
 		this.interrupt = true;
-		System.out.println("testEnded!!!");
 	}
 
 	@Override
@@ -95,15 +95,22 @@ public class ConnectionSampler extends AbstractMQTTSampler implements TestStateL
 
 	@Override
 	public void testStarted(String arg0) {
-		
 	}
 
 	@Override
 	public void threadFinished() {
+		if(JMeter.isNonGUI()) {
+			logger.info("The work has been done, will sleep current thread for " + getConnKeepTime() + " sceconds.");
+			sleepCurrentThreadAndDisconnect();
+		}
+	}
+	
+	private void sleepCurrentThreadAndDisconnect() {
 		try {
 			long start = System.currentTimeMillis();
-			while((start - System.currentTimeMillis()) <= TimeUnit.SECONDS.toMillis(getConnKeepTime())) {
+			while((System.currentTimeMillis() - start) <= TimeUnit.SECONDS.toMillis(getConnKeepTime())) {
 				if(this.interrupt) {
+					logger.info("interrupted flag is true, and stop the sleep.");
 					break;
 				}
 				TimeUnit.SECONDS.sleep(1);		
@@ -126,8 +133,28 @@ public class ConnectionSampler extends AbstractMQTTSampler implements TestStateL
 	@Override
 	public boolean interrupt() {
 		this.interrupt = true;
-		System.out.println("interrupt!!!");
+		if(!JMeter.isNonGUI()) {
+			logger.info("In GUI mode, received the interrupt request from user.");
+		}
 		return true;
 	}
-	
+
+	/**
+	 * In this listener, it can receive the interrupt event trigger by user.
+	 */
+	@Override
+	public void sampleOccurred(SampleEvent event) {
+		if(!JMeter.isNonGUI()) {
+			logger.info("Created the sampler results, will sleep current thread for " + getConnKeepTime() + " sceconds");
+			sleepCurrentThreadAndDisconnect();
+		}
+	}
+
+	@Override
+	public void sampleStarted(SampleEvent arg0) {
+	}
+
+	@Override
+	public void sampleStopped(SampleEvent arg0) {
+	}
 }
