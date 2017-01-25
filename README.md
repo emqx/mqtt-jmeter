@@ -20,6 +20,7 @@ The plugin includes 3 samplers:
 
 3) Sub sampler, which can be used for sub message from MQTT server.
 
+## [optional] Certification files for SSL/TLS connections (w/ and w/o client authentication)
 
 ## Connection sampler
 
