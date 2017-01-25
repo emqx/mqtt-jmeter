@@ -1,6 +1,8 @@
 package net.xmeter.gui;
 
 import java.awt.BorderLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -35,11 +37,11 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 
 	private JCheckBox dualAuth = new JCheckBox("Dual SSL authentication");
 
-	private final JLabeledTextField certificationFilePath1 = new JLabeledTextField("Trust Key Store(*.jks):     ", 20);
-	private final JLabeledTextField certificationFilePath2 = new JLabeledTextField("Client Certification(*.p12):", 20);
+	private final JLabeledTextField certificationFilePath1 = new JLabeledTextField("Trust Key Store(*.jks):       ", 25);
+	private final JLabeledTextField certificationFilePath2 = new JLabeledTextField("Client Certification(*.p12):", 25);
 	
-	private final JLabeledTextField tksPassword = new JLabeledTextField("Secret:", 6);
-	private final JLabeledTextField cksPassword = new JLabeledTextField("Secret:", 6);
+	private final JLabeledTextField tksPassword = new JLabeledTextField("Secret:", 10);
+	private final JLabeledTextField cksPassword = new JLabeledTextField("Secret:", 10);
 
 	private JButton browse1;
 	private JButton browse2;
@@ -118,35 +120,57 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		dualAuth.addChangeListener(this);
 		pPanel.add(dualAuth, BorderLayout.CENTER);
 
-		JPanel panel = new HorizontalPanel();
-		panel.add(certificationFilePath1);
+		JPanel panel = new JPanel(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		c.anchor = GridBagConstraints.SOUTHWEST;
+		
+		c.gridx = 0;
+		c.gridy = 0;
+		c.gridwidth = 2;
+		panel.add(certificationFilePath1, c);
 		certificationFilePath1.setVisible(false);
 
 		browse1 = new JButton(JMeterUtils.getResString("browse"));
 		browse1.setActionCommand(BROWSE1);
 		browse1.addActionListener(this);
 		browse1.setVisible(false);
-		panel.add(browse1);
 		
-		panel.add(tksPassword);
+		c.gridx = 2;
+		c.gridy = 0;
+		c.gridwidth = 1;
+		panel.add(browse1, c);
+		
+		c.gridx = 3;
+		c.gridy = 0;
+		c.gridwidth = 2;
+		panel.add(tksPassword, c);
 		tksPassword.setVisible(false);
 		
-		JPanel panel2 = new HorizontalPanel();
 		certificationFilePath2.setVisible(false);
-		panel2.add(certificationFilePath2);
+
+		//c.weightx = 0.0;
+		c.gridx = 0;
+		c.gridy = 1;
+		c.gridwidth = 2;
+		panel.add(certificationFilePath2, c);
 
 		browse2 = new JButton(JMeterUtils.getResString("browse"));
 		browse2.setActionCommand(BROWSE2);
 		browse2.addActionListener(this);
 		browse2.setVisible(false);
-		panel2.add(browse2);
 		
-		panel2.add(cksPassword);
+		c.gridx = 2;
+		c.gridy = 1;
+		c.gridwidth = 1;
+		panel.add(browse2, c);
+		
+		c.gridx = 3;
+		c.gridy = 1;
+		panel.add(cksPassword, c);
 		cksPassword.setVisible(false);
 		
 		protocolPanel.add(pPanel);
 		protocolPanel.add(panel);
-		protocolPanel.add(panel2);
 		
 		return protocolPanel;
 	}
