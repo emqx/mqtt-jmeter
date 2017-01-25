@@ -137,4 +137,8 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 	public void setPasswordAuth(String password) {
 		setProperty(PASSWORD_AUTH, password);
 	}
+	
+	public boolean isKeepTimeShow() {
+		return false;
+	}
 }

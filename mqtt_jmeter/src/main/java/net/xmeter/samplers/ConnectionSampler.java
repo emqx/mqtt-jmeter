@@ -34,6 +34,10 @@ public class ConnectionSampler extends AbstractMQTTSampler
 	private static final long serialVersionUID = 1859006013465470528L;
 
 	@Override
+	public boolean isKeepTimeShow() {
+		return true;
+	}
+	@Override
 	public SampleResult sample(Entry entry) {
 		SampleResult result = new SampleResult();
 		try {

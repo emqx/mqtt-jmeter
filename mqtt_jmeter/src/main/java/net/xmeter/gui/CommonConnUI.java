@@ -205,6 +205,9 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	}
 	
 	public void configure(AbstractMQTTSampler sampler) {
+		if(!sampler.isKeepTimeShow()) {
+			connKeeptime.setVisible(false);
+		}
 		certificationFilePath1.setText(sampler.getCertFile1());
 		certificationFilePath2.setText(sampler.getCertFile2());
 		connAttmptMax.setText(String.valueOf(sampler.getConnAttamptMax()));
