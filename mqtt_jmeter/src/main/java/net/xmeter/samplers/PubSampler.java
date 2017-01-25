@@ -3,6 +3,8 @@ package net.xmeter.samplers;
 import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
+import javax.xml.bind.DatatypeConverter;
+
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.testelement.ThreadListener;
@@ -79,26 +81,37 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 	public String getConnPrefix() {
 		return getPropertyAsString(CONN_CLIENT_ID_PREFIX, DEFAULT_CONN_PREFIX_FOR_PUB);
 	}
-
+	
+	public static byte[] hexToBinary(String hex) {
+	    return DatatypeConverter.parseHexBinary(hex);
+	}
+	
 	@Override
 	public SampleResult sample(Entry arg0) {
 		SampleResult result = new SampleResult();
 		try {
 			String topicName = getTopic();
-			String actualPayload = payload;
-
-			if (MESSAGE_TYPE_HEX_STRING.equals(getMessageType())) {
-				actualPayload = getMessage();
-				// TODO Change it to the binary hex.
-			} else if (MESSAGE_TYPE_STRING.equals(getMessageType())) {
-				actualPayload = getMessage();
-			}
+			byte[] toSend = new byte[0];
+			
 			if (isAddTimestamp()) {
-				actualPayload = (System.currentTimeMillis() + TIME_STAMP_SEP_FLAG) + payload;
+				byte[] timePrefix = (System.currentTimeMillis() + TIME_STAMP_SEP_FLAG).getBytes();
+				byte[] tmp = new byte[]{};
+				if (MESSAGE_TYPE_HEX_STRING.equals(getMessageType())) {
+					tmp = hexToBinary(getMessage());
+				} else if (MESSAGE_TYPE_STRING.equals(getMessageType())) {
+					tmp = getMessage().getBytes();
+				}
+				toSend = new byte[timePrefix.length + tmp.length];
+				System.arraycopy(timePrefix, 0, toSend, 0, timePrefix.length);
+				System.arraycopy(tmp, 0, toSend, timePrefix.length -1 , tmp.length);
+			} else {
+				byte[] tmp = getMessage().getBytes("utf-8");
+				toSend = new byte[tmp.length];
+				System.arraycopy(tmp, 0, toSend, 0 , tmp.length);
 			}
 			result.sampleStart();
 
-			Future<Void> pub = connection.publish(topicName, actualPayload.getBytes(), qos_enum, false);
+			Future<Void> pub = connection.publish(topicName, toSend, qos_enum, false);
 			pub.await();
 
 			result.sampleEnd();
