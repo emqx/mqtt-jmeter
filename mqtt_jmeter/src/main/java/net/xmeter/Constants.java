@@ -7,10 +7,10 @@ public interface Constants {
 	
 	public static final String PROTOCOL = "mqtt.protocol";
 	public static final String DUAL_AUTH = "mqtt.dual_ssl_authentication";
-	public static final String CERT_FILE_PATH1 = "mqtt.cert_file_path1";
-	public static final String CERT_FILE_PATH2 = "mqtt.cert_file_path2";
-	public static final String KEY_FILE_USR_NAME = "mqtt.key_file_usr_name";
-	public static final String KEY_FILE_PWD = "mqtt.key_file_password";
+	public static final String CERT_FILE_PATH1 = "mqtt.keystore_file_path";
+	public static final String CERT_FILE_PATH2 = "mqtt.clientcert_file_path";
+	public static final String KEY_FILE_PWD1 = "mqtt.keystore_password";
+	public static final String KEY_FILE_PWD2 = "mqtt.clientcert_password";
 	
 	public static final String USER_NAME_AUTH = "mqtt.user_name";
 	public static final String PASSWORD_AUTH = "mqtt.password";

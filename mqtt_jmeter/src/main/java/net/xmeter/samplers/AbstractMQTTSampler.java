@@ -50,37 +50,38 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 		setProperty(DUAL_AUTH, dualSSLAuth);
 	}
 
-	public String getCertFile1() {
+	public String getKeyStoreFilePath() {
 		return getPropertyAsString(CERT_FILE_PATH1, "");
 	}
 
-	public void setCertFile1(String certFile1) {
+	public void setKeyStoreFilePath(String certFile1) {
 		setProperty(CERT_FILE_PATH1, certFile1);
 	}
 
-	public String getCertFile2() {
+	public String getClientCertFilePath() {
 		return getPropertyAsString(CERT_FILE_PATH2, "");
 	}
 
-	public void setCertFile2(String certFile2) {
+	public void setClientCertFilePath(String certFile2) {
 		setProperty(CERT_FILE_PATH2, certFile2);
 	}
 
-	public String getKeyFileUsrName() {
-		return getPropertyAsString(KEY_FILE_USR_NAME, "");
+	public String getKeyStorePassword() {
+		return getPropertyAsString(KEY_FILE_PWD1, "");
+	}
+	
+	public void setKeyStorePassword(String keyStorePassword) {
+		this.setProperty(KEY_FILE_PWD1, keyStorePassword);
 	}
 
-	public void setKeyFileUsrName(String keyFileUsrName) {
-		this.setProperty(KEY_FILE_USR_NAME, keyFileUsrName);
+	public String getClientCertPassword() {
+		return getPropertyAsString(KEY_FILE_PWD2, "");
 	}
 
-	public String getKeyFilePassword() {
-		return getPropertyAsString(KEY_FILE_PWD, "");
+	public void setClientCertPassword(String clientCertPassword) {
+		this.setProperty(KEY_FILE_PWD2, clientCertPassword);
 	}
 
-	public void setKeyFilePassword(String keyFilePassword) {
-		this.setProperty(KEY_FILE_PWD, keyFilePassword);
-	}
 
 	public String getConnPrefix() {
 		return getPropertyAsString(CONN_CLIENT_ID_PREFIX, DEFAULT_CONN_PREFIX_FOR_CONN);

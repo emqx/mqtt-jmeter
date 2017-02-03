@@ -231,8 +231,8 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		if(!sampler.isKeepTimeShow()) {
 			connKeeptime.setVisible(false);
 		}
-		certificationFilePath1.setText(sampler.getCertFile1());
-		certificationFilePath2.setText(sampler.getCertFile2());
+		certificationFilePath1.setText(sampler.getKeyStoreFilePath());
+		certificationFilePath2.setText(sampler.getClientCertFilePath());
 		connAttmptMax.setText(String.valueOf(sampler.getConnAttamptMax()));
 		connKeepAlive.setText(String.valueOf(sampler.getConnKeepAlive()));
 		connKeeptime.setText(String.valueOf(sampler.getConnKeepTime()));
@@ -241,7 +241,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 			dualAuth.setVisible(true);
 			dualAuth.setSelected(sampler.isDualSSLAuth());	
 		}
-		cksPassword.setText(sampler.getKeyFilePassword());
+		cksPassword.setText(sampler.getKeyStorePassword());
 		if(DEFAULT_PROTOCOL.equals(sampler.getProtocol())) {
 			protocols.setSelectedIndex(0);	
 		} else {
@@ -251,15 +251,15 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		serverAddr.setText(sampler.getServer());
 		serverPort.setText(String.valueOf(sampler.getPort()));
 		timeout.setText(String.valueOf(sampler.getConnTimeout()));
-		tksPassword.setText(String.valueOf(sampler.getKeyFileUsrName()));
+		tksPassword.setText(String.valueOf(sampler.getClientCertPassword()));
 		userNameAuth.setText(sampler.getUserNameAuth());
 		passwordAuth.setText(sampler.getPasswordAuth());
 	}
 	
 	
 	public void setupSamplerProperties(AbstractMQTTSampler sampler) {
-		sampler.setCertFile1(certificationFilePath1.getText());
-		sampler.setCertFile2(certificationFilePath2.getText());
+		sampler.setKeyStoreFilePath(certificationFilePath1.getText());
+		sampler.setClientCertFilePath(certificationFilePath2.getText());
 		sampler.setConnKeepAlive(parseInt(connKeepAlive.getText()));
 		sampler.setConnAttamptMax(parseInt(connAttmptMax.getText()));
 		sampler.setConnKeepTime(parseInt(connKeeptime.getText()));
@@ -267,8 +267,8 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		sampler.setConnReconnAttamptMax(parseInt(reconnAttmptMax.getText()));
 		sampler.setConnTimeout(parseInt(timeout.getText()));
 		sampler.setDualSSLAuth(dualAuth.isSelected());
-		sampler.setKeyFilePassword(cksPassword.getText());
-		sampler.setKeyFileUsrName(tksPassword.getText());
+		sampler.setKeyStorePassword(cksPassword.getText());
+		sampler.setClientCertPassword(tksPassword.getText());
 		sampler.setPort(parseInt(serverPort.getText()));
 		sampler.setProtocol(protocols.getText());
 		sampler.setServer(serverAddr.getText());

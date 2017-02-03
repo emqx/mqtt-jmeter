@@ -49,28 +49,28 @@ public class Util implements Constants {
 
 			return sslContext;
 		} else {
-			String CA_KEYSTORE_PASS = sampler.getKeyFilePassword();
-			String CLIENT_KEYSTORE_PASS = sampler.getKeyFileUsrName();
+			String KEYSTORE_PASS = sampler.getKeyStorePassword();
+			String CLIENTCERT_PASS = sampler.getClientCertPassword();
 
 			String baseDir = FileServer.getFileServer().getBaseDir();
-			String file1 = sampler.getCertFile1();
+			String file1 = sampler.getKeyStoreFilePath();
 			
 			File theFile1 = new File(file1);
 			if(!theFile1.exists()) {
 				file1 = baseDir + file1;
 				theFile1 = new File(file1);
 				if(!theFile1.exists()) {
-					throw new RuntimeException("Cannot find file : " + sampler.getCertFile1());
+					throw new RuntimeException("Cannot find file : " + sampler.getKeyStoreFilePath());
 				}
 			}
 			
-			String file2 = sampler.getCertFile2();
+			String file2 = sampler.getClientCertFilePath();
 			File theFile2 = new File(file2);
 			if(!theFile2.exists()) {
 				file2 = baseDir + file2;
 				theFile2 = new File(file2);
 				if(!theFile2.exists()) {
-					throw new RuntimeException("Cannot find file : " + sampler.getCertFile2());
+					throw new RuntimeException("Cannot find file : " + sampler.getClientCertFilePath());
 				}
 			}
 			
@@ -78,13 +78,13 @@ public class Util implements Constants {
 			InputStream is_client = new FileInputStream(theFile2);
 
 			KeyStore tks = KeyStore.getInstance(KeyStore.getDefaultType()); // jks
-			tks.load(is_cacert, CA_KEYSTORE_PASS.toCharArray());
+			tks.load(is_cacert, KEYSTORE_PASS.toCharArray());
 
 			KeyStore cks = KeyStore.getInstance("PKCS12");
-			cks.load(is_client, CLIENT_KEYSTORE_PASS.toCharArray());
+			cks.load(is_client, CLIENTCERT_PASS.toCharArray());
 
 			SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(tks, new TrustSelfSignedStrategy()) // use it to customize
-					.loadKeyMaterial(cks, CLIENT_KEYSTORE_PASS.toCharArray()) // load client certificate
+					.loadKeyMaterial(cks, CLIENTCERT_PASS.toCharArray()) // load client certificate
 					.build();
 			return sslContext;
 		}
