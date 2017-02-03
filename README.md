@@ -33,7 +33,7 @@ After deploying emqtt server, you get the following OOTB (out of the box) SSL/TL
 
 We will use the OOTB test certfications (as an example) to show you how to prepare the required certification files for this EMQTT JMeter plugin.
 
-	```bash
+	```
 	export PATH=$PATH:<YOUR_JDK_HOM>/bin
 
 	keytool -import -alias cacert -keystore emqtt.jks -file cacert.pem -storepass <YOUR_PASSWORD> -trustcacerts -noprompt
@@ -43,8 +43,9 @@ We will use the OOTB test certfications (as an example) to show you how to prepa
 	openssl pkcs12 -export -inkey client-key.pem -in client-cert.pem -out client.p12 -password pass:<YOUR_PASSWORD>
 	```
 
-#### Specify key store, client certfication and corresponding pass phrases in plugin sampler
-![Specify key store, client certfication and corresponding pass phrases](https://github.com/emqtt/mqtt-jmeter/raw/master/screenshots/ssl_conn.png)
+
+#### Specify key store, client certfication and corresponding pass phrases in plugin sampler:
+![ssl_conn.png](https://github.com/emqtt/mqtt-jmeter/raw/master/screenshots/ssl_conn.png)
 
 
 ## Connection sampler
