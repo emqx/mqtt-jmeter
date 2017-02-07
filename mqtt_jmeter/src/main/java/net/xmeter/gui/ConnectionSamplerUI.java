@@ -57,7 +57,7 @@ public class ConnectionSamplerUI extends AbstractSamplerGui implements Constants
 
 	@Override
 	public String getLabelResource() {
-		return "";
+		throw new RuntimeException();
 	}
 
 	@Override
