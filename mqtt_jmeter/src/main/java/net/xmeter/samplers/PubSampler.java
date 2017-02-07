@@ -101,12 +101,18 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 					tmp = hexToBinary(getMessage());
 				} else if (MESSAGE_TYPE_STRING.equals(getMessageType())) {
 					tmp = getMessage().getBytes();
+				} else if(MESSAGE_TYPE_RANDOM_STR_WITH_FIX_LEN.equals(getMessageType())) {
+					tmp = payload.getBytes();
 				}
 				toSend = new byte[timePrefix.length + tmp.length];
 				System.arraycopy(timePrefix, 0, toSend, 0, timePrefix.length);
-				System.arraycopy(tmp, 0, toSend, timePrefix.length -1 , tmp.length);
+				System.arraycopy(tmp, 0, toSend, timePrefix.length , tmp.length);
 			} else {
 				byte[] tmp = getMessage().getBytes("utf-8");
+				
+				if(MESSAGE_TYPE_RANDOM_STR_WITH_FIX_LEN.equals(getMessageType())) {
+					tmp = payload.getBytes("utf-8");
+				}
 				toSend = new byte[tmp.length];
 				System.arraycopy(tmp, 0, toSend, 0 , tmp.length);
 			}
