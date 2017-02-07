@@ -40,6 +40,7 @@ public class ConnectionSampler extends AbstractMQTTSampler
 	@Override
 	public SampleResult sample(Entry entry) {
 		SampleResult result = new SampleResult();
+		result.setSampleLabel(getName());
 		try {
 			if (!DEFAULT_PROTOCOL.equals(getProtocol())) {
 				mqtt.setSslContext(Util.getContext(this));
@@ -112,6 +113,10 @@ public class ConnectionSampler extends AbstractMQTTSampler
 
 	private void sleepCurrentThreadAndDisconnect() {
 		try {
+			//If the connection is null or does not connect successfully, then not necessary to keep the connection.
+			if(connection == null || (!connection.isConnected())) {
+				return;
+			}
 			long start = System.currentTimeMillis();
 			while ((System.currentTimeMillis() - start) <= TimeUnit.SECONDS.toMillis(getConnKeepTime())) {
 				if (this.interrupt) {
@@ -123,8 +128,7 @@ public class ConnectionSampler extends AbstractMQTTSampler
 
 			if (connection != null) {
 				connection.disconnect();
-				logger.log(Priority.INFO,
-						MessageFormat.format("The connection {0} disconneted successfully.", connection));
+				logger.log(Priority.INFO, MessageFormat.format("The connection {0} disconneted successfully.", connection));
 			}
 		} catch (InterruptedException e) {
 			logger.log(Priority.ERROR, e.getMessage(), e);
@@ -151,8 +155,7 @@ public class ConnectionSampler extends AbstractMQTTSampler
 	@Override
 	public void sampleOccurred(SampleEvent event) {
 		if (!JMeter.isNonGUI()) {
-			logger.info(
-					"Created the sampler results, will sleep current thread for " + getConnKeepTime() + " sceconds");
+			logger.info("Created the sampler results, will sleep current thread for " + getConnKeepTime() + " sceconds");
 			sleepCurrentThreadAndDisconnect();
 		}
 	}

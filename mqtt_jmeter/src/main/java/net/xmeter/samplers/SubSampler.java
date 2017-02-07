@@ -87,7 +87,8 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 	@Override
 	public SampleResult sample(Entry arg0) {
 		SampleResult result = new SampleResult();
-
+		result.setSampleLabel(getName());
+		
 		long startTime = System.currentTimeMillis();
 		result.sampleStart();
 
