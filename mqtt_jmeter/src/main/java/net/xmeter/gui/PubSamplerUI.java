@@ -187,6 +187,7 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 	public void clearGui() {
 		super.clearGui();
 		connUI.clearUI();
+		connUI.connNamePrefix.setText(DEFAULT_CONN_PREFIX_FOR_PUB);
 		this.topicName.setText(DEFAULT_TOPIC_NAME);
 		this.qosChoice.setText(String.valueOf(QOS_0));
 		this.timestamp.setSelected(false);

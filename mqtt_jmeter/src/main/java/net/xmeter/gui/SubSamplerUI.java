@@ -132,6 +132,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants{
 	public void clearGui() {
 		super.clearGui();
 		connUI.clearUI();
+		connUI.connNamePrefix.setText(DEFAULT_CONN_PREFIX_FOR_SUB);
 		this.topicName.setText(DEFAULT_TOPIC_NAME);
 		this.qosChoice.setText(String.valueOf(QOS_0));
 		this.timestamp.setSelected(false);

@@ -48,7 +48,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private static final String BROWSE1 = "browse1";
 	private static final String BROWSE2 = "browse2";
 	
-	private final JLabeledTextField connNamePrefix = new JLabeledTextField("ClientId prefix:", 8);
+	public final JLabeledTextField connNamePrefix = new JLabeledTextField("ClientId prefix:", 8);
 	private final JLabeledTextField connKeepAlive = new JLabeledTextField("Keep alive(s):", 4);
 	
 	private final JLabeledTextField connKeeptime = new JLabeledTextField("Connection keep time(s):", 4);
