@@ -20,7 +20,58 @@ The plugin includes 3 samplers:
 
 3) Sub sampler, which can be used for sub message from MQTT server.
 
+If MQTT JMeter plugin is installed successfully, then open JMeter and below 3 MQTT samplers can be found under 'Sampler'.
+
 ![mqtt_jmeter_plugin](screenshots/mqtt_jmeter_plugin.png)
+
+
+## Connection sampler
+
+![conn_sampler](screenshots/conn_sampler.png)
+
+### MQTT connection
+
+This section includes basic connection settings.
+
+**Server name or IP**: The server install with MQTT server, it can be either IP address or server name. The default value is 127.0.0.1.
+
+**Port number**: The port that opens by MQTT server, the default value is 1883 for TCP protocol, and normally 8883 for SSL protocol.
+
+**Timeout(s)**: The connection timeout seconds while connecting to MQTT server. The default is 10 seconds.
+
+### MQTT Protocol
+
+The sampler supports for 2 protocols, TCP and SSL. For the SSL protocol, it includes normal SSL and dual SSL authentication. 
+
+If **'Dual SSL authentication'** is checked, please follow 'Certification files for SSL/TLS connections' in below to configure client SSL configuration.
+
+![protocol_setting](screenshots/protocol_setting.png)
+
+### User authentication
+
+User can configure MQTT server with user name & password authentication, refer to [EMQ user name and password authentication guide](http://emqtt.com/docs/v2/guide.html#id3).
+
+**User name**: If MQTT server configured with user name, then specify user name here.
+
+**Password**: If MQTT server configured with password, then specify password here.
+
+### Connection options
+
+**ClientId prefix**: The client id prefix, the plugin will add generated uuid after the prefix to identify the client. Default value is 'conn_'.
+
+**Keep alive(s)**: Ping packet send interval in seconds. Default value is 300, which means each connection sends a ping packet to MQTT server every 5 minutes.
+
+**Connection keep time(s)**: The value is for setting the connection elapsed time after successfully established MQTT connection. The default value is 1800 seconds, which means that the connection will be alive within 30 minutes.
+
+**Connect attampt max**: The maximum number of reconnect attempts before an error is reported back to the client on the first attempt by the client to connect to a server. Set to -1 to use unlimited attempts. Defaults to 0.
+
+**Reconnect attampt max**:  The maximum number of reconnect attempts before an error is reported back to the client after a server connection had previously been established. Set to -1 to use unlimited attempts. Defaults to 0.
+
+## Pub sampler
+
+
+
+## Sub sampler
 
 ## Certification files for SSL/TLS connections
 After deploying emqtt server, you get the following OOTB (out of the box) SSL/TLS certification files under ${EMQTTD_HOME}/etc/certs directory:
@@ -50,20 +101,3 @@ We will use the OOTB test certfications (as an example) to show you how to prepa
 
 
 #### Specify key store, client certfication and corresponding pass phrases in plugin sampler:
-![ssl_conn.png](https://github.com/emqtt/mqtt-jmeter/raw/master/screenshots/ssl_conn.png)
-
-
-## Connection sampler
-
-
-
-## Pub sampler
-
-
-
-## Sub sampler
-
-
-
-
- 
