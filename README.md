@@ -141,3 +141,5 @@ We will use the OOTB test certfications (as an example) to show you how to prepa
 
 
 #### Specify key store, client certfication and corresponding pass phrases in plugin sampler:
+
+![ssl_conn](screenshots/ssl_conn.png)
