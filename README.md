@@ -101,7 +101,7 @@ For **MQTT connection**, **User authentication** and **Connection options** sect
 
 **QoS level**: The available QoS value, 0 is AT_MOST_ONCE, 1 is AT_LEAST_ONCE and 2 is EXACTLY_ONCE.
 
-**Topic name**: The topic name that the message will subscribe to.
+**Topic name**: The topic name that subscriber will subscribe to.
 
 **Payload includes timestamp**: If the checkbox is enabled, then it means the payload includes timestamp. It can be used to calcuate the message latency time. 
 
