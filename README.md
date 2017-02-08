@@ -68,8 +68,29 @@ User can configure MQTT server with user name & password authentication, refer t
 **Reconnect attampt max**:  The maximum number of reconnect attempts before an error is reported back to the client after a server connection had previously been established. Set to -1 to use unlimited attempts. Defaults to 0.
 
 ## Pub sampler
+![pub_sampler](screenshots/pub_sampler.png)
 
+For **MQTT connection**, **User authentication** and **Connection options** section settings, please refer to *Connection sampler* for more detailed information.
 
+### Pub options
+
+**QoS level**: The available QoS value, 0 is AT_MOST_ONCE, 1 is AT_LEAST_ONCE and 2 is EXACTLY_ONCE.
+
+**Topic name**: The topic name that the message will send to.
+
+**Add timestamp in payload**: Add timestamp in the payload or not. If the checkbox is enabled, then timestamp of running pub sampler will be added ahead of payload. Mostly it can be used together with **Sub sampler** to calculate message latency time.
+
+### Payloads
+
+**Message type**: 3 types of message can be used. 
+
+1) String: The normal string that sent to MQTT server. It can also be a JMeter variable.
+
+2) Hex string: The hex string that sent to MQTT server. The chars input must be [0-9] or [A-F] or [a-f]. The hex string will be converted to binary and send to server. It can also be a JMeter variable.
+
+3) Random string with fixed length: Refer to below screenshot. If the option is selected, then it requires user to input 'Length'. The length means the auto generated string length. Default is 1024, which means generated a 1kb size of random string.
+
+![payload_setting](screenshots/payload_setting.png)
 
 ## Sub sampler
 
