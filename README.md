@@ -20,6 +20,8 @@ The plugin includes 3 samplers:
 
 3) Sub sampler, which can be used for sub message from MQTT server.
 
+![mqtt_jmeter_plugin](screenshots/mqtt_jmeter_plugin.png)
+
 ## Certification files for SSL/TLS connections
 After deploying emqtt server, you get the following OOTB (out of the box) SSL/TLS certification files under ${EMQTTD_HOME}/etc/certs directory:
 
