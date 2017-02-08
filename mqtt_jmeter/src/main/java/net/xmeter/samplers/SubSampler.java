@@ -89,9 +89,8 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 		SampleResult result = new SampleResult();
 		result.setSampleLabel(getName());
 		
-		long startTime = System.currentTimeMillis();
 		result.sampleStart();
-
+		
 		if (connectFailed) {
 			return fillFailedResult(result, MessageFormat.format("Connection {0} connected failed.", connection));
 		} else if (subFailed) {
@@ -116,9 +115,15 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 				avgSize = receivedMessageSize / receivedCount;
 			}
 			result = fillOKResult(result, avgSize, message, content.toString());
-			if (isAddTimestamp()) {
-				result.setEndTime(startTime + (long) this.avgElapsedTime);
+			
+			if(receivedCount == 0) {
+				result.setEndTime(result.getStartTime());
+			} else {
+				if (isAddTimestamp()) {
+					result.setEndTime(result.getStartTime() + (long) this.avgElapsedTime);
+				}
 			}
+			
 			result.setSampleCount(receivedCount);
 
 			receivedMessageSize = 0;
