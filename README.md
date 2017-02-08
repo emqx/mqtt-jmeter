@@ -93,6 +93,25 @@ For **MQTT connection**, **User authentication** and **Connection options** sect
 ![payload_setting](screenshots/payload_setting.png)
 
 ## Sub sampler
+![sub_sampler](screenshots/sub_sampler.png)
+
+For **MQTT connection**, **User authentication** and **Connection options** section settings, please refer to *Connection sampler* for more detailed information.
+
+### Sub options
+
+**QoS level**: The available QoS value, 0 is AT_MOST_ONCE, 1 is AT_LEAST_ONCE and 2 is EXACTLY_ONCE.
+
+**Topic name**: The topic name that the message will subscribe to.
+
+**Payload includes timestamp**: If the checkbox is enabled, then it means the payload includes timestamp. It can be used to calcuate the message latency time. 
+
+message_latency = timestamp_in_sub_when_receive_msg - timestamp_in_payload (timestamp in pub machine when sending out message)
+
+*Please notice, if the machine publish message is not the same as subscriber, then the calculated message latency time is not accurate. It's because the time is almost not the same in different machines. So the latency time calculated by sub sampler could be only be a reference.*
+
+**Debug response**: If it's checked, then the received message will be print in response. It's recommend to enable it when you're debugging script. 
+
+
 
 ## Certification files for SSL/TLS connections
 After deploying emqtt server, you get the following OOTB (out of the box) SSL/TLS certification files under ${EMQTTD_HOME}/etc/certs directory:
