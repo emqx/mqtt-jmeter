@@ -21,7 +21,7 @@ The plugin includes 3 samplers:
 3) Sub sampler, which can be used for sub message from MQTT server.
 
 ## Certification files for SSL/TLS connections
-After deploying emqtt server, you get the following OOTB (out of the box) SSL/TLS certification files under <EMQTTD_HOME>/etc/certs directory:
+After deploying emqtt server, you get the following OOTB (out of the box) SSL/TLS certification files under ${EMQTTD_HOME}/etc/certs directory:
 
 1) cacert.pem : the self-signed CA certification 
 
@@ -33,7 +33,9 @@ After deploying emqtt server, you get the following OOTB (out of the box) SSL/TL
 
 We will use the OOTB test certfications (as an example) to show you how to prepare the required certification files for this EMQTT JMeter plugin.
 
+
 	```
+
 	export PATH=$PATH:<YOUR_JDK_HOM>/bin
 
 	keytool -import -alias cacert -keystore emqtt.jks -file cacert.pem -storepass <YOUR_PASSWORD> -trustcacerts -noprompt
@@ -41,6 +43,7 @@ We will use the OOTB test certfications (as an example) to show you how to prepa
 	keytool -import -alias server -keystore emqtt.jks -file cert.pem -storepass <YOUR_PASSWORD>
 
 	openssl pkcs12 -export -inkey client-key.pem -in client-cert.pem -out client.p12 -password pass:<YOUR_PASSWORD>
+
 	```
 
 
