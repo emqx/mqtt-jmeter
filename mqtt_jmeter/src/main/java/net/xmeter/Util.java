@@ -16,7 +16,7 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.jmeter.services.FileServer;
 
-import net.xmeter.samplers.ConnectionSampler;
+import net.xmeter.samplers.AbstractMQTTSampler;
 
 public class Util implements Constants {
 	
@@ -32,7 +32,7 @@ public class Util implements Constants {
 		return prefix + post;
 	}
 
-	public static SSLContext getContext(ConnectionSampler sampler) throws Exception {
+	public static SSLContext getContext(AbstractMQTTSampler sampler) throws Exception {
 		if (!sampler.isDualSSLAuth()) {
 			SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
 			sslContext.init(null, new TrustManager[] { new X509TrustManager() {

@@ -5,7 +5,7 @@
   <version>0.0.1-SNAPSHOT</version>
   
   <properties>
-		<jmeter-version>3.0</jmeter-version>
+		<jmeter-version>3.1</jmeter-version>
 	</properties>
 
 	<dependencies>

@@ -140,6 +140,10 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 	@Override
 	public void threadStarted() {
 		try {
+			if (!DEFAULT_PROTOCOL.equals(getProtocol())) {
+				mqtt.setSslContext(Util.getContext(this));
+			}
+			
 			mqtt.setHost(getProtocol().toLowerCase() + "://" + getServer() + ":" + getPort());
 			mqtt.setKeepAlive((short) getConnKeepAlive());
 
