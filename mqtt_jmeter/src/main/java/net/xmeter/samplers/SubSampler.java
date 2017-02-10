@@ -108,13 +108,7 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 					content.append(contents.get(i) + " \n");
 				}
 			}
-			// System.out.println(MessageFormat.format("receivedMessageSize {0}
-			// with receivedCount {1}.", receivedMessageSize, receivedCount));
-			int avgSize = 0;
-			if (receivedCount != 0) {
-				avgSize = receivedMessageSize / receivedCount;
-			}
-			result = fillOKResult(result, avgSize, message, content.toString());
+			result = fillOKResult(result, receivedMessageSize, message, content.toString());
 			
 			if(receivedCount == 0) {
 				result.setEndTime(result.getStartTime());
@@ -142,7 +136,7 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 		result.setSuccessful(false);
 		result.setResponseMessage(message);
 		result.setResponseData("Failed.".getBytes());
-		result.sampleEnd();
+		result.setEndTime(result.getStartTime());
 		return result;
 	}
 
