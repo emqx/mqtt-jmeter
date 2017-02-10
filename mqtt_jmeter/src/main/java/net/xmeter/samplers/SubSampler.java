@@ -121,6 +121,8 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 			} else {
 				if (isAddTimestamp()) {
 					result.setEndTime(result.getStartTime() + (long) this.avgElapsedTime);
+				} else {
+					result.setEndTime(result.getStartTime());	
 				}
 			}
 			
