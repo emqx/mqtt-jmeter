@@ -99,18 +99,25 @@ For **MQTT connection**, **User authentication** and **Connection options** sect
 
 ### Sub options
 
-**QoS level**: The available QoS value, 0 is AT_MOST_ONCE, 1 is AT_LEAST_ONCE and 2 is EXACTLY_ONCE.
+-  **QoS level**: The available QoS value, 0 is AT_MOST_ONCE, 1 is AT_LEAST_ONCE and 2 is EXACTLY_ONCE.
 
-**Topic name**: The topic name that subscriber will subscribe to.
+-  **Topic name**: The topic name that subscriber will subscribe to.
 
-**Payload includes timestamp**: If the checkbox is enabled, then it means the payload includes timestamp. It can be used to calcuate the message latency time. 
+-  **Payload includes timestamp**: If the checkbox is enabled, then it means the payload includes timestamp. It can be used to calcuate the message latency time.
 
+```
 message_latency = timestamp_in_sub_when_receive_msg - timestamp_in_payload (timestamp in pub machine when sending out message)
 
-*Please notice, if the machine publish message is not the same as subscriber, then the calculated message latency time is not accurate. It's because the time is almost not the same in different machines. So the latency time calculated by sub sampler could be only be a reference.*
+Please notice, if the machine publish message is not the same as subscriber, then the calculated message latency time is not accurate. It's because the time is almost not the same in different machines. So the latency time calculated by sub sampler could be only be a reference.
+```
 
-**Debug response**: If it's checked, then the received message will be print in response. It's recommend to enable it when you're debugging script. 
+-  **Debug response**: If it's checked, then the received message will be print in response. It's recommend to enable it when you're debugging script.
 
+### Sub test script
+![sub_testplan](screenshots/sub_testplan.png)
+
+Normally, the sub sampler is used together with constant timers. Refer to the test plan in above, if the 'Thead delay (in milliseconds)' is set to 1000, then it means subscriber report test result every 1 second. During the 1 second, multiple messages could be received, and result in report is the summarized data during 1 second.
+If constant timer is set to 2000, then means summarized report during 2 seconds.
 
 
 ## Certification files for SSL/TLS connections
