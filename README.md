@@ -1,9 +1,9 @@
 # mqtt-jmeter
-MQTT JMeter Plugin, it's used for testing MQTT protocol. The plugin was used for EMQ's performance benchmark test, and here is report link - https://github.com/emqtt/emq-docs-cn.
-The plugin is developed and maintained by https://www.xmeter.net. XMeter is a professional performance testing service provider.
+MQTT JMeter Plugin, it's used for testing MQTT protocol. The plugin was used for EMQ's performance benchmark test, and here is [report link](https://github.com/emqtt/emq-xmeter-cn).
+The plugin is developed and maintained by [XMeter](https://www.xmeter.net). XMeter is a professional performance testing service provider.
 
 # Install instruction
-The plugin is a standard JMeter plugin. You can download the latest version of mqtt-jmeter from https://github.com/emqtt/mqtt-jmeter/releases, and then copy the downloaded JAR files into $JMETER_HOME/lib/ext folder. After restart the JMeter, then you can see the 3 samplers provided by this plugin.
+The plugin is a standard JMeter plugin. You can download the latest version of mqtt-jmeter from [here](https://github.com/emqtt/mqtt-jmeter/releases), and then copy the downloaded JAR files into $JMETER_HOME/lib/ext folder. After restart the JMeter, then you can see the 3 samplers provided by this plugin.
 
 We recommend to use JMeter 3.0 or above. 
 
