@@ -33,11 +33,11 @@ If MQTT JMeter plugin is installed successfully, then open JMeter and below 3 MQ
 
 This section includes basic connection settings.
 
-**Server name or IP**: The server install with MQTT server, it can be either IP address or server name. The default value is 127.0.0.1.
+- **Server name or IP**: The server install with MQTT server, it can be either IP address or server name. The default value is 127.0.0.1.
 
-**Port number**: The port that opens by MQTT server, the default value is 1883 for TCP protocol, and normally 8883 for SSL protocol.
+- **Port number**: The port that opens by MQTT server, the default value is 1883 for TCP protocol, and normally 8883 for SSL protocol.
 
-**Timeout(s)**: The connection timeout seconds while connecting to MQTT server. The default is 10 seconds.
+- **Timeout(s)**: The connection timeout seconds while connecting to MQTT server. The default is 10 seconds.
 
 ### MQTT Protocol
 
@@ -51,21 +51,21 @@ If **'Dual SSL authentication'** is checked, please follow 'Certification files 
 
 User can configure MQTT server with user name & password authentication, refer to [EMQ user name and password authentication guide](http://emqtt.com/docs/v2/guide.html#id3).
 
-**User name**: If MQTT server configured with user name, then specify user name here.
+- **User name**: If MQTT server configured with user name, then specify user name here.
 
-**Password**: If MQTT server configured with password, then specify password here.
+- **Password**: If MQTT server configured with password, then specify password here.
 
 ### Connection options
 
-**ClientId prefix**: The client id prefix, the plugin will add generated uuid after the prefix to identify the client. Default value is 'conn_'.
+- **ClientId prefix**: The client id prefix, the plugin will add generated uuid after the prefix to identify the client. Default value is 'conn_'.
 
-**Keep alive(s)**: Ping packet send interval in seconds. Default value is 300, which means each connection sends a ping packet to MQTT server every 5 minutes.
+- **Keep alive(s)**: Ping packet send interval in seconds. Default value is 300, which means each connection sends a ping packet to MQTT server every 5 minutes.
 
-**Connection keep time(s)**: The value is for setting the connection elapsed time after successfully established MQTT connection. The default value is 1800 seconds, which means that the connection will be alive within 30 minutes.
+- **Connection keep time(s)**: The value is for setting the connection elapsed time after successfully established MQTT connection. The default value is 1800 seconds, which means that the connection will be alive within 30 minutes.
 
-**Connect attampt max**: The maximum number of reconnect attempts before an error is reported back to the client on the first attempt by the client to connect to a server. Set to -1 to use unlimited attempts. Defaults to 0.
+- **Connect attampt max**: The maximum number of reconnect attempts before an error is reported back to the client on the first attempt by the client to connect to a server. Set to -1 to use unlimited attempts. Defaults to 0.
 
-**Reconnect attampt max**:  The maximum number of reconnect attempts before an error is reported back to the client after a server connection had previously been established. Set to -1 to use unlimited attempts. Defaults to 0.
+- **Reconnect attampt max**:  The maximum number of reconnect attempts before an error is reported back to the client after a server connection had previously been established. Set to -1 to use unlimited attempts. Defaults to 0.
 
 ## Pub sampler
 ![pub_sampler](screenshots/pub_sampler.png)
@@ -74,21 +74,21 @@ For **MQTT connection**, **User authentication** and **Connection options** sect
 
 ### Pub options
 
-**QoS level**: The available QoS value, 0 is AT_MOST_ONCE, 1 is AT_LEAST_ONCE and 2 is EXACTLY_ONCE.
+- **QoS level**: The available QoS value, 0 is AT_MOST_ONCE, 1 is AT_LEAST_ONCE and 2 is EXACTLY_ONCE.
 
-**Topic name**: The topic name that the message will send to.
+- **Topic name**: The topic name that the message will send to.
 
-**Add timestamp in payload**: Add timestamp in the payload or not. If the checkbox is enabled, then timestamp of running pub sampler will be added ahead of payload. Mostly it can be used together with **Sub sampler** to calculate message latency time.
+- **Add timestamp in payload**: Add timestamp in the payload or not. If the checkbox is enabled, then timestamp of running pub sampler will be added ahead of payload. Mostly it can be used together with **Sub sampler** to calculate message latency time.
 
 ### Payloads
 
 **Message type**: 3 types of message can be used. 
 
-1) String: The normal string that sent to MQTT server. It can also be a JMeter variable.
+- String: The normal string that sent to MQTT server. It can also be a JMeter variable.
 
-2) Hex string: The hex string that sent to MQTT server. The chars input must be [0-9] or [A-F] or [a-f]. The hex string will be converted to binary and send to server. It can also be a JMeter variable.
+- Hex string: The hex string that sent to MQTT server. The chars input must be [0-9] or [A-F] or [a-f]. The hex string will be converted to binary and send to server. It can also be a JMeter variable.
 
-3) Random string with fixed length: Refer to below screenshot. If the option is selected, then it requires user to input 'Length'. The length means the auto generated string length. Default is 1024, which means generated a 1kb size of random string.
+- Random string with fixed length: Refer to below screenshot. If the option is selected, then it requires user to input 'Length'. The length means the auto generated string length. Default is 1024, which means generated a 1kb size of random string.
 
 ![payload_setting](screenshots/payload_setting.png)
 
@@ -108,7 +108,8 @@ For **MQTT connection**, **User authentication** and **Connection options** sect
 ```
 message_latency = timestamp_in_sub_when_receive_msg - timestamp_in_payload (timestamp in pub machine when sending out message)
 
-Please notice, if the machine publish message is not the same as subscriber, then the calculated message latency time is not accurate. It's because the time is almost not the same in different machines. So the latency time calculated by sub sampler could be only be a reference.
+Please notice, if the machine publish message is not the same as subscriber, then the calculated message latency time is not accurate. 
+It's because the time is almost not the same in different machines. So the latency time calculated by sub sampler could be only be a reference.
 ```
 
 -  **Debug response**: If it's checked, then the received message will be print in response. It's recommend to enable it when you're debugging script.
@@ -116,7 +117,7 @@ Please notice, if the machine publish message is not the same as subscriber, the
 ### Sub test script
 ![sub_testplan](screenshots/sub_testplan.png)
 
-Normally, the sub sampler is used together with constant timers. Refer to the test plan in above, if the 'Thead delay (in milliseconds)' is set to 1000, then it means subscriber report test result every 1 second. During the 1 second, multiple messages could be received, and result in report is the summarized data during 1 second.
+Normally, the sub sampler is used together with constant timers. Refer to the test plan in above, if the 'Thead delay (in milliseconds)' of constant timer is set to 1000, then it means subscriber report test result every 1 second. During the 1 second, multiple messages could be received, and result in report is the summarized data during 1 second.
 If constant timer is set to 2000, then means summarized report during 2 seconds.
 
 
