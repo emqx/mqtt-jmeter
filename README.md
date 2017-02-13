@@ -14,11 +14,11 @@ If you'd like to build binary by yourself, please clone the project and run 'mvn
 # How to use
 The plugin includes 3 samplers: 
 
-1) Connection sampler, which can be used for connection mock. For example, in a large scale system, there could have lots of backend connections with no data transimission except some hearbeat signal. The sampler can be used in this case.
+- Connection sampler, which can be used for connection mock. For example, in a large scale system, there could have lots of backend connections with no data transimission except some hearbeat signal. The sampler can be used in this case.
 
-2) Pub sampler, which can be used for publish message to MQTT server.
+- Pub sampler, which can be used for publish message to MQTT server.
 
-3) Sub sampler, which can be used for sub message from MQTT server.
+- Sub sampler, which can be used for sub message from MQTT server.
 
 If MQTT JMeter plugin is installed successfully, then open JMeter and below 3 MQTT samplers can be found under 'Sampler'.
 
@@ -43,7 +43,7 @@ This section includes basic connection settings.
 
 The sampler supports for 2 protocols, TCP and SSL. For the SSL protocol, it includes normal SSL and dual SSL authentication. 
 
-If **'Dual SSL authentication'** is checked, please follow 'Certification files for SSL/TLS connections' in below to configure client SSL configuration.
+If **'Dual SSL authentication'** is checked, please follow 'Certification files for SSL/TLS connections' at end of this doc configure client SSL configuration.
 
 ![protocol_setting](screenshots/protocol_setting.png)
 
