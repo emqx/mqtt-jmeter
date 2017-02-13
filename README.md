@@ -116,29 +116,27 @@ message_latency = timestamp_in_sub_when_receive_msg - timestamp_in_payload (time
 ## Certification files for SSL/TLS connections
 After deploying emqtt server, you get the following OOTB (out of the box) SSL/TLS certification files under ${EMQTTD_HOME}/etc/certs directory:
 
-1) cacert.pem : the self-signed CA certification 
+1) **cacert.pem** : the self-signed CA certification 
 
-2) cert.pem : certification for emqtt server
+2) **cert.pem** : certification for emqtt server
 
-3) client-cert.pem : certfication for emqtt client in order to connect to server via SSL/TLS connection. In this jmeter plugin case, the client implies jmeter "virtual user" 
+3) **client-cert.pem** : certfication for emqtt client in order to connect to server via SSL/TLS connection. In this jmeter plugin case, the client implies jmeter "virtual user" 
+
+4) **client-key.pem** **key.pem** : key files to protect client and server certification respectively
 
 [Note:] The above server and client certifications are both issued by the self-signed CA. If you would like to use official certifications for your EMQTT deployment, please check out relevant document to configure it.
 
 We will use the OOTB test certfications (as an example) to show you how to prepare the required certification files for this EMQTT JMeter plugin.
 
+```
+export PATH=$PATH:<YOUR_JDK_HOM>/bin
 
-	```
+keytool -import -alias cacert -keystore emqtt.jks -file cacert.pem -storepass <YOUR_PASSWORD> -trustcacerts -noprompt
+keytool -import -alias client -keystore emqtt.jks -file client-cert.pem -storepass <YOUR_PASSWORD>
+keytool -import -alias server -keystore emqtt.jks -file cert.pem -storepass <YOUR_PASSWORD>
 
-	export PATH=$PATH:<YOUR_JDK_HOM>/bin
-
-	keytool -import -alias cacert -keystore emqtt.jks -file cacert.pem -storepass <YOUR_PASSWORD> -trustcacerts -noprompt
-	keytool -import -alias client -keystore emqtt.jks -file client-cert.pem -storepass <YOUR_PASSWORD>
-	keytool -import -alias server -keystore emqtt.jks -file cert.pem -storepass <YOUR_PASSWORD>
-
-	openssl pkcs12 -export -inkey client-key.pem -in client-cert.pem -out client.p12 -password pass:<YOUR_PASSWORD>
-
-	```
-
+openssl pkcs12 -export -inkey client-key.pem -in client-cert.pem -out client.p12 -password pass:<YOUR_PASSWORD>
+```
 
 #### Specify key store, client certfication and corresponding pass phrases in plugin sampler:
 
