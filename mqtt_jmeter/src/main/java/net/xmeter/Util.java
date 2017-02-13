@@ -15,6 +15,8 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.jmeter.services.FileServer;
+import org.apache.jorphan.logging.LoggingManager;
+import org.apache.log.Logger;
 
 import net.xmeter.samplers.AbstractMQTTSampler;
 
@@ -22,6 +24,7 @@ public class Util implements Constants {
 	
 	private static SecureRandom random = new SecureRandom();
     private static char[] seeds = "abcdefghijklmnopqrstuvwxmy0123456789".toCharArray();
+    private transient static Logger logger = LoggingManager.getLoggerForClass();
 
 	public static String generateClientId(String prefix) {
 		int leng = prefix.length();
@@ -49,6 +52,7 @@ public class Util implements Constants {
 
 			return sslContext;
 		} else {
+			logger.info("Configured with dual SSL, trying to load key files.");
 			String KEYSTORE_PASS = sampler.getKeyStorePassword();
 			String CLIENTCERT_PASS = sampler.getClientCertPassword();
 
@@ -74,19 +78,18 @@ public class Util implements Constants {
 				}
 			}
 			
-			InputStream is_cacert = new FileInputStream(theFile1);
-			InputStream is_client = new FileInputStream(theFile2);
+			try(InputStream is_cacert = new FileInputStream(theFile1); InputStream is_client = new FileInputStream(theFile2)) {
+				KeyStore tks = KeyStore.getInstance(KeyStore.getDefaultType()); // jks
+				tks.load(is_cacert, KEYSTORE_PASS.toCharArray());
 
-			KeyStore tks = KeyStore.getInstance(KeyStore.getDefaultType()); // jks
-			tks.load(is_cacert, KEYSTORE_PASS.toCharArray());
+				KeyStore cks = KeyStore.getInstance("PKCS12");
+				cks.load(is_client, CLIENTCERT_PASS.toCharArray());
 
-			KeyStore cks = KeyStore.getInstance("PKCS12");
-			cks.load(is_client, CLIENTCERT_PASS.toCharArray());
-
-			SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(tks, new TrustSelfSignedStrategy()) // use it to customize
-					.loadKeyMaterial(cks, CLIENTCERT_PASS.toCharArray()) // load client certificate
-					.build();
-			return sslContext;
+				SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(tks, new TrustSelfSignedStrategy()) // use it to customize
+						.loadKeyMaterial(cks, CLIENTCERT_PASS.toCharArray()) // load client certificate
+						.build();
+				return sslContext;
+			}
 		}
 	}
 	
