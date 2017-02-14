@@ -125,13 +125,13 @@ public class ConnectionSampler extends AbstractMQTTSampler
 				}
 				TimeUnit.SECONDS.sleep(1);
 			}
-
+		} catch (InterruptedException e) {
+			logger.log(Priority.ERROR, e.getMessage(), e);
+		} finally {
 			if (connection != null) {
 				connection.disconnect();
 				logger.log(Priority.INFO, MessageFormat.format("The connection {0} disconneted successfully.", connection));
 			}
-		} catch (InterruptedException e) {
-			logger.log(Priority.ERROR, e.getMessage(), e);
 		}
 	}
 
