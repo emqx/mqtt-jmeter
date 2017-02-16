@@ -31,7 +31,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>${project.artifactId}</finalName>
+		<finalName>mqtt-xmeter</finalName>
 		<defaultGoal>install</defaultGoal>
 		<plugins>
 			<plugin>
