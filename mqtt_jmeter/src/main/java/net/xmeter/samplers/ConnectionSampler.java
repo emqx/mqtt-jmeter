@@ -112,6 +112,8 @@ public class ConnectionSampler extends AbstractMQTTSampler
 	@Override
 	public void threadFinished() {
 		if (JMeter.isNonGUI()) {
+			//The keepTime is saved as instance variable, because the method getConnKeepTime() in threadFinished() 
+			//returns with initial value of jmx tree. The JMeter variable replacement cannot be applied.
 			logger.info("The work has been done, will sleep current thread for " + keepTime + " sceconds.");
 			sleepCurrentThreadAndDisconnect();
 		}
