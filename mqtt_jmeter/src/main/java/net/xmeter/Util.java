@@ -57,6 +57,9 @@ public class Util implements Constants {
 			String CLIENTCERT_PASS = sampler.getClientCertPassword();
 
 			String baseDir = FileServer.getFileServer().getBaseDir();
+			if(baseDir != null && (!baseDir.endsWith("/"))) {
+				baseDir += "/";
+			}
 			String file1 = sampler.getKeyStoreFilePath();
 			
 			File theFile1 = new File(file1);
