@@ -28,6 +28,8 @@ public class ConnectionSampler extends AbstractMQTTSampler
 	private transient MQTT mqtt = new MQTT();
 	private transient FutureConnection connection = null;
 	private boolean interrupt = false;
+	private int keepTime = 0;
+	
 	/**
 	 * 
 	 */
@@ -45,6 +47,8 @@ public class ConnectionSampler extends AbstractMQTTSampler
 			if (!DEFAULT_PROTOCOL.equals(getProtocol())) {
 				mqtt.setSslContext(Util.getContext(this));
 			}
+			
+			this.keepTime = Integer.parseInt(getConnKeepTime());
 
 			mqtt.setHost(getProtocol().toLowerCase() + "://" + getServer() + ":" + getPort());
 			mqtt.setKeepAlive((short) Integer.parseInt(getConnKeepAlive()));
@@ -108,7 +112,7 @@ public class ConnectionSampler extends AbstractMQTTSampler
 	@Override
 	public void threadFinished() {
 		if (JMeter.isNonGUI()) {
-			logger.info("The work has been done, will sleep current thread for " + getConnKeepTime() + " sceconds.");
+			logger.info("The work has been done, will sleep current thread for " + keepTime + " sceconds.");
 			sleepCurrentThreadAndDisconnect();
 		}
 	}
@@ -120,7 +124,7 @@ public class ConnectionSampler extends AbstractMQTTSampler
 				return;
 			}
 			long start = System.currentTimeMillis();
-			while ((System.currentTimeMillis() - start) <= TimeUnit.SECONDS.toMillis(Integer.parseInt(getConnKeepTime()))) {
+			while ((System.currentTimeMillis() - start) <= TimeUnit.SECONDS.toMillis(keepTime)) {
 				if (this.interrupt) {
 					logger.info("interrupted flag is true, and stop the sleep.");
 					break;
