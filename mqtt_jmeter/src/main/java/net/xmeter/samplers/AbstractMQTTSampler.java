@@ -18,19 +18,19 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 		setProperty(SERVER, server);
 	}
 
-	public int getPort() {
-		return getPropertyAsInt(PORT, DEFAULT_PORT);
+	public String getPort() {
+		return getPropertyAsString(PORT, DEFAULT_PORT);
 	}
 
-	public void setPort(int port) {
+	public void setPort(String port) {
 		setProperty(PORT, port);
 	}
 
-	public int getConnTimeout() {
-		return getPropertyAsInt(CONN_TIMEOUT, DEFAULT_CONN_TIME_OUT);
+	public String getConnTimeout() {
+		return getPropertyAsString(CONN_TIMEOUT, DEFAULT_CONN_TIME_OUT);
 	}
 
-	public void setConnTimeout(int connTimeout) {
+	public void setConnTimeout(String connTimeout) {
 		setProperty(CONN_TIMEOUT, connTimeout);
 	}
 
@@ -91,35 +91,35 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 		setProperty(CONN_CLIENT_ID_PREFIX, connPrefix);
 	}
 
-	public int getConnKeepAlive() {
-		return getPropertyAsInt(CONN_KEEP_ALIVE, DEFAULT_CONN_KEEP_ALIVE);
+	public String getConnKeepAlive() {
+		return getPropertyAsString(CONN_KEEP_ALIVE, DEFAULT_CONN_KEEP_ALIVE);
 	}
 
-	public void setConnKeepAlive(int connKeepAlive) {
+	public void setConnKeepAlive(String connKeepAlive) {
 		setProperty(CONN_KEEP_ALIVE, connKeepAlive);
 	}
 
-	public int getConnKeepTime() {
-		return getPropertyAsInt(CONN_KEEP_TIME, DEFAULT_CONN_KEEP_TIME);
+	public String getConnKeepTime() {
+		return getPropertyAsString(CONN_KEEP_TIME, DEFAULT_CONN_KEEP_TIME);
 	}
 
-	public void setConnKeepTime(int connKeepTime) {
+	public void setConnKeepTime(String connKeepTime) {
 		setProperty(CONN_KEEP_TIME, connKeepTime);
 	}
 
-	public int getConnAttamptMax() {
-		return getPropertyAsInt(CONN_ATTAMPT_MAX, DEFAULT_CONN_ATTAMPT_MAX);
+	public String getConnAttamptMax() {
+		return getPropertyAsString(CONN_ATTAMPT_MAX, DEFAULT_CONN_ATTAMPT_MAX);
 	}
 
-	public void setConnAttamptMax(int connAttamptMax) {
+	public void setConnAttamptMax(String connAttamptMax) {
 		setProperty(CONN_ATTAMPT_MAX, connAttamptMax);
 	}
 
-	public int getConnReconnAttamptMax() {
-		return getPropertyAsInt(CONN_RECONN_ATTAMPT_MAX, DEFAULT_CONN_RECONN_ATTAMPT_MAX);
+	public String getConnReconnAttamptMax() {
+		return getPropertyAsString(CONN_RECONN_ATTAMPT_MAX, DEFAULT_CONN_RECONN_ATTAMPT_MAX);
 	}
 
-	public void setConnReconnAttamptMax(int connReconnAttamptMax) {
+	public void setConnReconnAttamptMax(String connReconnAttamptMax) {
 		setProperty(CONN_RECONN_ATTAMPT_MAX, connReconnAttamptMax);
 	}
 

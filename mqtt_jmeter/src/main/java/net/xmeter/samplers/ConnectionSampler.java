@@ -47,23 +47,25 @@ public class ConnectionSampler extends AbstractMQTTSampler
 			}
 
 			mqtt.setHost(getProtocol().toLowerCase() + "://" + getServer() + ":" + getPort());
-			mqtt.setKeepAlive((short) getConnKeepAlive());
+			mqtt.setKeepAlive((short) Integer.parseInt(getConnKeepAlive()));
 			String clientId = Util.generateClientId(getConnPrefix());
 			mqtt.setClientId(clientId);
-			mqtt.setConnectAttemptsMax(getConnAttamptMax());
-			mqtt.setReconnectAttemptsMax(getConnReconnAttamptMax());
+			mqtt.setConnectAttemptsMax(Integer.parseInt(getConnAttamptMax()));
+			mqtt.setReconnectAttemptsMax(Integer.parseInt(getConnReconnAttamptMax()));
 
 			if (!"".equals(getUserNameAuth().trim())) {
+				System.out.println("user name:" + getUserNameAuth());
 				mqtt.setUserName(getUserNameAuth());
 			}
 			if (!"".equals(getPasswordAuth().trim())) {
+				System.out.println("password:" + getPasswordAuth());
 				mqtt.setPassword(getPasswordAuth());
 			}
 
 			result.sampleStart();
 			connection = mqtt.futureConnection();
 			Future<Void> f1 = connection.connect();
-			f1.await(getConnTimeout(), TimeUnit.SECONDS);
+			f1.await(Integer.parseInt(getConnTimeout()), TimeUnit.SECONDS);
 
 			Topic[] topics = { new Topic("topic_" + clientId, QoS.AT_LEAST_ONCE) };
 			connection.subscribe(topics);
@@ -118,7 +120,7 @@ public class ConnectionSampler extends AbstractMQTTSampler
 				return;
 			}
 			long start = System.currentTimeMillis();
-			while ((System.currentTimeMillis() - start) <= TimeUnit.SECONDS.toMillis(getConnKeepTime())) {
+			while ((System.currentTimeMillis() - start) <= TimeUnit.SECONDS.toMillis(Integer.parseInt(getConnKeepTime()))) {
 				if (this.interrupt) {
 					logger.info("interrupted flag is true, and stop the sleep.");
 					break;

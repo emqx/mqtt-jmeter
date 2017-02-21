@@ -90,7 +90,13 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants{
 		super.configure(element);
 		SubSampler sampler = (SubSampler) element;
 		connUI.configure(sampler);
-		this.qosChoice.setSelectedIndex(sampler.getQOS());
+
+		if(sampler.getQOS().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1){
+			this.qosChoice.setSelectedIndex(Integer.parseInt(sampler.getQOS()));	
+		} else {
+			this.qosChoice.setText(sampler.getQOS());
+		}
+		
 		this.topicName.setText(sampler.getTopic());
 		this.timestamp.setSelected(sampler.isAddTimestamp());
 		this.debugResponse.setSelected(sampler.isDebugResponse());
@@ -112,18 +118,23 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants{
 		connUI.setupSamplerProperties(sampler);
 		sampler.setTopic(this.topicName.getText());
 		
-		int qos = QOS_0;
-		try {
-			qos = Integer.parseInt(this.qosChoice.getText());
-			if (qos < QOS_0 || qos > QOS_2) {
-				qos = QOS_0;
+		if(this.qosChoice.getText().indexOf(JMETER_VARIABLE_PREFIX) == -1) {
+			int qos = QOS_0;
+			try {
+				qos = Integer.parseInt(this.qosChoice.getText());
+				if (qos < QOS_0 || qos > QOS_2) {
+					qos = QOS_0;
+					logger.info("Invalid QoS value, set to default QoS value 0.");
+				}
+			} catch (Exception ex) {
 				logger.info("Invalid QoS value, set to default QoS value 0.");
+				qos = QOS_0;
 			}
-		} catch (Exception ex) {
-			logger.info("Invalid QoS value, set to default QoS value 0.");
-			qos = QOS_0;
+			sampler.setQOS(String.valueOf(qos));
+		} else {
+			sampler.setQOS(this.qosChoice.getText());
 		}
-		sampler.setQOS(qos);
+		
 		sampler.setAddTimestamp(this.timestamp.isSelected());
 		sampler.setDebugResponse(this.debugResponse.isSelected());
 	}

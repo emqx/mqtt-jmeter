@@ -30,11 +30,11 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 	private String clientId = "";
 	private QoS qos_enum = QoS.AT_MOST_ONCE;
 
-	public int getQOS() {
-		return getPropertyAsInt(QOS_LEVEL, QOS_0);
+	public String getQOS() {
+		return getPropertyAsString(QOS_LEVEL, String.valueOf(QOS_0));
 	}
 
-	public void setQOS(int qos) {
+	public void setQOS(String qos) {
 		setProperty(QOS_LEVEL, qos);
 	}
 
@@ -62,11 +62,11 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 		setProperty(MESSAGE_TYPE, messageType);
 	}
 
-	public int getMessageLength() {
-		return getPropertyAsInt(MESSAGE_FIX_LENGTH, DEFAULT_MESSAGE_FIX_LENGTH);
+	public String getMessageLength() {
+		return getPropertyAsString(MESSAGE_FIX_LENGTH, DEFAULT_MESSAGE_FIX_LENGTH);
 	}
 
-	public void setMessageLength(int length) {
+	public void setMessageLength(String length) {
 		setProperty(MESSAGE_FIX_LENGTH, length);
 	}
 
@@ -145,13 +145,13 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 			}
 			
 			mqtt.setHost(getProtocol().toLowerCase() + "://" + getServer() + ":" + getPort());
-			mqtt.setKeepAlive((short) getConnKeepAlive());
+			mqtt.setKeepAlive((short) Integer.parseInt(getConnKeepAlive()));
 
 			clientId = Util.generateClientId(getConnPrefix());
 			mqtt.setClientId(clientId);
 
-			mqtt.setConnectAttemptsMax(getConnAttamptMax());
-			mqtt.setReconnectAttemptsMax(getConnReconnAttamptMax());
+			mqtt.setConnectAttemptsMax(Integer.parseInt(getConnAttamptMax()));
+			mqtt.setReconnectAttemptsMax(Integer.parseInt(getConnReconnAttamptMax()));
 
 			if (!"".equals(getUserNameAuth().trim())) {
 				mqtt.setUserName(getUserNameAuth());
@@ -160,10 +160,11 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 				mqtt.setPassword(getPasswordAuth());
 			}
 			if (MESSAGE_TYPE_RANDOM_STR_WITH_FIX_LEN.equals(getMessageType())) {
-				payload = Util.generatePayload(getMessageLength());
+				payload = Util.generatePayload(Integer.parseInt(getMessageLength()));
 			}
 
-			switch (getQOS()) {
+			int qos = Integer.parseInt(getQOS());
+			switch (qos) {
 			case 0:
 				qos_enum = QoS.AT_MOST_ONCE;
 				break;
@@ -179,7 +180,7 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 
 			connection = mqtt.futureConnection();
 			Future<Void> f1 = connection.connect();
-			f1.await(getConnTimeout(), TimeUnit.SECONDS);
+			f1.await(Integer.parseInt(getConnTimeout()), TimeUnit.SECONDS);
 		} catch (Exception e) {
 			logger.log(Priority.ERROR, e.getMessage(), e);
 		}

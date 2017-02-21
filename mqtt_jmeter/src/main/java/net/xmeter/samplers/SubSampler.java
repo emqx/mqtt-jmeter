@@ -48,11 +48,11 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 	 */
 	private static final long serialVersionUID = 2979978053740194951L;
 
-	public int getQOS() {
-		return getPropertyAsInt(QOS_LEVEL, QOS_0);
+	public String getQOS() {
+		return getPropertyAsString(QOS_LEVEL, String.valueOf(QOS_0));
 	}
 
-	public void setQOS(int qos) {
+	public void setQOS(String qos) {
 		setProperty(QOS_LEVEL, qos);
 	}
 
@@ -174,13 +174,13 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 			}
 			
 			mqtt.setHost(getProtocol().toLowerCase() + "://" + getServer() + ":" + getPort());
-			mqtt.setKeepAlive((short) getConnKeepAlive());
+			mqtt.setKeepAlive((short) Integer.parseInt(getConnKeepAlive()));
 
 			String clientId = Util.generateClientId(getConnPrefix());
 			mqtt.setClientId(clientId);
 
-			mqtt.setConnectAttemptsMax(getConnAttamptMax());
-			mqtt.setReconnectAttemptsMax(getConnReconnAttamptMax());
+			mqtt.setConnectAttemptsMax(Integer.parseInt(getConnAttamptMax()));
+			mqtt.setReconnectAttemptsMax(Integer.parseInt(getConnReconnAttamptMax()));
 
 			if (!"".equals(getUserNameAuth().trim())) {
 				mqtt.setUserName(getUserNameAuth());

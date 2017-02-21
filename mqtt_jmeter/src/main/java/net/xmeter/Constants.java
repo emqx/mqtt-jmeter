@@ -49,9 +49,11 @@ public interface Constants {
 	public static final int MAX_CLIENT_ID_LENGTH = 23;
 	
 	public static final String DEFAULT_SERVER = "127.0.0.1";
-	public static final int DEFAULT_PORT = 1883;
-	public static final int DEFAULT_CONN_TIME_OUT = 10;
+	public static final String DEFAULT_PORT = "1883";
+	public static final String DEFAULT_CONN_TIME_OUT = "10";
 	public static final String DEFAULT_PROTOCOL = "TCP";
+	
+	public static final String JMETER_VARIABLE_PREFIX = "${";
 	
 	public static final String DEFAULT_TOPIC_NAME = "test_topic";
 	
@@ -59,12 +61,12 @@ public interface Constants {
 	public static final String DEFAULT_CONN_PREFIX_FOR_PUB = "pub_";
 	public static final String DEFAULT_CONN_PREFIX_FOR_SUB = "sub_";
 	
-	public static final int DEFAULT_CONN_KEEP_ALIVE = 300;
-	public static final int DEFAULT_CONN_KEEP_TIME = 1800;
-	public static final int DEFAULT_CONN_ATTAMPT_MAX = 0;
-	public static final int DEFAULT_CONN_RECONN_ATTAMPT_MAX = 0;
+	public static final String DEFAULT_CONN_KEEP_ALIVE = "300";
+	public static final String DEFAULT_CONN_KEEP_TIME = "1800";
+	public static final String DEFAULT_CONN_ATTAMPT_MAX = "0";
+	public static final String DEFAULT_CONN_RECONN_ATTAMPT_MAX = "0";
 	
 	public static final boolean DEFAULT_ADD_TIMESTAMP = false;
-	public static final int DEFAULT_MESSAGE_FIX_LENGTH = 1024;
+	public static final String DEFAULT_MESSAGE_FIX_LENGTH = "1024";
 	
 }

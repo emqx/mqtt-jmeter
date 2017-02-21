@@ -111,6 +111,8 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		//pPanel.setLayout(new GridLayout(1, 2));
 
 		protocols = new JLabeledChoice("Protocols:", new String[] { "TCP", "SSL" }, true, false);
+		//JComboBox<String> component = (JComboBox) protocols.getComponentList().get(1);
+		//component.setSize(new Dimension(40, component.getHeight()));
 		protocols.addChangeListener(this);
 		pPanel.add(protocols, BorderLayout.WEST);
 
@@ -233,25 +235,30 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		}
 		certificationFilePath1.setText(sampler.getKeyStoreFilePath());
 		certificationFilePath2.setText(sampler.getClientCertFilePath());
-		connAttmptMax.setText(String.valueOf(sampler.getConnAttamptMax()));
-		connKeepAlive.setText(String.valueOf(sampler.getConnKeepAlive()));
-		connKeeptime.setText(String.valueOf(sampler.getConnKeepTime()));
+		connAttmptMax.setText(sampler.getConnAttamptMax());
+		connKeepAlive.setText(sampler.getConnKeepAlive());
+		connKeeptime.setText(sampler.getConnKeepTime());
 		connNamePrefix.setText(sampler.getConnPrefix());
 		if(sampler.isDualSSLAuth()) {
 			dualAuth.setVisible(true);
 			dualAuth.setSelected(sampler.isDualSSLAuth());	
 		}
 		cksPassword.setText(sampler.getKeyStorePassword());
-		if(DEFAULT_PROTOCOL.equals(sampler.getProtocol())) {
-			protocols.setSelectedIndex(0);	
+		
+		if(sampler.getProtocol().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1){
+			if(DEFAULT_PROTOCOL.equals(sampler.getProtocol())) {
+				protocols.setSelectedIndex(0);	
+			} else {
+				protocols.setSelectedIndex(1);
+			}
 		} else {
-			protocols.setSelectedIndex(1);
+			protocols.setText(sampler.getProtocol());
 		}
-		reconnAttmptMax.setText(String.valueOf(sampler.getConnReconnAttamptMax()));
+		reconnAttmptMax.setText(sampler.getConnReconnAttamptMax());
 		serverAddr.setText(sampler.getServer());
-		serverPort.setText(String.valueOf(sampler.getPort()));
-		timeout.setText(String.valueOf(sampler.getConnTimeout()));
-		tksPassword.setText(String.valueOf(sampler.getClientCertPassword()));
+		serverPort.setText(sampler.getPort());
+		timeout.setText(sampler.getConnTimeout());
+		tksPassword.setText(sampler.getClientCertPassword());
 		userNameAuth.setText(sampler.getUserNameAuth());
 		passwordAuth.setText(sampler.getPasswordAuth());
 	}
@@ -260,16 +267,16 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	public void setupSamplerProperties(AbstractMQTTSampler sampler) {
 		sampler.setKeyStoreFilePath(certificationFilePath1.getText());
 		sampler.setClientCertFilePath(certificationFilePath2.getText());
-		sampler.setConnKeepAlive(parseInt(connKeepAlive.getText()));
-		sampler.setConnAttamptMax(parseInt(connAttmptMax.getText()));
-		sampler.setConnKeepTime(parseInt(connKeeptime.getText()));
+		sampler.setConnKeepAlive(connKeepAlive.getText());
+		sampler.setConnAttamptMax(connAttmptMax.getText());
+		sampler.setConnKeepTime(connKeeptime.getText());
 		sampler.setConnPrefix(connNamePrefix.getText());
-		sampler.setConnReconnAttamptMax(parseInt(reconnAttmptMax.getText()));
-		sampler.setConnTimeout(parseInt(timeout.getText()));
+		sampler.setConnReconnAttamptMax(reconnAttmptMax.getText());
+		sampler.setConnTimeout(timeout.getText());
 		sampler.setDualSSLAuth(dualAuth.isSelected());
 		sampler.setKeyStorePassword(cksPassword.getText());
 		sampler.setClientCertPassword(tksPassword.getText());
-		sampler.setPort(parseInt(serverPort.getText()));
+		sampler.setPort(serverPort.getText());
 		sampler.setProtocol(protocols.getText());
 		sampler.setServer(serverAddr.getText());
 		sampler.setUserNameAuth(userNameAuth.getText());
@@ -287,16 +294,16 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		certificationFilePath1.setText("");
 		certificationFilePath2.setText("");
 		dualAuth.setSelected(false);
-		connAttmptMax.setText(String.valueOf(DEFAULT_CONN_ATTAMPT_MAX));
-		connKeepAlive.setText(String.valueOf(DEFAULT_CONN_KEEP_ALIVE));
-		connKeeptime.setText(String.valueOf(DEFAULT_CONN_KEEP_TIME));
+		connAttmptMax.setText(DEFAULT_CONN_ATTAMPT_MAX);
+		connKeepAlive.setText(DEFAULT_CONN_KEEP_ALIVE);
+		connKeeptime.setText(DEFAULT_CONN_KEEP_TIME);
 		connNamePrefix.setText(DEFAULT_CONN_PREFIX_FOR_CONN);
-		protocols.setSelectedIndex(0);
+		protocols.setSelectedIndex(0);	
 		cksPassword.setText("");
-		reconnAttmptMax.setText(String.valueOf(DEFAULT_CONN_RECONN_ATTAMPT_MAX));
+		reconnAttmptMax.setText(DEFAULT_CONN_RECONN_ATTAMPT_MAX);
 		serverAddr.setText(DEFAULT_SERVER);
-		serverPort.setText(String.valueOf(DEFAULT_PORT));
-		timeout.setText(String.valueOf(DEFAULT_CONN_TIME_OUT));
+		serverPort.setText(DEFAULT_PORT);
+		timeout.setText(DEFAULT_CONN_TIME_OUT);
 		userNameAuth.setText("");
 		passwordAuth.setText("");
 	}
