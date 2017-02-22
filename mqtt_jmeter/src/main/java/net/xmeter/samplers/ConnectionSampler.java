@@ -2,6 +2,7 @@ package net.xmeter.samplers;
 
 import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.jmeter.JMeter;
 import org.apache.jmeter.samplers.Entry;
@@ -28,7 +29,11 @@ public class ConnectionSampler extends AbstractMQTTSampler
 	private transient MQTT mqtt = new MQTT();
 	private transient FutureConnection connection = null;
 	private boolean interrupt = false;
-	private int keepTime = 0;
+	//Declare it as static, for the instance variable will be set to initial value 0 in testEnded method.
+	//The static value will not be reset.
+	private static int keepTime = 0;
+	
+	private static AtomicBoolean sleepFlag = new AtomicBoolean(false);
 	
 	/**
 	 * 
@@ -48,8 +53,6 @@ public class ConnectionSampler extends AbstractMQTTSampler
 				mqtt.setSslContext(Util.getContext(this));
 			}
 			
-			this.keepTime = Integer.parseInt(getConnKeepTime());
-
 			mqtt.setHost(getProtocol().toLowerCase() + "://" + getServer() + ":" + getPort());
 			mqtt.setKeepAlive((short) Integer.parseInt(getConnKeepAlive()));
 			String clientId = Util.generateClientId(getConnPrefix());
@@ -98,11 +101,35 @@ public class ConnectionSampler extends AbstractMQTTSampler
 	@Override
 	public void testEnded(String arg0) {
 		this.interrupt = true;
+		
+		try {
+			if (JMeter.isNonGUI()) {
+				if(!sleepFlag.get()) {
+					//The keepTime is saved as static variable, because keepTime variable in testEnded() 
+					//returns with initial value.
+					logger.info("The work has been done, will keep connection for " + keepTime + " sceconds.");
+					TimeUnit.SECONDS.sleep(keepTime);	
+					sleepFlag.set(true);
+				}
+				
+				//The following code does not make sense, because the connection variable was already reset.
+				//But it makes sense in threadFinished method.
+				//The reason for not sleeping and then disconnecting in threadFinished is to avoid maintain too much of threads.
+				//Otherwise each thread (for a thread-group) will be kept open before sleeping.
+				/*if(this.connection != null) {
+					this.connection.disconnect();
+					logger.info(MessageFormat.format("The connection {0} disconneted successfully.", connection));	
+				}*/
+			}
+		} catch(Exception ex) {
+			logger.error(ex.getMessage(), ex);
+		}
 	}
 
 	@Override
 	public void testStarted() {
-
+		keepTime = Integer.parseInt(getConnKeepTime());
+		logger.info("Keeptime is: "  + keepTime);
 	}
 
 	@Override
@@ -111,12 +138,7 @@ public class ConnectionSampler extends AbstractMQTTSampler
 
 	@Override
 	public void threadFinished() {
-		if (JMeter.isNonGUI()) {
-			//The keepTime is saved as instance variable, because the method getConnKeepTime() in threadFinished() 
-			//returns with initial value of jmx tree. The JMeter variable replacement cannot be applied.
-			logger.info("The work has been done, will sleep current thread for " + keepTime + " sceconds.");
-			sleepCurrentThreadAndDisconnect();
-		}
+		
 	}
 
 	private void sleepCurrentThreadAndDisconnect() {
@@ -133,8 +155,8 @@ public class ConnectionSampler extends AbstractMQTTSampler
 				}
 				TimeUnit.SECONDS.sleep(1);
 			}
-		} catch (InterruptedException e) {
-			logger.log(Priority.ERROR, e.getMessage(), e);
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
 		} finally {
 			if (connection != null) {
 				connection.disconnect();
