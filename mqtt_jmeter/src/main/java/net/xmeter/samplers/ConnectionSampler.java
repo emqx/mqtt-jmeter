@@ -145,6 +145,11 @@ public class ConnectionSampler extends AbstractMQTTSampler
 		try {
 			//If the connection is null or does not connect successfully, then not necessary to keep the connection.
 			if(connection == null || (!connection.isConnected())) {
+				if(connection == null) {
+					logger.info("Connection is null.");
+				} else if(!connection.isConnected()) {
+					logger.info("Connection is created, but is not connected.");
+				}
 				return;
 			}
 			long start = System.currentTimeMillis();
