@@ -237,11 +237,23 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 				}
 			});
 
+			final String topicName = getTopic();
+			try {
+				qos = Integer.parseInt(getQOS());
+				logger.info("QoS level is: " + qos);
+			} catch(Exception ex) {
+				logger.error(MessageFormat.format("Specified invalid QoS value {0}, set to default QoS value {1}!", ex.getMessage(), qos));
+				qos = QOS_0;
+			}
+			
 			connection.connect(new Callback<Void>() {
 				@Override
 				public void onSuccess(Void value) {
-					String topicName = getTopic();
 					Topic[] topics = new Topic[1];
+					if(qos < 0 || qos > 2) {
+						logger.error("Specified invalid QoS value, set to default QoS value " + qos);
+						qos = QOS_0;
+					}
 					if (qos == QOS_0) {
 						topics[0] = new Topic(topicName, QoS.AT_MOST_ONCE);
 					} else if (qos == QOS_1) {
