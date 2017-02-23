@@ -188,7 +188,10 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 			if (!"".equals(getPasswordAuth().trim())) {
 				mqtt.setPassword(getPasswordAuth());
 			}
-
+			
+			qos = Integer.parseInt(getQOS());
+			logger.info("sub: threadStarted qos = " + qos);
+			
 			connection = mqtt.callbackConnection();
 			connection.listener(new Listener() {
 				@Override
