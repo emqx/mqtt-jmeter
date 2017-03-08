@@ -33,7 +33,7 @@ If MQTT JMeter plugin is installed successfully, then open JMeter and below 3 MQ
 
 This section includes basic connection settings.
 
-- **Server name or IP**: The server install with MQTT server, it can be either IP address or server name. The default value is 127.0.0.1.
+- **Server name or IP**: The server install with MQTT server, it can be either IP address or server name. The default value is 127.0.0.1. DO NOT add protocol (e,g tcp:// or ssl:// etc) before server name or IP address! 
 
 - **Port number**: The port that opens by MQTT server, the default value is 1883 for TCP protocol, and normally 8883 for SSL protocol.
 
