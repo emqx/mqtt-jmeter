@@ -127,7 +127,7 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 			logger.log(Priority.ERROR, ex.getMessage(), ex);
 			result.sampleEnd();
 			result.setSuccessful(false);
-			result.setResponseMessage(MessageFormat.format("Connection {0} connected failed.", connection));
+			result.setResponseMessage(MessageFormat.format("Publish failed for connection {0}.", connection));
 			result.setResponseData("Failed.".getBytes());
 			result.setResponseCode("500");
 		}
