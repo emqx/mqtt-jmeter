@@ -40,7 +40,7 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 	private List<String> contents = new ArrayList<String>();
 	private boolean printFlag = false;
 
-	private Object lock = new Object();
+	private transient Object lock = new Object();
 
 	private int qos = QOS_0;
 	/**
