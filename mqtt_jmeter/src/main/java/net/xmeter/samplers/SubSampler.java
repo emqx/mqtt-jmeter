@@ -86,6 +86,124 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 
 	@Override
 	public SampleResult sample(Entry arg0) {
+		if (connection == null) { // first loop, do initialization
+			try {
+				if (!DEFAULT_PROTOCOL.equals(getProtocol())) {
+					mqtt.setSslContext(Util.getContext(this));
+				}
+				
+				mqtt.setHost(getProtocol().toLowerCase() + "://" + getServer() + ":" + getPort());
+				mqtt.setKeepAlive((short) Integer.parseInt(getConnKeepAlive()));
+	
+				String clientId = Util.generateClientId(getConnPrefix());
+				mqtt.setClientId(clientId);
+	
+				mqtt.setConnectAttemptsMax(Integer.parseInt(getConnAttamptMax()));
+				mqtt.setReconnectAttemptsMax(Integer.parseInt(getConnReconnAttamptMax()));
+	
+				if (!"".equals(getUserNameAuth().trim())) {
+					mqtt.setUserName(getUserNameAuth());
+				}
+				if (!"".equals(getPasswordAuth().trim())) {
+					mqtt.setPassword(getPasswordAuth());
+				}
+				
+				connection = mqtt.callbackConnection();
+				connection.listener(new Listener() {
+					@Override
+					public void onPublish(UTF8Buffer topic, Buffer body, Runnable ack) {
+						try {
+							ByteArrayOutputStream baos = new ByteArrayOutputStream();
+							body.writeTo(baos);
+							String msg = baos.toString();
+							ack.run();
+							synchronized (lock) {
+								if (isAddTimestamp()) {
+									long now = System.currentTimeMillis();
+									int index = msg.indexOf(TIME_STAMP_SEP_FLAG);
+									if (index == -1 && (!printFlag)) {
+										logger.info("Payload does not include timestamp: " + msg);
+										printFlag = true;
+									} else if (index != -1) {
+										long start = Long.parseLong(msg.substring(0, index));
+										long elapsed = now - start;
+										avgElapsedTime = (avgElapsedTime * receivedCount + elapsed) / (receivedCount + 1);
+									}
+								}
+								if (isDebugResponse()) {
+									contents.add(msg);
+								}
+								receivedMessageSize += msg.length();
+								receivedCount++;
+							}
+						} catch (IOException e) {
+							logger.log(Priority.ERROR, e.getMessage(), e);
+						}
+					}
+	
+					@Override
+					public void onFailure(Throwable value) {
+						connectFailed = true;
+						connection.kill(null);
+					}
+	
+					@Override
+					public void onDisconnected() {
+					}
+	
+					@Override
+					public void onConnected() {
+					}
+				});
+	
+				final String topicName = getTopic();
+				try {
+					qos = Integer.parseInt(getQOS());
+				} catch(Exception ex) {
+					logger.error(MessageFormat.format("Specified invalid QoS value {0}, set to default QoS value {1}!", ex.getMessage(), qos));
+					qos = QOS_0;
+				}
+				
+				connection.connect(new Callback<Void>() {
+					@Override
+					public void onSuccess(Void value) {
+						Topic[] topics = new Topic[1];
+						if(qos < 0 || qos > 2) {
+							logger.error("Specified invalid QoS value, set to default QoS value " + qos);
+							qos = QOS_0;
+						}
+						if (qos == QOS_0) {
+							topics[0] = new Topic(topicName, QoS.AT_MOST_ONCE);
+						} else if (qos == QOS_1) {
+							topics[0] = new Topic(topicName, QoS.AT_LEAST_ONCE);
+						} else {
+							topics[0] = new Topic(topicName, QoS.EXACTLY_ONCE);
+						}
+	
+						connection.subscribe(topics, new Callback<byte[]>() {
+							@Override
+							public void onSuccess(byte[] value) {
+								logger.info("sub successful, topic is " + topicName);
+							}
+	
+							@Override
+							public void onFailure(Throwable value) {
+								subFailed = true;
+								connection.kill(null);
+							}
+						});
+					}
+	
+					@Override
+					public void onFailure(Throwable value) {
+						connectFailed = true;
+					}
+				});
+			} catch (Exception e) {
+				logger.log(Priority.ERROR, e.getMessage(), e);
+			}
+		} 
+		
 		SampleResult result = new SampleResult();
 		result.setSampleLabel(getName());
 		
@@ -101,7 +219,6 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 
 		synchronized (lock) {
 			String message = MessageFormat.format("Received {0} of message\n.", receivedCount);
-			// getLogger().info(message);
 			StringBuffer content = new StringBuffer("");
 			if (isDebugResponse()) {
 				for (int i = 0; i < contents.size(); i++) {
@@ -152,7 +269,13 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 	}
 
 	@Override
+	public void threadStarted() {
+		//logger.info("*** in threadStarted");
+	}
+
+	@Override
 	public void threadFinished() {
+		//logger.info("*** in threadFinished");
 		this.connection.disconnect(new Callback<Void>() {
 			@Override
 			public void onSuccess(Void value) {
@@ -165,126 +288,4 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 			}
 		});
 	}
-
-	@Override
-	public void threadStarted() {
-		try {
-			if (!DEFAULT_PROTOCOL.equals(getProtocol())) {
-				mqtt.setSslContext(Util.getContext(this));
-			}
-			
-			mqtt.setHost(getProtocol().toLowerCase() + "://" + getServer() + ":" + getPort());
-			mqtt.setKeepAlive((short) Integer.parseInt(getConnKeepAlive()));
-
-			String clientId = Util.generateClientId(getConnPrefix());
-			mqtt.setClientId(clientId);
-
-			mqtt.setConnectAttemptsMax(Integer.parseInt(getConnAttamptMax()));
-			mqtt.setReconnectAttemptsMax(Integer.parseInt(getConnReconnAttamptMax()));
-
-			if (!"".equals(getUserNameAuth().trim())) {
-				mqtt.setUserName(getUserNameAuth());
-			}
-			if (!"".equals(getPasswordAuth().trim())) {
-				mqtt.setPassword(getPasswordAuth());
-			}
-			
-			connection = mqtt.callbackConnection();
-			connection.listener(new Listener() {
-				@Override
-				public void onPublish(UTF8Buffer topic, Buffer body, Runnable ack) {
-					try {
-						ByteArrayOutputStream baos = new ByteArrayOutputStream();
-						body.writeTo(baos);
-						String msg = baos.toString();
-						ack.run();
-						synchronized (lock) {
-							if (isAddTimestamp()) {
-								long now = System.currentTimeMillis();
-								int index = msg.indexOf(TIME_STAMP_SEP_FLAG);
-								if (index == -1 && (!printFlag)) {
-									logger.info("Payload does not include timestamp: " + msg);
-									printFlag = true;
-								} else if (index != -1) {
-									long start = Long.parseLong(msg.substring(0, index));
-									long elapsed = now - start;
-									avgElapsedTime = (avgElapsedTime * receivedCount + elapsed) / (receivedCount + 1);
-								}
-							}
-							if (isDebugResponse()) {
-								contents.add(msg);
-							}
-							receivedMessageSize += msg.length();
-							receivedCount++;
-						}
-					} catch (IOException e) {
-						logger.log(Priority.ERROR, e.getMessage(), e);
-					}
-				}
-
-				@Override
-				public void onFailure(Throwable value) {
-					connectFailed = true;
-					connection.kill(null);
-				}
-
-				@Override
-				public void onDisconnected() {
-				}
-
-				@Override
-				public void onConnected() {
-				}
-			});
-
-			final String topicName = getTopic();
-			try {
-				qos = Integer.parseInt(getQOS());
-				logger.info("QoS level is: " + qos);
-			} catch(Exception ex) {
-				logger.error(MessageFormat.format("Specified invalid QoS value {0}, set to default QoS value {1}!", ex.getMessage(), qos));
-				qos = QOS_0;
-			}
-			
-			connection.connect(new Callback<Void>() {
-				@Override
-				public void onSuccess(Void value) {
-					Topic[] topics = new Topic[1];
-					if(qos < 0 || qos > 2) {
-						logger.error("Specified invalid QoS value, set to default QoS value " + qos);
-						qos = QOS_0;
-					}
-					if (qos == QOS_0) {
-						topics[0] = new Topic(topicName, QoS.AT_MOST_ONCE);
-					} else if (qos == QOS_1) {
-						topics[0] = new Topic(topicName, QoS.AT_LEAST_ONCE);
-					} else {
-						topics[0] = new Topic(topicName, QoS.EXACTLY_ONCE);
-					}
-
-					connection.subscribe(topics, new Callback<byte[]>() {
-						@Override
-						public void onSuccess(byte[] value) {
-							logger.info("sub successful: " + new String(value));
-						}
-
-						@Override
-						public void onFailure(Throwable value) {
-							subFailed = true;
-							connection.kill(null);
-						}
-					});
-				}
-
-				@Override
-				public void onFailure(Throwable value) {
-					connectFailed = true;
-				}
-			});
-		} catch (Exception e) {
-			logger.log(Priority.ERROR, e.getMessage(), e);
-		}
-
-	}
-
 }
