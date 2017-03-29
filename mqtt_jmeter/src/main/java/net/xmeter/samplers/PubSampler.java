@@ -88,6 +88,54 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 	
 	@Override
 	public SampleResult sample(Entry arg0) {
+		if (connection == null) { // first loop, do initialization
+			try {
+				if (!DEFAULT_PROTOCOL.equals(getProtocol())) {
+					mqtt.setSslContext(Util.getContext(this));
+				}
+				
+				mqtt.setHost(getProtocol().toLowerCase() + "://" + getServer() + ":" + getPort());
+				mqtt.setKeepAlive((short) Integer.parseInt(getConnKeepAlive()));
+
+				clientId = Util.generateClientId(getConnPrefix());
+				mqtt.setClientId(clientId);
+
+				mqtt.setConnectAttemptsMax(Integer.parseInt(getConnAttamptMax()));
+				mqtt.setReconnectAttemptsMax(Integer.parseInt(getConnReconnAttamptMax()));
+
+				if (!"".equals(getUserNameAuth().trim())) {
+					mqtt.setUserName(getUserNameAuth());
+				}
+				if (!"".equals(getPasswordAuth().trim())) {
+					mqtt.setPassword(getPasswordAuth());
+				}
+				if (MESSAGE_TYPE_RANDOM_STR_WITH_FIX_LEN.equals(getMessageType())) {
+					payload = Util.generatePayload(Integer.parseInt(getMessageLength()));
+				}
+
+				int qos = Integer.parseInt(getQOS());
+				switch (qos) {
+				case 0:
+					qos_enum = QoS.AT_MOST_ONCE;
+					break;
+				case 1:
+					qos_enum = QoS.AT_LEAST_ONCE;
+					break;
+				case 2:
+					qos_enum = QoS.EXACTLY_ONCE;
+					break;
+				default:
+					break;
+				}
+
+				connection = mqtt.futureConnection();
+				Future<Void> f1 = connection.connect();
+				f1.await(Integer.parseInt(getConnTimeout()), TimeUnit.SECONDS);
+			} catch (Exception e) {
+				logger.log(Priority.ERROR, e.getMessage(), e);
+			}
+		}
+		
 		SampleResult result = new SampleResult();
 		result.setSampleLabel(getName());
 		try {
@@ -136,51 +184,7 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 
 	@Override
 	public void threadStarted() {
-		try {
-			if (!DEFAULT_PROTOCOL.equals(getProtocol())) {
-				mqtt.setSslContext(Util.getContext(this));
-			}
-			
-			mqtt.setHost(getProtocol().toLowerCase() + "://" + getServer() + ":" + getPort());
-			mqtt.setKeepAlive((short) Integer.parseInt(getConnKeepAlive()));
-
-			clientId = Util.generateClientId(getConnPrefix());
-			mqtt.setClientId(clientId);
-
-			mqtt.setConnectAttemptsMax(Integer.parseInt(getConnAttamptMax()));
-			mqtt.setReconnectAttemptsMax(Integer.parseInt(getConnReconnAttamptMax()));
-
-			if (!"".equals(getUserNameAuth().trim())) {
-				mqtt.setUserName(getUserNameAuth());
-			}
-			if (!"".equals(getPasswordAuth().trim())) {
-				mqtt.setPassword(getPasswordAuth());
-			}
-			if (MESSAGE_TYPE_RANDOM_STR_WITH_FIX_LEN.equals(getMessageType())) {
-				payload = Util.generatePayload(Integer.parseInt(getMessageLength()));
-			}
-
-			int qos = Integer.parseInt(getQOS());
-			switch (qos) {
-			case 0:
-				qos_enum = QoS.AT_MOST_ONCE;
-				break;
-			case 1:
-				qos_enum = QoS.AT_LEAST_ONCE;
-				break;
-			case 2:
-				qos_enum = QoS.EXACTLY_ONCE;
-				break;
-			default:
-				break;
-			}
-
-			connection = mqtt.futureConnection();
-			Future<Void> f1 = connection.connect();
-			f1.await(Integer.parseInt(getConnTimeout()), TimeUnit.SECONDS);
-		} catch (Exception e) {
-			logger.log(Priority.ERROR, e.getMessage(), e);
-		}
+		
 	}
 
 	@Override
