@@ -25,6 +25,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants{
 	
 	private JLabeledChoice qosChoice;
 	
+	private final JLabeledTextField sampleCount = new JLabeledTextField("Received message number for one sample:");
 	private final JLabeledTextField topicName = new JLabeledTextField("Topic name:");
 	private JCheckBox debugResponse = new JCheckBox("Debug response");
 	private JCheckBox timestamp = new JCheckBox("Payload includes timestamp");
@@ -66,6 +67,10 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants{
 		optsPanel1.add(timestamp);
 		optsPanelCon.add(optsPanel1);
 		
+		JPanel optsPanel3 = new HorizontalPanel();
+		optsPanel3.add(sampleCount);
+		optsPanelCon.add(optsPanel3);
+		
 		JPanel optsPanel2 = new HorizontalPanel();
 		optsPanel2.add(debugResponse);
 		optsPanelCon.add(optsPanel2);
@@ -100,6 +105,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants{
 		this.topicName.setText(sampler.getTopic());
 		this.timestamp.setSelected(sampler.isAddTimestamp());
 		this.debugResponse.setSelected(sampler.isDebugResponse());
+		this.sampleCount.setText(sampler.getSampleCount());
 	}
 
 	@Override
@@ -137,6 +143,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants{
 		
 		sampler.setAddTimestamp(this.timestamp.isSelected());
 		sampler.setDebugResponse(this.debugResponse.isSelected());
+		sampler.setSampleCount(this.sampleCount.getText());
 	}
 	
 	@Override
@@ -148,6 +155,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants{
 		this.qosChoice.setText(String.valueOf(QOS_0));
 		this.timestamp.setSelected(false);
 		this.debugResponse.setSelected(false);
+		this.sampleCount.setText(DEFAULT_SAMPLE_COUNT);
 	}
 	
 }

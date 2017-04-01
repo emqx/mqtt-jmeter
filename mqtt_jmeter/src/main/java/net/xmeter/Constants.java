@@ -33,6 +33,8 @@ public interface Constants {
 	public static final String ADD_TIMESTAMP = "mqtt.add_timestamp";
 	public static final String PAYLOAD_SIZE = "mqtt.payload_size";
 	
+	public static final String SAMPLE_COUNT = "mqtt.sample_msg_count";
+	
 	public static final String TIME_STAMP = "mqtt.time_stamp";
 	public static final String TIME_STAMP_SEP_FLAG = "ts_sep_flag";
 	
@@ -65,6 +67,7 @@ public interface Constants {
 	public static final String DEFAULT_CONN_KEEP_TIME = "1800";
 	public static final String DEFAULT_CONN_ATTAMPT_MAX = "0";
 	public static final String DEFAULT_CONN_RECONN_ATTAMPT_MAX = "0";
+	public static final String DEFAULT_SAMPLE_COUNT = "-1";
 	
 	public static final boolean DEFAULT_ADD_TIMESTAMP = false;
 	public static final String DEFAULT_MESSAGE_FIX_LENGTH = "1024";

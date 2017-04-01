@@ -63,6 +63,21 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 	public void setTopic(String topicName) {
 		setProperty(TOPIC_NAME, topicName);
 	}
+	
+	public String getSampleCount() {
+		return getPropertyAsString(SAMPLE_COUNT, DEFAULT_SAMPLE_COUNT);
+	}
+	
+	public void setSampleCount(String count) {
+		try {
+			int temp = Integer.parseInt(count);
+			temp = (temp == 0 ? 1 : temp); //If the value is set to 0, then change it to 1.
+			setProperty(SAMPLE_COUNT, count);
+		} catch(Exception ex) {
+			logger.info("Invalid count value, set to default value.");
+			setProperty(SAMPLE_COUNT, DEFAULT_SAMPLE_COUNT);
+		}
+	}
 
 	public boolean isAddTimestamp() {
 		return getPropertyAsBoolean(ADD_TIMESTAMP);
@@ -135,6 +150,11 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 								}
 								receivedMessageSize += msg.length();
 								receivedCount++;
+								if(!getSampleCount().equals(DEFAULT_SAMPLE_COUNT)) {
+									if(receivedCount >= Integer.parseInt(getSampleCount())) {
+										lock.notify();
+									}
+								}
 							}
 						} catch (IOException e) {
 							logger.log(Priority.ERROR, e.getMessage(), e);
@@ -218,6 +238,14 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 		}
 
 		synchronized (lock) {
+			if((!getSampleCount().equals(DEFAULT_SAMPLE_COUNT)) && (receivedCount < Integer.parseInt(getSampleCount()))) {
+				try {
+					lock.wait();
+				} catch (InterruptedException e) {
+					logger.info("Received exception when waiting for notification signal: " + e.getMessage());
+				}
+			}
+			
 			String message = MessageFormat.format("Received {0} of message\n.", receivedCount);
 			StringBuffer content = new StringBuffer("");
 			if (isDebugResponse()) {
