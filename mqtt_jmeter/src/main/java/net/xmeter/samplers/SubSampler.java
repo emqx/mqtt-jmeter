@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
@@ -64,8 +67,16 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 		setProperty(TOPIC_NAME, topicName);
 	}
 	
+	public String getSampleCondition() {
+		return getPropertyAsString(SAMPLE_CONDITION, SAMPLE_ON_CONDITION_OPTION1);
+	}
+	
+	public void setSampleCondition(String option) {
+		setProperty(SAMPLE_CONDITION, option);
+	}
+	
 	public String getSampleCount() {
-		return getPropertyAsString(SAMPLE_COUNT, DEFAULT_SAMPLE_COUNT);
+		return getPropertyAsString(SAMPLE_CONDITION_VALUE, DEFAULT_SAMPLE_VALUE_COUNT);
 	}
 	
 	public void setSampleCount(String count) {
@@ -76,10 +87,27 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 				logger.info("Invalid sample message count value.");
 				throw new IllegalArgumentException();
 			}
-			setProperty(SAMPLE_COUNT, count);
+			setProperty(SAMPLE_CONDITION_VALUE, count);
 		} catch(Exception ex) {
 			logger.info("Invalid count value, set to default value.");
-			setProperty(SAMPLE_COUNT, DEFAULT_SAMPLE_COUNT);
+			setProperty(SAMPLE_CONDITION_VALUE, DEFAULT_SAMPLE_VALUE_COUNT);
+		}
+	}
+	
+	public String getSampleElapsedTime() {
+		return getPropertyAsString(SAMPLE_CONDITION_VALUE, SAMPLE_CONDITION_VALUE);
+	}
+	
+	public void setSampleElapsedTime(String elapsedTime) {
+		try {
+			int temp = Integer.parseInt(elapsedTime);
+			if(temp <= 0) {
+				throw new IllegalArgumentException();
+			}
+			setProperty(SAMPLE_CONDITION_VALUE, elapsedTime);
+		}catch(Exception ex) {
+			logger.info("Invalid elapsed time value, set to default value: " + elapsedTime);
+			setProperty(SAMPLE_CONDITION_VALUE, DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_SEC);
 		}
 	}
 
@@ -105,6 +133,7 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 
 	@Override
 	public SampleResult sample(Entry arg0) {
+		final boolean sampleByTime = SAMPLE_ON_CONDITION_OPTION1.equals(getSampleCondition());
 		if (connection == null) { // first loop, do initialization
 			try {
 				if (!DEFAULT_PROTOCOL.equals(getProtocol())) {
@@ -114,7 +143,12 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 				mqtt.setHost(getProtocol().toLowerCase() + "://" + getServer() + ":" + getPort());
 				mqtt.setKeepAlive((short) Integer.parseInt(getConnKeepAlive()));
 	
-				String clientId = Util.generateClientId(getConnPrefix());
+				String clientId = null;
+				if(isClientIdSuffix()) {
+					clientId = Util.generateClientId(getConnPrefix());
+				} else {
+					clientId = getConnPrefix();
+				}
 				mqtt.setClientId(clientId);
 	
 				mqtt.setConnectAttemptsMax(Integer.parseInt(getConnAttamptMax()));
@@ -154,9 +188,11 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 								}
 								receivedMessageSize += msg.length();
 								receivedCount++;
-								if(!getSampleCount().equals(DEFAULT_SAMPLE_COUNT)) {
-									if(receivedCount >= Integer.parseInt(getSampleCount())) {
-										lock.notify();
+								if(!sampleByTime) {
+									if(!getSampleCount().equals(DEFAULT_SAMPLE_VALUE_COUNT)) {
+										if(receivedCount >= Integer.parseInt(getSampleCount())) {
+											lock.notify();
+										}
 									}
 								}
 							}
@@ -242,11 +278,19 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 		}
 
 		synchronized (lock) {
-			if((!getSampleCount().equals(DEFAULT_SAMPLE_COUNT)) && (receivedCount < Integer.parseInt(getSampleCount()))) {
+			if(sampleByTime) {
 				try {
 					lock.wait();
 				} catch (InterruptedException e) {
 					logger.info("Received exception when waiting for notification signal: " + e.getMessage());
+				}
+			} else {
+				if((!getSampleCount().equals(DEFAULT_SAMPLE_VALUE_COUNT)) && (receivedCount < Integer.parseInt(getSampleCount()))) {
+					try {
+						lock.wait();
+					} catch (InterruptedException e) {
+						logger.info("Received exception when waiting for notification signal: " + e.getMessage());
+					}
 				}
 			}
 			
@@ -303,6 +347,28 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 	@Override
 	public void threadStarted() {
 		//logger.info("*** in threadStarted");
+		boolean sampleByTime = SAMPLE_ON_CONDITION_OPTION1.equals(getSampleCondition());
+		if(!sampleByTime) {
+			logger.info("Configured with sampled on message count, will not check message sent time.");
+			return;
+		}
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		executor.submit(new Runnable() {
+			@Override
+			public void run() {
+				while(true) {
+					try {
+						TimeUnit.MILLISECONDS.sleep(Long.parseLong(getSampleElapsedTime()));
+						synchronized (lock) {
+							lock.notify();
+						}
+					} catch (Exception e) {
+						logger.log(Priority.ERROR, e.getMessage());
+					} 
+				}
+			}
+		});
+		executor.shutdown();
 	}
 
 	@Override

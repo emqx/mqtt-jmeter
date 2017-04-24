@@ -98,6 +98,14 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 	public void setConnKeepAlive(String connKeepAlive) {
 		setProperty(CONN_KEEP_ALIVE, connKeepAlive);
 	}
+	
+	public boolean isClientIdSuffix() {
+		return getPropertyAsBoolean(CONN_CLIENT_ID_SUFFIX, DEFAULT_ADD_CLIENT_ID_SUFFIX);
+	}
+	
+	public void setClientIdSuffix(boolean clientIdSuffix) {
+		setProperty(CONN_CLIENT_ID_SUFFIX, clientIdSuffix);
+	}
 
 	public String getConnKeepTime() {
 		return getPropertyAsString(CONN_KEEP_TIME, DEFAULT_CONN_KEEP_TIME);

@@ -48,7 +48,9 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private static final String BROWSE1 = "browse1";
 	private static final String BROWSE2 = "browse2";
 	
-	public final JLabeledTextField connNamePrefix = new JLabeledTextField("ClientId prefix:", 8);
+	public final JLabeledTextField connNamePrefix = new JLabeledTextField("ClientId:", 8);
+	private JCheckBox connNameSuffix = new JCheckBox("Add random client id suffix");
+	
 	private final JLabeledTextField connKeepAlive = new JLabeledTextField("Keep alive(s):", 4);
 	
 	private final JLabeledTextField connKeeptime = new JLabeledTextField("Connection keep time(s):", 4);
@@ -77,16 +79,20 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		JPanel optsPanelCon = new VerticalPanel();
 		optsPanelCon.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Connection options"));
 		
-		JPanel optsPanel = new HorizontalPanel();
-		optsPanel.add(connNamePrefix);
-		optsPanel.add(connKeepAlive);
-		optsPanel.add(connKeeptime);
-		optsPanelCon.add(optsPanel);
+		JPanel optsPanel0 = new HorizontalPanel();
+		optsPanel0.add(connNamePrefix);
+		optsPanel0.add(connNameSuffix);
+		connNameSuffix.setSelected(true);
+		optsPanelCon.add(optsPanel0);
 		
-		JPanel optsPanel2 = new HorizontalPanel();
-		optsPanel2.add(connAttmptMax);
-		optsPanel2.add(reconnAttmptMax);
-		optsPanelCon.add(optsPanel2);
+		JPanel optsPanel1 = new HorizontalPanel();
+		optsPanel1.add(connKeepAlive);
+		optsPanel1.add(connKeeptime);
+		optsPanelCon.add(optsPanel1);
+		
+		optsPanel1.add(connAttmptMax);
+		optsPanel1.add(reconnAttmptMax);
+		optsPanelCon.add(optsPanel1);
 		
 		return optsPanelCon;
 	}
@@ -239,6 +245,13 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		connKeepAlive.setText(sampler.getConnKeepAlive());
 		connKeeptime.setText(sampler.getConnKeepTime());
 		connNamePrefix.setText(sampler.getConnPrefix());
+		
+		if(sampler.isClientIdSuffix()) {
+			connNameSuffix.setSelected(true);
+		} else {
+			connNameSuffix.setSelected(false);
+		}
+		
 		if(sampler.isDualSSLAuth()) {
 			dualAuth.setVisible(true);
 			dualAuth.setSelected(sampler.isDualSSLAuth());	
@@ -271,6 +284,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		sampler.setConnAttamptMax(connAttmptMax.getText());
 		sampler.setConnKeepTime(connKeeptime.getText());
 		sampler.setConnPrefix(connNamePrefix.getText());
+		sampler.setClientIdSuffix(connNameSuffix.isSelected());
 		sampler.setConnReconnAttamptMax(reconnAttmptMax.getText());
 		sampler.setConnTimeout(timeout.getText());
 		sampler.setDualSSLAuth(dualAuth.isSelected());
@@ -306,5 +320,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		timeout.setText(DEFAULT_CONN_TIME_OUT);
 		userNameAuth.setText("");
 		passwordAuth.setText("");
+		connNameSuffix.setSelected(true);
 	}
 }

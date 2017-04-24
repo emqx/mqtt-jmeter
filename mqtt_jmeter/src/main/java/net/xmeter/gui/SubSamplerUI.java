@@ -5,6 +5,8 @@ import java.awt.BorderLayout;
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.apache.jmeter.gui.util.HorizontalPanel;
 import org.apache.jmeter.gui.util.VerticalPanel;
@@ -18,17 +20,21 @@ import org.apache.log.Logger;
 import net.xmeter.Constants;
 import net.xmeter.samplers.SubSampler;
 
-public class SubSamplerUI extends AbstractSamplerGui implements Constants{
+public class SubSamplerUI extends AbstractSamplerGui implements Constants, ChangeListener{
 	private static final Logger logger = LoggingManager.getLoggerForClass();
 	
 	private CommonConnUI connUI = new CommonConnUI();
 	
 	private JLabeledChoice qosChoice;
 	
-	private final JLabeledTextField sampleCount = new JLabeledTextField("Received message number for one sample:");
+	private JLabeledChoice sampleOnCondition;
+	
+	private final JLabeledTextField sampleConditionValue = new JLabeledTextField("");
 	private final JLabeledTextField topicName = new JLabeledTextField("Topic name:");
+	
 	private JCheckBox debugResponse = new JCheckBox("Debug response");
 	private JCheckBox timestamp = new JCheckBox("Payload includes timestamp");
+	
 	/**
 	 * 
 	 */
@@ -60,6 +66,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants{
 		optsPanelCon.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Sub options"));
 
 		qosChoice = new JLabeledChoice("QoS Level:", new String[] { String.valueOf(QOS_0), String.valueOf(QOS_1), String.valueOf(QOS_2) }, true, false);
+		sampleOnCondition = new JLabeledChoice("Sample on:", new String[] {SAMPLE_ON_CONDITION_OPTION1, SAMPLE_ON_CONDITION_OPTION2});
 
 		JPanel optsPanel1 = new HorizontalPanel();
 		optsPanel1.add(qosChoice);
@@ -68,7 +75,9 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants{
 		optsPanelCon.add(optsPanel1);
 		
 		JPanel optsPanel3 = new HorizontalPanel();
-		optsPanel3.add(sampleCount);
+		sampleOnCondition.addChangeListener(this);
+		optsPanel3.add(sampleOnCondition);
+		optsPanel3.add(sampleConditionValue);
 		optsPanelCon.add(optsPanel3);
 		
 		JPanel optsPanel2 = new HorizontalPanel();
@@ -105,7 +114,13 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants{
 		this.topicName.setText(sampler.getTopic());
 		this.timestamp.setSelected(sampler.isAddTimestamp());
 		this.debugResponse.setSelected(sampler.isDebugResponse());
-		this.sampleCount.setText(sampler.getSampleCount());
+		this.sampleOnCondition.setText(sampler.getSampleCondition());
+
+		if(SAMPLE_ON_CONDITION_OPTION1.equalsIgnoreCase(sampleOnCondition.getText())) {
+			this.sampleConditionValue.setText(sampler.getSampleElapsedTime());
+		} else if(SAMPLE_ON_CONDITION_OPTION2.equalsIgnoreCase(sampleOnCondition.getText())) {
+			this.sampleConditionValue.setText(sampler.getSampleCount());
+		}
 	}
 
 	@Override
@@ -143,7 +158,13 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants{
 		
 		sampler.setAddTimestamp(this.timestamp.isSelected());
 		sampler.setDebugResponse(this.debugResponse.isSelected());
-		sampler.setSampleCount(this.sampleCount.getText());
+		sampler.setSampleCondition(this.sampleOnCondition.getText());
+		
+		if(SAMPLE_ON_CONDITION_OPTION1.equalsIgnoreCase(sampleOnCondition.getText())) {
+			sampler.setSampleElapsedTime(this.sampleConditionValue.getText());
+		} else if(SAMPLE_ON_CONDITION_OPTION2.equalsIgnoreCase(sampleOnCondition.getText())) {
+			sampler.setSampleCount(this.sampleConditionValue.getText());
+		}
 	}
 	
 	@Override
@@ -155,7 +176,19 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants{
 		this.qosChoice.setText(String.valueOf(QOS_0));
 		this.timestamp.setSelected(false);
 		this.debugResponse.setSelected(false);
-		this.sampleCount.setText(DEFAULT_SAMPLE_COUNT);
+		this.sampleOnCondition.setText(SAMPLE_ON_CONDITION_OPTION1);
+		this.sampleConditionValue.setText(DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_SEC);
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		if(this.sampleOnCondition == e.getSource()) {
+			if(SAMPLE_ON_CONDITION_OPTION1.equalsIgnoreCase(sampleOnCondition.getText())) {
+				sampleConditionValue.setText(DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_SEC);
+			} else if(SAMPLE_ON_CONDITION_OPTION2.equalsIgnoreCase(sampleOnCondition.getText())) {
+				sampleConditionValue.setText(DEFAULT_SAMPLE_VALUE_COUNT);
+			}
+		}
 	}
 	
 }

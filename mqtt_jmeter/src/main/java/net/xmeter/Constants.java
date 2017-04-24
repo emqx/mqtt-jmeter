@@ -17,7 +17,8 @@ public interface Constants {
 	
 	public static final String CONN_KEEP_TIME = "mqtt.keep_time";
 	public static final String CONN_CLIENT_ID_PREFIX = "mqtt.client_id_prefix";
-
+	public static final String CONN_CLIENT_ID_SUFFIX = "mqtt.client_id_suffix";
+	
 	public static final String CONN_ELAPSED_TIME = "mqtt.conn_elapsed_time";
 	public static final String CONN_CLIENT_AUTH = "mqtt.conn_client_auth";
 	public static final String CONN_ATTAMPT_MAX = "mqtt.conn_attampt_max";
@@ -33,7 +34,8 @@ public interface Constants {
 	public static final String ADD_TIMESTAMP = "mqtt.add_timestamp";
 	public static final String PAYLOAD_SIZE = "mqtt.payload_size";
 	
-	public static final String SAMPLE_COUNT = "mqtt.sample_msg_count";
+	public static final String SAMPLE_CONDITION_VALUE = "mqtt.sample_condition_value";
+	public static final String SAMPLE_CONDITION = "mqtt.sample_condition";
 	
 	public static final String TIME_STAMP = "mqtt.time_stamp";
 	public static final String TIME_STAMP_SEP_FLAG = "ts_sep_flag";
@@ -47,6 +49,9 @@ public interface Constants {
 	public static final String MESSAGE_TYPE_RANDOM_STR_WITH_FIX_LEN = "Random string with fixed length";
 	public static final String MESSAGE_TYPE_HEX_STRING = "Hex string";
 	public static final String MESSAGE_TYPE_STRING = "String";
+	
+	public static final String SAMPLE_ON_CONDITION_OPTION1 = "eplased with specified time(ms)";
+	public static final String SAMPLE_ON_CONDITION_OPTION2 = "received number of message";
 	
 	public static final int MAX_CLIENT_ID_LENGTH = 23;
 	
@@ -67,9 +72,13 @@ public interface Constants {
 	public static final String DEFAULT_CONN_KEEP_TIME = "1800";
 	public static final String DEFAULT_CONN_ATTAMPT_MAX = "0";
 	public static final String DEFAULT_CONN_RECONN_ATTAMPT_MAX = "0";
-	public static final String DEFAULT_SAMPLE_COUNT = "-1";
+	
+	public static final String DEFAULT_SAMPLE_VALUE_COUNT = "-1";
+	public static final String DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_SEC = "1000";
 	
 	public static final boolean DEFAULT_ADD_TIMESTAMP = false;
 	public static final String DEFAULT_MESSAGE_FIX_LENGTH = "1024";
+	
+	public static final boolean DEFAULT_ADD_CLIENT_ID_SUFFIX = true;
 	
 }

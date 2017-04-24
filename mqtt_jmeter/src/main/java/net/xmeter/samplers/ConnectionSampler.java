@@ -55,7 +55,14 @@ public class ConnectionSampler extends AbstractMQTTSampler
 			
 			mqtt.setHost(getProtocol().toLowerCase() + "://" + getServer() + ":" + getPort());
 			mqtt.setKeepAlive((short) Integer.parseInt(getConnKeepAlive()));
-			String clientId = Util.generateClientId(getConnPrefix());
+			
+			String clientId = null;
+			if(isClientIdSuffix()) {
+				clientId = Util.generateClientId(getConnPrefix());
+			} else {
+				clientId = getConnPrefix();
+			}
+			
 			mqtt.setClientId(clientId);
 			mqtt.setConnectAttemptsMax(Integer.parseInt(getConnAttamptMax()));
 			mqtt.setReconnectAttemptsMax(Integer.parseInt(getConnReconnAttamptMax()));
