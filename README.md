@@ -57,7 +57,7 @@ User can configure MQTT server with user name & password authentication, refer t
 
 ### Connection options
 
-- **ClientId prefix**: The client id prefix, the plugin will add generated uuid after the prefix to identify the client. Default value is 'conn_'.
+- **ClientId**: The client id, the plugin will add generated uuid after the prefix to identify the client if keep 'Add random client id suffix' selected. Default value is 'conn_'. If 'Add random client id suffix' is not selected, then the text of 'ClientId' will be passed as 'clientId' of current connection.
 
 - **Keep alive(s)**: Ping packet send interval in seconds. Default value is 300, which means each connection sends a ping packet to MQTT server every 5 minutes.
 
@@ -111,11 +111,13 @@ message_latency = timestamp_in_sub_when_receive_msg - timestamp_in_payload (time
 Please notice, if the machine publish message is not the same as subscriber, then the calculated message latency time is not accurate. 
 It's because the time is almost not the same in different machines. So the latency time calculated by sub sampler could be only be a reference.
 ```
+- **Sample on**: It controls how to sample. The default value is 'elapsed with specified time(ms)', which means a sub sampler will be occurred every ms specified in next text field (default is 1000ms). During the 1000 ms, multiple messages could be received, and result in report is the summarized data during 1000 ms. If the value is set to 2000, then means summarized report during 2000 ms.
+
+Another option is 'received number of message', which means a sub sampler will be occurred when received number of message that specified in next text field (default is 1). 
 
 -  **Debug response**: If it's checked, then the received message will be print in response. It's recommend to enable it when you're debugging script.
 
 ### Sub test script
-![sub_testplan](screenshots/sub_testplan.png)
 
 Normally, the sub sampler is used together with constant timers. Refer to the test plan in above, if the 'Thead delay (in milliseconds)' of constant timer is set to 1000, then it means subscriber report test result every 1 second. During the 1 second, multiple messages could be received, and result in report is the summarized data during 1 second.
 If constant timer is set to 2000, then means summarized report during 2 seconds.
