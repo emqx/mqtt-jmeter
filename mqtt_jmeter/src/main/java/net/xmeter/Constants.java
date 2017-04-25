@@ -73,7 +73,7 @@ public interface Constants {
 	public static final String DEFAULT_CONN_ATTAMPT_MAX = "0";
 	public static final String DEFAULT_CONN_RECONN_ATTAMPT_MAX = "0";
 	
-	public static final String DEFAULT_SAMPLE_VALUE_COUNT = "-1";
+	public static final String DEFAULT_SAMPLE_VALUE_COUNT = "1";
 	public static final String DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_SEC = "1000";
 	
 	public static final boolean DEFAULT_ADD_TIMESTAMP = false;

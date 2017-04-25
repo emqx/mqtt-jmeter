@@ -82,8 +82,7 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 	public void setSampleCount(String count) {
 		try {
 			int temp = Integer.parseInt(count);
-			temp = (temp == 0 ? 1 : temp); //If the value is set to 0, then change it to 1.
-			if(temp < -1) {
+			if(temp < 1) {
 				logger.info("Invalid sample message count value.");
 				throw new IllegalArgumentException();
 			}
