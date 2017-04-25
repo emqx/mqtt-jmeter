@@ -117,12 +117,6 @@ Another option is 'received number of message', which means a sub sampler will b
 
 -  **Debug response**: If it's checked, then the received message will be print in response. It's recommend to enable it when you're debugging script.
 
-### Sub test script
-
-Normally, the sub sampler is used together with constant timers. Refer to the test plan in above, if the 'Thead delay (in milliseconds)' of constant timer is set to 1000, then it means subscriber report test result every 1 second. During the 1 second, multiple messages could be received, and result in report is the summarized data during 1 second.
-If constant timer is set to 2000, then means summarized report during 2 seconds.
-
-
 ## Certification files for SSL/TLS connections
 After deploying emqtt server, you get the following OOTB (out of the box) SSL/TLS certification files under ${EMQTTD_HOME}/etc/certs directory:
 
