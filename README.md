@@ -111,9 +111,7 @@ message_latency = timestamp_in_sub_when_receive_msg - timestamp_in_payload (time
 Please notice, if the machine publish message is not the same as subscriber, then the calculated message latency time is not accurate. 
 It's because the time is almost not the same in different machines. So the latency time calculated by sub sampler could be only be a reference.
 ```
-- **Sample on**: It controls how to sample. The default value is 'elapsed with specified time(ms)', which means a sub sampler will be occurred every ms specified in next text field (default is 1000ms). During the 1000 ms, multiple messages could be received, and result in report is the summarized data during 1000 ms. If the value is set to 2000, then means summarized report during 2000 ms.
-
-Another option is 'received number of message', which means a sub sampler will be occurred when received number of message that specified in next text field (default is 1). 
+- **Sample on**: It controls how to sample. The default value is '**elapsed with specified time(ms)**', which means a sub sampler will be occurred every ms specified in next text field (default is 1000ms). During the 1000 ms, multiple messages could be received, and result in report is the summarized data during 1000 ms. If the value is set to 2000, then means summarized report during 2000 ms. Another option is '**received number of message**', which means a sub sampler will be occurred when received number of message that specified in next text field (default is 1). 
 
 -  **Debug response**: If it's checked, then the received message will be print in response. It's recommend to enable it when you're debugging script.
 
