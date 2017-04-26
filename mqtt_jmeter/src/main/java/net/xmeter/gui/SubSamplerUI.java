@@ -78,6 +78,8 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 		sampleOnCondition.addChangeListener(this);
 		optsPanel3.add(sampleOnCondition);
 		optsPanel3.add(sampleConditionValue);
+		sampleOnCondition.setToolTipText("When sub sampler should report out.");
+		sampleConditionValue.setToolTipText("Please specify an integer value great than 0, other values will be ignored.");
 		optsPanelCon.add(optsPanel3);
 		
 		JPanel optsPanel2 = new HorizontalPanel();

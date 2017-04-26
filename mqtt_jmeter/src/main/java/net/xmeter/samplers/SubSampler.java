@@ -3,11 +3,12 @@ package net.xmeter.samplers;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
@@ -24,6 +25,7 @@ import org.fusesource.mqtt.client.MQTT;
 import org.fusesource.mqtt.client.QoS;
 import org.fusesource.mqtt.client.Topic;
 
+import net.xmeter.SubBean;
 import net.xmeter.Util;
 
 @SuppressWarnings("deprecation")
@@ -36,15 +38,12 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 	private boolean subFailed = false;
 	private boolean receivedMsgFailed = false;
 
-	private int receivedMessageSize = 0;
-	private int receivedCount = 0;
-	private double avgElapsedTime = 0f;
-
-	private List<String> contents = new ArrayList<String>();
+	private transient ConcurrentLinkedQueue<SubBean> batches = new ConcurrentLinkedQueue<>();
 	private boolean printFlag = false;
 
 	private transient Object lock = new Object();
-
+	private transient AtomicBoolean threadFinished = new AtomicBoolean(false); 
+	
 	private int qos = QOS_0;
 	/**
 	 * 
@@ -94,7 +93,7 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 	}
 	
 	public String getSampleElapsedTime() {
-		return getPropertyAsString(SAMPLE_CONDITION_VALUE, SAMPLE_CONDITION_VALUE);
+		return getPropertyAsString(SAMPLE_CONDITION_VALUE, DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_SEC);
 	}
 	
 	public void setSampleElapsedTime(String elapsedTime) {
@@ -126,14 +125,15 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 		setProperty(DEBUG_RESPONSE, debugResponse);
 	}
 
-	public String getConnPrefix() {
+	public String getConnClientId() {
 		return getPropertyAsString(CONN_CLIENT_ID_PREFIX, DEFAULT_CONN_PREFIX_FOR_SUB);
 	}
 
 	@Override
 	public SampleResult sample(Entry arg0) {
 		final boolean sampleByTime = SAMPLE_ON_CONDITION_OPTION1.equals(getSampleCondition());
-		if (connection == null) { // first loop, do initialization
+		final int sampleCount = Integer.parseInt(getSampleCount());
+		if (connection == null) { // first loop, initializing ..
 			try {
 				if (!DEFAULT_PROTOCOL.equals(getProtocol())) {
 					mqtt.setSslContext(Util.getContext(this));
@@ -144,9 +144,9 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 	
 				String clientId = null;
 				if(isClientIdSuffix()) {
-					clientId = Util.generateClientId(getConnPrefix());
+					clientId = Util.generateClientId(getConnClientId());
 				} else {
-					clientId = getConnPrefix();
+					clientId = getConnClientId();
 				}
 				mqtt.setClientId(clientId);
 	
@@ -170,6 +170,21 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 							String msg = baos.toString();
 							ack.run();
 							synchronized (lock) {
+								SubBean bean = null;
+								if(batches.isEmpty()) {
+									bean = new SubBean();
+									batches.add(bean);
+								} else {
+									SubBean[] beans = new SubBean[batches.size()];
+									batches.toArray(beans);
+									bean = beans[beans.length - 1];
+								}
+								
+								if((!sampleByTime) && (bean.getReceivedCount() == sampleCount)) { //Create a new batch when latest bean is full.
+									logger.info("The tail bean is full, will create a new bean for it.");
+									bean = new SubBean();
+									batches.add(bean);
+								}
 								if (isAddTimestamp()) {
 									long now = System.currentTimeMillis();
 									int index = msg.indexOf(TIME_STAMP_SEP_FLAG);
@@ -179,19 +194,22 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 									} else if (index != -1) {
 										long start = Long.parseLong(msg.substring(0, index));
 										long elapsed = now - start;
+										
+										double avgElapsedTime = bean.getAvgElapsedTime();
+										int receivedCount = bean.getReceivedCount();
 										avgElapsedTime = (avgElapsedTime * receivedCount + elapsed) / (receivedCount + 1);
+										bean.setAvgElapsedTime(avgElapsedTime);
 									}
 								}
 								if (isDebugResponse()) {
-									contents.add(msg);
+									bean.getContents().add(msg);
 								}
-								receivedMessageSize += msg.length();
-								receivedCount++;
+								bean.setReceivedMessageSize(bean.getReceivedMessageSize() + msg.length());
+								bean.setReceivedCount(bean.getReceivedCount() + 1);
 								if(!sampleByTime) {
-									if(!getSampleCount().equals(DEFAULT_SAMPLE_VALUE_COUNT)) {
-										if(receivedCount >= Integer.parseInt(getSampleCount())) {
-											lock.notify();
-										}
+									logger.info(System.currentTimeMillis() + ": need notify? receivedCount=" + bean.getReceivedCount() + ", sampleCount=" + sampleCount);
+									if(bean.getReceivedCount() == sampleCount) {
+										lock.notify();
 									}
 								}
 							}
@@ -277,6 +295,7 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 		}
 
 		synchronized (lock) {
+			
 			if(sampleByTime) {
 				try {
 					lock.wait();
@@ -284,7 +303,14 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 					logger.info("Received exception when waiting for notification signal: " + e.getMessage());
 				}
 			} else {
-				if((!getSampleCount().equals(DEFAULT_SAMPLE_VALUE_COUNT)) && (receivedCount < Integer.parseInt(getSampleCount()))) {
+				int receivedCount = (batches.isEmpty() ? 0 : batches.element().getReceivedCount());;
+				boolean needWait = false;
+				if(receivedCount < sampleCount) {
+					needWait = true;
+				}
+				
+				logger.info(System.currentTimeMillis() + ": need wait? receivedCount=" + receivedCount + ", sampleCount=" + sampleCount);
+				if(needWait) {
 					try {
 						lock.wait();
 					} catch (InterruptedException e) {
@@ -293,6 +319,9 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 				}
 			}
 			
+			SubBean bean = batches.poll();
+			int receivedCount = bean.getReceivedCount();
+			List<String> contents = bean.getContents();
 			String message = MessageFormat.format("Received {0} of message\n.", receivedCount);
 			StringBuffer content = new StringBuffer("");
 			if (isDebugResponse()) {
@@ -300,24 +329,18 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 					content.append(contents.get(i) + " \n");
 				}
 			}
-			result = fillOKResult(result, receivedMessageSize, message, content.toString());
+			result = fillOKResult(result, bean.getReceivedMessageSize(), message, content.toString());
 			
 			if(receivedCount == 0) {
 				result.setEndTime(result.getStartTime());
 			} else {
 				if (isAddTimestamp()) {
-					result.setEndTime(result.getStartTime() + (long) this.avgElapsedTime);
+					result.setEndTime(result.getStartTime() + (long) bean.getAvgElapsedTime());
 				} else {
 					result.setEndTime(result.getStartTime());	
 				}
 			}
-			
 			result.setSampleCount(receivedCount);
-
-			receivedMessageSize = 0;
-			receivedCount = 0;
-			avgElapsedTime = 0f;
-			contents.clear();
 
 			return result;
 		}
@@ -351,13 +374,23 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 			logger.info("Configured with sampled on message count, will not check message sent time.");
 			return;
 		}
+		
+		final long sampleElapsedTime = Long.parseLong(getSampleElapsedTime());
+		
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 		executor.submit(new Runnable() {
 			@Override
 			public void run() {
 				while(true) {
 					try {
-						TimeUnit.MILLISECONDS.sleep(Long.parseLong(getSampleElapsedTime()));
+						//logger.info(System.currentTimeMillis() + ", sampleElapsedTime = " + sampleElapsedTime);
+						if(threadFinished.get()) {
+							synchronized (lock) {
+								lock.notify();
+							}
+							break;
+						}
+						TimeUnit.MILLISECONDS.sleep(sampleElapsedTime);
 						synchronized (lock) {
 							lock.notify();
 						}
@@ -369,9 +402,11 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 		});
 		executor.shutdown();
 	}
-
+	
 	@Override
 	public void threadFinished() {
+		//logger.info(System.currentTimeMillis() + ", threadFinished");
+		threadFinished.set(true);
 		//logger.info("*** in threadFinished");
 		this.connection.disconnect(new Callback<Void>() {
 			@Override

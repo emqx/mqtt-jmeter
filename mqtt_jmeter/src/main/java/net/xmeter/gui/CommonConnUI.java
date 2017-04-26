@@ -49,7 +49,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private static final String BROWSE2 = "browse2";
 	
 	public final JLabeledTextField connNamePrefix = new JLabeledTextField("ClientId:", 8);
-	private JCheckBox connNameSuffix = new JCheckBox("Add random client id suffix");
+	private JCheckBox connNameSuffix = new JCheckBox("Add random suffix for ClientId");
 	
 	private final JLabeledTextField connKeepAlive = new JLabeledTextField("Keep alive(s):", 4);
 	

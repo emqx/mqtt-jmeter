@@ -50,8 +50,8 @@ public interface Constants {
 	public static final String MESSAGE_TYPE_HEX_STRING = "Hex string";
 	public static final String MESSAGE_TYPE_STRING = "String";
 	
-	public static final String SAMPLE_ON_CONDITION_OPTION1 = "eplased with specified time(ms)";
-	public static final String SAMPLE_ON_CONDITION_OPTION2 = "received number of message";
+	public static final String SAMPLE_ON_CONDITION_OPTION1 = "specified eplased time (ms)";
+	public static final String SAMPLE_ON_CONDITION_OPTION2 = "number of received messages";
 	
 	public static final int MAX_CLIENT_ID_LENGTH = 23;
 	
