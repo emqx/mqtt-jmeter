@@ -320,6 +320,9 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 			}
 			
 			SubBean bean = batches.poll();
+			if(bean == null) { //In case selected with time interval
+				bean = new SubBean();
+			}
 			int receivedCount = bean.getReceivedCount();
 			List<String> contents = bean.getContents();
 			String message = MessageFormat.format("Received {0} of message\n.", receivedCount);
