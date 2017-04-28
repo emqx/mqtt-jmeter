@@ -68,11 +68,9 @@ public class ConnectionSampler extends AbstractMQTTSampler
 			mqtt.setReconnectAttemptsMax(Integer.parseInt(getConnReconnAttamptMax()));
 
 			if (!"".equals(getUserNameAuth().trim())) {
-				System.out.println("user name:" + getUserNameAuth());
 				mqtt.setUserName(getUserNameAuth());
 			}
 			if (!"".equals(getPasswordAuth().trim())) {
-				System.out.println("password:" + getPasswordAuth());
 				mqtt.setPassword(getPasswordAuth());
 			}
 
@@ -196,7 +194,7 @@ public class ConnectionSampler extends AbstractMQTTSampler
 	 */
 	@Override
 	public void sampleOccurred(SampleEvent event) {
-		if (!JMeter.isNonGUI()) {
+		if (!JMeter.isNonGUI() && "MQTT Connection Sampler".equals(event.getResult().getSampleLabel() )) {
 			logger.info("Created the sampler results, will sleep current thread for " + getConnKeepTime() + " sceconds");
 			sleepCurrentThreadAndDisconnect();
 		}
