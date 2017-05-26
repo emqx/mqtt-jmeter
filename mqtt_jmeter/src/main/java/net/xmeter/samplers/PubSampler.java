@@ -29,6 +29,7 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 	private String payload = null;
 	private String clientId = "";
 	private QoS qos_enum = QoS.AT_MOST_ONCE;
+	private String topicName = "";
 
 	public String getQOS() {
 		return getPropertyAsString(QOS_LEVEL, String.valueOf(QOS_0));
@@ -117,6 +118,9 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 					payload = Util.generatePayload(Integer.parseInt(getMessageLength()));
 				}
 
+				topicName = getTopic();
+				logger.info("*** topicName=" + topicName);
+
 				int qos = Integer.parseInt(getQOS());
 				switch (qos) {
 				case 0:
@@ -143,8 +147,6 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 		SampleResult result = new SampleResult();
 		result.setSampleLabel(getName());
 		try {
-			String topicName = getTopic();
-
 			byte[] toSend = new byte[]{};
 			byte[] tmp = new byte[]{};
 

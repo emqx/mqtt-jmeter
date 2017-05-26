@@ -134,7 +134,7 @@ public class ConnectionSampler extends AbstractMQTTSampler
 	@Override
 	public void testStarted() {
 		keepTime = Integer.parseInt(getConnKeepTime());
-		logger.info("Keeptime is: "  + keepTime);
+		logger.info("*** Keeptime is: "  + keepTime);
 	}
 
 	@Override
