@@ -207,7 +207,7 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 								bean.setReceivedMessageSize(bean.getReceivedMessageSize() + msg.length());
 								bean.setReceivedCount(bean.getReceivedCount() + 1);
 								if(!sampleByTime) {
-									logger.info(System.currentTimeMillis() + ": need notify? receivedCount=" + bean.getReceivedCount() + ", sampleCount=" + sampleCount);
+									//logger.info(System.currentTimeMillis() + ": need notify? receivedCount=" + bean.getReceivedCount() + ", sampleCount=" + sampleCount);
 									if(bean.getReceivedCount() == sampleCount) {
 										lock.notify();
 									}
@@ -309,7 +309,7 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 					needWait = true;
 				}
 				
-				logger.info(System.currentTimeMillis() + ": need wait? receivedCount=" + receivedCount + ", sampleCount=" + sampleCount);
+				//logger.info(System.currentTimeMillis() + ": need wait? receivedCount=" + receivedCount + ", sampleCount=" + sampleCount);
 				if(needWait) {
 					try {
 						lock.wait();
