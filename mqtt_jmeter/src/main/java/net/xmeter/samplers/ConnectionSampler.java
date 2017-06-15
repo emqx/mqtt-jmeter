@@ -103,8 +103,6 @@ public class ConnectionSampler extends AbstractMQTTSampler
 		this.testEnded("local");
 	}
 
-	// note: with sleepFlag as static variable, when we hit the 2nd test run, say via JMeterGUI, sleepFlags is still true
-	// thus, 2nd round of test is actually not supported, you need to restart JMeter to re-initialize this sampler
 	@Override
 	public void testEnded(String arg0) {
 		logger.info("in testEnded, isNonGUI=" + JMeter.isNonGUI() + ", sleepFlag=" + sleepFlag.get());
@@ -141,6 +139,7 @@ public class ConnectionSampler extends AbstractMQTTSampler
 
 	@Override
 	public void testStarted(String arg0) {
+		sleepFlag.set(false);
 		keepTime = Integer.parseInt(getConnKeepTime());
 		logger.info("*** Keeptime is: "  + keepTime);
 	}
@@ -193,12 +192,17 @@ public class ConnectionSampler extends AbstractMQTTSampler
 		return true;
 	}
 
-	// Note: JMeter.isNonGUI only valid when you specify "-n" option from command line, 
-	// other cases (such as JMeter GUI, remote engine) all get isNonGUI()=false
-	// If you use remote engine, a workaround is to start agent with the appended -D entry, e.g.
-	// jmeter-server -DJMeter.NonGui=true
-	// however, the interrupt mechanism doesn't work well with remote engine if it sleeps, 
-	// you may need to manually kill remote jmeter process to clean it up
+	// Note: JMeter.isNonGUI() only valid when you specify "-n" option from command line, 
+	// other cases (such as JMeter GUI, remote engine) all treat isNonGUI() as "false"
+	// So, if you use remote engine, it's actually follow isNonGUI()=false path in this sampler code,
+	// and you can control the test and stop it in JMeter GUI via say "Remote Stop All" button.
+	//
+	// You can also start remote agent with say "jmeter-server -DJMeter.NonGui=true",
+	// in order to fool JMeter to treat isNonGUI() as "true".
+	// However, the interrupt mechanism may not work well with remote engine when stop the remote test from JMeter GUI,
+	// you may need to manually kill remote jmeter process to clean it up.
+	// 
+	
 	/**
 	 * In this listener, it can receive the interrupt event trigger by user.
 	 */
