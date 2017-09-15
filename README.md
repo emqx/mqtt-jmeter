@@ -131,7 +131,7 @@ After deploying emqtt server, you get the following OOTB (out of the box) SSL/TL
 We will use the OOTB test certfications (as an example) to show you how to prepare the required certification files for this EMQTT JMeter plugin.
 
 ```
-export PATH=$PATH:<YOUR_JDK_HOM>/bin
+export PATH=$PATH:<YOUR_JDK_HOME>/bin
 
 keytool -import -alias cacert -keystore emqtt.jks -file cacert.pem -storepass <YOUR_PASSWORD> -trustcacerts -noprompt
 keytool -import -alias client -keystore emqtt.jks -file client-cert.pem -storepass <YOUR_PASSWORD>
