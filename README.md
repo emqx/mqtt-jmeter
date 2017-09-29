@@ -37,7 +37,7 @@ This section includes basic connection settings.
 
 - **Port number**: The port that opens by MQTT server, the default value is 1883 for TCP protocol, and normally 8883 for SSL protocol.
 
-- **MQTT version**: The MQTT version, default is 3.1, and another option is 3.1.1 (E,g, the version is required for establish connection to Azure IoTHub)
+- **MQTT version**: The MQTT version, default is 3.1, and another option is 3.1.1 (E,g, sometimes the version is probably required for establish connection to Azure IoTHub)
 
 - **Timeout(s)**: The connection timeout seconds while connecting to MQTT server. The default is 10 seconds.
 
