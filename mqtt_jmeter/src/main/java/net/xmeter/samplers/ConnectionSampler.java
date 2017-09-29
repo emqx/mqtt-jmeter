@@ -105,6 +105,7 @@ public class ConnectionSampler extends AbstractMQTTSampler
 
 	@Override
 	public void testEnded(String arg0) {
+		logger.info("in testEnded, isNonGUI=" + JMeter.isNonGUI() + ", sleepFlag=" + sleepFlag.get());
 		this.interrupt = true;
 		
 		try {
@@ -133,12 +134,14 @@ public class ConnectionSampler extends AbstractMQTTSampler
 
 	@Override
 	public void testStarted() {
-		keepTime = Integer.parseInt(getConnKeepTime());
-		logger.info("*** Keeptime is: "  + keepTime);
+		this.testStarted("local");
 	}
 
 	@Override
 	public void testStarted(String arg0) {
+		sleepFlag.set(false);
+		keepTime = Integer.parseInt(getConnKeepTime());
+		logger.info("*** Keeptime is: "  + keepTime);
 	}
 
 	@Override
@@ -189,6 +192,17 @@ public class ConnectionSampler extends AbstractMQTTSampler
 		return true;
 	}
 
+	// Note: JMeter.isNonGUI() only valid when you specify "-n" option from command line, 
+	// other cases (such as JMeter GUI, remote engine) all treat isNonGUI() as "false"
+	// So, if you use remote engine, it's actually follow isNonGUI()=false path in this sampler code,
+	// and you can control the test and stop it in JMeter GUI via say "Remote Stop All" button.
+	//
+	// You can also start remote agent with say "jmeter-server -DJMeter.NonGui=true",
+	// in order to fool JMeter to treat isNonGUI() as "true".
+	// However, the interrupt mechanism may not work well with remote engine when stop the remote test from JMeter GUI,
+	// you may need to manually kill remote jmeter process to clean it up.
+	// 
+	
 	/**
 	 * In this listener, it can receive the interrupt event trigger by user.
 	 */
