@@ -118,9 +118,6 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 					payload = Util.generatePayload(Integer.parseInt(getMessageLength()));
 				}
 
-				topicName = getTopic();
-				logger.info("*** topicName=" + topicName);
-
 				int qos = Integer.parseInt(getQOS());
 				switch (qos) {
 				case 0:
@@ -158,6 +155,7 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 				tmp = payload.getBytes();
 			}
 
+			topicName = getTopic();
 			if (isAddTimestamp()) {
 				byte[] timePrefix = (System.currentTimeMillis() + TIME_STAMP_SEP_FLAG).getBytes();
 				toSend = new byte[timePrefix.length + tmp.length];
