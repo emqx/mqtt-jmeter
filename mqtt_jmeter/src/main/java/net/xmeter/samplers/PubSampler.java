@@ -95,6 +95,7 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 					mqtt.setSslContext(Util.getContext(this));
 				}
 				
+				mqtt.setVersion(getMqttVersion());
 				mqtt.setHost(getProtocol().toLowerCase() + "://" + getServer() + ":" + getPort());
 				mqtt.setKeepAlive((short) Integer.parseInt(getConnKeepAlive()));
 

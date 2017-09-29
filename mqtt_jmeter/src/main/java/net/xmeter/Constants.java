@@ -2,6 +2,7 @@ package net.xmeter;
 
 public interface Constants {
 	public static final String SERVER = "mqtt.server";
+	public static final String MQTT_VERSION = "mqtt.version";
 	public static final String PORT = "mqtt.port";
 	public static final String CONN_TIMEOUT = "mqtt.conn_timeout";
 	
@@ -50,12 +51,16 @@ public interface Constants {
 	public static final String MESSAGE_TYPE_HEX_STRING = "Hex string";
 	public static final String MESSAGE_TYPE_STRING = "String";
 	
+	public static final String MQTT_VERSION_3_1_1 = "3.1.1";
+	public static final String MQTT_VERSION_3_1 = "3.1";
+	
 	public static final String SAMPLE_ON_CONDITION_OPTION1 = "specified elapsed time (ms)";
 	public static final String SAMPLE_ON_CONDITION_OPTION2 = "number of received messages";
 	
 	public static final int MAX_CLIENT_ID_LENGTH = 23;
 	
 	public static final String DEFAULT_SERVER = "127.0.0.1";
+	public static final String DEFAULT_MQTT_VERSION = "3.1";
 	public static final String DEFAULT_PORT = "1883";
 	public static final String DEFAULT_CONN_TIME_OUT = "10";
 	public static final String DEFAULT_PROTOCOL = "TCP";

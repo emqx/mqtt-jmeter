@@ -28,6 +28,7 @@ import net.xmeter.samplers.AbstractMQTTSampler;
 public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private final JLabeledTextField serverAddr = new JLabeledTextField("Server name or IP:");
 	private final JLabeledTextField serverPort = new JLabeledTextField("Port number:", 5);
+	private JLabeledChoice mqttVersion = new JLabeledChoice("MQTT version:", new String[] { MQTT_VERSION_3_1, MQTT_VERSION_3_1_1 }, false, false);;
 	private final JLabeledTextField timeout = new JLabeledTextField("Timeout(s):", 5);
 	
 	private final JLabeledTextField userNameAuth = new JLabeledTextField("User name:");
@@ -65,6 +66,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		connPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "MQTT connection"));
 		connPanel.add(serverAddr);
 		connPanel.add(serverPort);
+		connPanel.add(mqttVersion);
 		
 		JPanel timeoutPannel = new HorizontalPanel();
 		timeoutPannel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Timeout"));
@@ -269,6 +271,11 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		}
 		reconnAttmptMax.setText(sampler.getConnReconnAttamptMax());
 		serverAddr.setText(sampler.getServer());
+		if(sampler.getMqttVersion().equals(MQTT_VERSION_3_1)) {
+			mqttVersion.setSelectedIndex(0);
+		} else if(sampler.getMqttVersion().equals(MQTT_VERSION_3_1_1)) {
+			mqttVersion.setSelectedIndex(1);
+		}
 		serverPort.setText(sampler.getPort());
 		timeout.setText(sampler.getConnTimeout());
 		tksPassword.setText(sampler.getClientCertPassword());
@@ -293,6 +300,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		sampler.setPort(serverPort.getText());
 		sampler.setProtocol(protocols.getText());
 		sampler.setServer(serverAddr.getText());
+		sampler.setMqttVersion(mqttVersion.getText());
 		sampler.setUserNameAuth(userNameAuth.getText());
 		sampler.setPasswordAuth(passwordAuth.getText());
 	}
@@ -317,6 +325,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		reconnAttmptMax.setText(DEFAULT_CONN_RECONN_ATTAMPT_MAX);
 		serverAddr.setText(DEFAULT_SERVER);
 		serverPort.setText(DEFAULT_PORT);
+		mqttVersion.setSelectedIndex(0);
 		timeout.setText(DEFAULT_CONN_TIME_OUT);
 		userNameAuth.setText("");
 		passwordAuth.setText("");

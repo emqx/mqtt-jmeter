@@ -17,6 +17,14 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 	public void setServer(String server) {
 		setProperty(SERVER, server);
 	}
+	
+	public String getMqttVersion() {
+		return getPropertyAsString(MQTT_VERSION, DEFAULT_MQTT_VERSION);
+	}
+	
+	public void setMqttVersion(String version) {
+		setProperty(MQTT_VERSION, version);
+	}
 
 	public String getPort() {
 		return getPropertyAsString(PORT, DEFAULT_PORT);
