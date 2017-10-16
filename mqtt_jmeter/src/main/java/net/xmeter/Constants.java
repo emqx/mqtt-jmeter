@@ -25,6 +25,7 @@ public interface Constants {
 	public static final String CONN_ATTAMPT_MAX = "mqtt.conn_attampt_max";
 	public static final String CONN_KEEP_ALIVE = "mqtt.conn_keep_alive";
 	public static final String CONN_RECONN_ATTAMPT_MAX = "mqtt.reconn_attampt_max";
+	public static final String CONN_SHARE_CONNECTION = "mqtt.conn_share";
 	
 	public static final String MESSAGE_TYPE = "mqtt.message_type";
 	public static final String MESSAGE_FIX_LENGTH = "mqtt.message_type_fixed_length";
@@ -64,6 +65,7 @@ public interface Constants {
 	public static final String DEFAULT_PORT = "1883";
 	public static final String DEFAULT_CONN_TIME_OUT = "10";
 	public static final String DEFAULT_PROTOCOL = "TCP";
+	public static final boolean DEFAULT_CONNECTION_SHARE = false;
 	
 	public static final String JMETER_VARIABLE_PREFIX = "${";
 	

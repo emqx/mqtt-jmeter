@@ -28,6 +28,7 @@ import net.xmeter.samplers.AbstractMQTTSampler;
 public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private final JLabeledTextField serverAddr = new JLabeledTextField("Server name or IP:");
 	private final JLabeledTextField serverPort = new JLabeledTextField("Port number:", 5);
+	private JCheckBox connShared = new JCheckBox("Share conn in thread");
 	private JLabeledChoice mqttVersion = new JLabeledChoice("MQTT version:", new String[] { MQTT_VERSION_3_1, MQTT_VERSION_3_1_1 }, false, false);;
 	private final JLabeledTextField timeout = new JLabeledTextField("Timeout(s):", 5);
 	
@@ -67,6 +68,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		connPanel.add(serverAddr);
 		connPanel.add(serverPort);
 		connPanel.add(mqttVersion);
+		connPanel.add(connShared);
 		
 		JPanel timeoutPannel = new HorizontalPanel();
 		timeoutPannel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Timeout"));
@@ -241,11 +243,16 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		if(!sampler.isKeepTimeShow()) {
 			connKeeptime.setVisible(false);
 		}
+		
+		if(!sampler.isConnectionShareShow()) {
+			connShared.setVisible(false);
+		}
 		certificationFilePath1.setText(sampler.getKeyStoreFilePath());
 		certificationFilePath2.setText(sampler.getClientCertFilePath());
 		connAttmptMax.setText(sampler.getConnAttamptMax());
 		connKeepAlive.setText(sampler.getConnKeepAlive());
 		connKeeptime.setText(sampler.getConnKeepTime());
+		connShared.setSelected(sampler.isConnectionShare());
 		connNamePrefix.setText(sampler.getConnPrefix());
 		
 		if(sampler.isClientIdSuffix()) {
@@ -291,6 +298,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		sampler.setConnAttamptMax(connAttmptMax.getText());
 		sampler.setConnKeepTime(connKeeptime.getText());
 		sampler.setConnPrefix(connNamePrefix.getText());
+		sampler.setConnectionShare(connShared.isSelected());
 		sampler.setClientIdSuffix(connNameSuffix.isSelected());
 		sampler.setConnReconnAttamptMax(reconnAttmptMax.getText());
 		sampler.setConnTimeout(timeout.getText());
@@ -320,6 +328,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		connKeepAlive.setText(DEFAULT_CONN_KEEP_ALIVE);
 		connKeeptime.setText(DEFAULT_CONN_KEEP_TIME);
 		connNamePrefix.setText(DEFAULT_CONN_PREFIX_FOR_CONN);
+		connShared.setSelected(DEFAULT_CONNECTION_SHARE);
 		protocols.setSelectedIndex(0);	
 		cksPassword.setText("");
 		reconnAttmptMax.setText(DEFAULT_CONN_RECONN_ATTAMPT_MAX);

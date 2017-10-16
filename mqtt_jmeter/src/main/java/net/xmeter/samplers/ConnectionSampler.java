@@ -15,8 +15,8 @@ import org.apache.jmeter.testelement.ThreadListener;
 import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
 import org.apache.log.Priority;
-import org.fusesource.mqtt.client.Future;
-import org.fusesource.mqtt.client.FutureConnection;
+import org.fusesource.mqtt.client.Callback;
+import org.fusesource.mqtt.client.CallbackConnection;
 import org.fusesource.mqtt.client.MQTT;
 import org.fusesource.mqtt.client.QoS;
 import org.fusesource.mqtt.client.Topic;
@@ -27,7 +27,7 @@ public class ConnectionSampler extends AbstractMQTTSampler
 		implements TestStateListener, ThreadListener, Interruptible, SampleListener {
 	private transient static Logger logger = LoggingManager.getLoggerForClass();
 	private transient MQTT mqtt = new MQTT();
-	private transient FutureConnection connection = null;
+	private transient CallbackConnection connection = null;
 	private boolean interrupt = false;
 	//Declare it as static, for the instance variable will be set to initial value 0 in testEnded method.
 	//The static value will not be reset.
@@ -48,6 +48,9 @@ public class ConnectionSampler extends AbstractMQTTSampler
 	public SampleResult sample(Entry entry) {
 		SampleResult result = new SampleResult();
 		result.setSampleLabel(getName());
+		
+		String key = new String(getThreadName() + this.hashCode());
+		
 		try {
 			if (!DEFAULT_PROTOCOL.equals(getProtocol())) {
 				mqtt.setSslContext(Util.getContext(this));
@@ -76,12 +79,23 @@ public class ConnectionSampler extends AbstractMQTTSampler
 			}
 
 			result.sampleStart();
-			connection = mqtt.futureConnection();
-			Future<Void> f1 = connection.connect();
-			f1.await(Integer.parseInt(getConnTimeout()), TimeUnit.SECONDS);
+			connection = ConnectionsManager.getInstance().createConnection(key, mqtt);
+			Object connLock = new Object();
+			connection.connect(new ConnectionCallback(connection, connLock));
+			connLock.wait(TimeUnit.SECONDS.toMillis(Integer.parseInt(getConnTimeout())));
 
 			Topic[] topics = { new Topic("topic_" + clientId, QoS.AT_LEAST_ONCE) };
-			connection.subscribe(topics);
+			connection.subscribe(topics, new Callback<byte[]>() {
+				@Override
+				public void onSuccess(byte[] value) {
+					
+				}
+				
+				@Override
+				public void onFailure(Throwable value) {
+					
+				}
+			});
 
 			result.sampleEnd();
 			result.setSuccessful(true);
@@ -153,12 +167,8 @@ public class ConnectionSampler extends AbstractMQTTSampler
 	private void sleepCurrentThreadAndDisconnect() {
 		try {
 			//If the connection is null or does not connect successfully, then not necessary to keep the connection.
-			if(connection == null || (!connection.isConnected())) {
-				if(connection == null) {
-					logger.info("Connection is null.");
-				} else if(!connection.isConnected()) {
-					logger.info("Connection is created, but is not connected.");
-				}
+			if(connection == null) {
+				logger.info("Connection is null.");
 				return;
 			}
 			long start = System.currentTimeMillis();
@@ -173,8 +183,15 @@ public class ConnectionSampler extends AbstractMQTTSampler
 			logger.error(e.getMessage(), e);
 		} finally {
 			if (connection != null) {
-				connection.disconnect();
-				logger.log(Priority.INFO, MessageFormat.format("The connection {0} disconneted successfully.", connection));
+				Object lockObj = new Object();
+				ConnectionCallback callback = new ConnectionCallback(connection, lockObj);
+				connection.disconnect(callback);
+				try {
+					lockObj.wait();
+					logger.log(Priority.INFO, MessageFormat.format("The connection {0} disconneted successfully.", connection));
+				} catch (InterruptedException ex) {
+					logger.error(ex.getMessage(), ex);
+				}
 			}
 		}
 	}

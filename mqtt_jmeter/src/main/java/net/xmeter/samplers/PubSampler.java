@@ -11,8 +11,8 @@ import org.apache.jmeter.testelement.ThreadListener;
 import org.apache.jorphan.logging.LoggingManager;
 import org.apache.log.Logger;
 import org.apache.log.Priority;
-import org.fusesource.mqtt.client.Future;
-import org.fusesource.mqtt.client.FutureConnection;
+import org.fusesource.mqtt.client.Callback;
+import org.fusesource.mqtt.client.CallbackConnection;
 import org.fusesource.mqtt.client.MQTT;
 import org.fusesource.mqtt.client.QoS;
 
@@ -25,11 +25,12 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 	private static final long serialVersionUID = -4312341622759500786L;
 	private transient static Logger logger = LoggingManager.getLoggerForClass();
 	private transient MQTT mqtt = new MQTT();
-	private transient FutureConnection connection = null;
+	private transient CallbackConnection connection = null;
 	private String payload = null;
 	private String clientId = "";
 	private QoS qos_enum = QoS.AT_MOST_ONCE;
 	private String topicName = "";
+	private String connKey = "";
 
 	public String getQOS() {
 		return getPropertyAsString(QOS_LEVEL, String.valueOf(QOS_0));
@@ -88,57 +89,81 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 	}
 	
 	@Override
+	public boolean isConnectionShareShow() {
+		return true;
+	}
+	
+	private String getKey() {
+		String key = getThreadName();
+		if(!isConnectionShare()) {
+			key = new String(getThreadName() + this.hashCode());
+		}
+		return key;
+	}
+	
+	@Override
 	public SampleResult sample(Entry arg0) {
-		if (connection == null) { // first loop, do initialization
-			try {
-				if (!DEFAULT_PROTOCOL.equals(getProtocol())) {
-					mqtt.setSslContext(Util.getContext(this));
-				}
-				
-				mqtt.setVersion(getMqttVersion());
-				mqtt.setHost(getProtocol().toLowerCase() + "://" + getServer() + ":" + getPort());
-				mqtt.setKeepAlive((short) Integer.parseInt(getConnKeepAlive()));
+		this.connKey = getKey();
+		if(connection == null) {
+			connection = ConnectionsManager.getInstance().getConnection(connKey);
+			if(connection != null) {
+				logger.info("Use the shared connection: " + connection);
+			} else {
+				try {
+					if (!DEFAULT_PROTOCOL.equals(getProtocol())) {
+						mqtt.setSslContext(Util.getContext(this));
+					}
+					
+					mqtt.setVersion(getMqttVersion());
+					mqtt.setHost(getProtocol().toLowerCase() + "://" + getServer() + ":" + getPort());
+					mqtt.setKeepAlive((short) Integer.parseInt(getConnKeepAlive()));
 
-				if(isClientIdSuffix()) {
-					clientId = Util.generateClientId(getConnPrefix());
-				} else {
-					clientId = getConnPrefix();
-				}
-				mqtt.setClientId(clientId);
+					if(isClientIdSuffix()) {
+						clientId = Util.generateClientId(getConnPrefix());
+					} else {
+						clientId = getConnPrefix();
+					}
+					mqtt.setClientId(clientId);
 
-				mqtt.setConnectAttemptsMax(Integer.parseInt(getConnAttamptMax()));
-				mqtt.setReconnectAttemptsMax(Integer.parseInt(getConnReconnAttamptMax()));
+					mqtt.setConnectAttemptsMax(Integer.parseInt(getConnAttamptMax()));
+					mqtt.setReconnectAttemptsMax(Integer.parseInt(getConnReconnAttamptMax()));
 
-				if (!"".equals(getUserNameAuth().trim())) {
-					mqtt.setUserName(getUserNameAuth());
-				}
-				if (!"".equals(getPasswordAuth().trim())) {
-					mqtt.setPassword(getPasswordAuth());
-				}
-				if (MESSAGE_TYPE_RANDOM_STR_WITH_FIX_LEN.equals(getMessageType())) {
-					payload = Util.generatePayload(Integer.parseInt(getMessageLength()));
-				}
+					if (!"".equals(getUserNameAuth().trim())) {
+						mqtt.setUserName(getUserNameAuth());
+					}
+					if (!"".equals(getPasswordAuth().trim())) {
+						mqtt.setPassword(getPasswordAuth());
+					}
 
-				int qos = Integer.parseInt(getQOS());
-				switch (qos) {
-				case 0:
-					qos_enum = QoS.AT_MOST_ONCE;
-					break;
-				case 1:
-					qos_enum = QoS.AT_LEAST_ONCE;
-					break;
-				case 2:
-					qos_enum = QoS.EXACTLY_ONCE;
-					break;
-				default:
-					break;
+					int qos = Integer.parseInt(getQOS());
+					switch (qos) {
+					case 0:
+						qos_enum = QoS.AT_MOST_ONCE;
+						break;
+					case 1:
+						qos_enum = QoS.AT_LEAST_ONCE;
+						break;
+					case 2:
+						qos_enum = QoS.EXACTLY_ONCE;
+						break;
+					default:
+						break;
+					}
+					Object connLock = new Object();
+					connection = ConnectionsManager.getInstance().createConnection(connKey, mqtt);
+					synchronized (connLock) {
+						connection.connect(new ConnectionCallback(connection, connLock));
+						connLock.wait(TimeUnit.SECONDS.toMillis(Integer.parseInt(getConnTimeout())));
+					}
+				} catch (Exception e) {
+					logger.log(Priority.ERROR, e.getMessage(), e);
 				}
-
-				connection = mqtt.futureConnection();
-				Future<Void> f1 = connection.connect();
-				f1.await(Integer.parseInt(getConnTimeout()), TimeUnit.SECONDS);
-			} catch (Exception e) {
-				logger.log(Priority.ERROR, e.getMessage(), e);
+			}
+		}
+		
+		if(payload == null) {
+			if (MESSAGE_TYPE_RANDOM_STR_WITH_FIX_LEN.equals(getMessageType())) {
+				payload = Util.generatePayload(Integer.parseInt(getMessageLength()));
 			}
 		}
 		
@@ -167,12 +192,11 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 				System.arraycopy(tmp, 0, toSend, 0 , tmp.length);
 			}
 			result.sampleStart();
-
-			Future<Void> pub = connection.publish(topicName, toSend, qos_enum, false);
-			pub.await();
-
+			PubCallback pubCallback = new PubCallback();
+			connection.publish(topicName, toSend, qos_enum, false, pubCallback);
+			
 			result.sampleEnd();
-			result.setSuccessful(true);
+			result.setSuccessful(pubCallback.isSuccessful());
 			result.setResponseData((MessageFormat.format("Publish Successful by {0}.", clientId)).getBytes());
 			result.setResponseMessage(MessageFormat.format("publish successfully via Connection {0}.", connection));
 			result.setResponseCodeOK();
@@ -195,8 +219,21 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 	@Override
 	public void threadFinished() {
 		if (this.connection != null) {
-			this.connection.disconnect();
-			logger.info(MessageFormat.format("The connection {0} disconneted successfully.", connection));
+			this.connection.disconnect(new Callback<Void>() {
+				
+				@Override
+				public void onSuccess(Void value) {
+					logger.info(MessageFormat.format("The connection {0} disconneted successfully.", connection));		
+				}
+				
+				@Override
+				public void onFailure(Throwable value) {
+					logger.log(Priority.ERROR, value.getMessage(), value);
+				}
+			});
+		}
+		if(ConnectionsManager.getInstance().containsConnection(connKey)) {
+			ConnectionsManager.getInstance().removeConnection(connKey);	
 		}
 	}
 }
