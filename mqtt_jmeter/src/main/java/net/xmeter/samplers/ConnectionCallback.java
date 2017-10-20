@@ -31,6 +31,5 @@ public class ConnectionCallback implements Callback<Void>{
 			logger.log(Priority.ERROR, value.getMessage(), value);
 			this.connLock.notify();			
 		}
-		connection.kill(null);
 	}
 }

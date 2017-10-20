@@ -196,6 +196,7 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 			connection.publish(topicName, toSend, qos_enum, false, pubCallback);
 			
 			result.sampleEnd();
+			result.setLatency(result.getEndTime() - result.getStartTime());
 			result.setSuccessful(pubCallback.isSuccessful());
 			result.setResponseData((MessageFormat.format("Publish Successful by {0}.", clientId)).getBytes());
 			result.setResponseMessage(MessageFormat.format("publish successfully via Connection {0}.", connection));
@@ -203,6 +204,7 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 		} catch (Exception ex) {
 			logger.log(Priority.ERROR, ex.getMessage(), ex);
 			result.sampleEnd();
+			result.setLatency(result.getEndTime() - result.getStartTime());
 			result.setSuccessful(false);
 			result.setResponseMessage(MessageFormat.format("Publish failed for connection {0}.", connection));
 			result.setResponseData("Failed.".getBytes());
