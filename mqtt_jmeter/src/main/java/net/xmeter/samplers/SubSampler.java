@@ -395,7 +395,7 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 		result.setResponseCode("500");
 		result.setSuccessful(false);
 		result.setResponseMessage(message);
-		result.setResponseData("Failed.".getBytes());
+		result.setResponseData(message.getBytes());
 		result.setEndTime(result.getStartTime());
 		return result;
 	}
