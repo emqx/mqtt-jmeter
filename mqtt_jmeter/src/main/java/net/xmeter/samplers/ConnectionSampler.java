@@ -79,11 +79,14 @@ public class ConnectionSampler extends AbstractMQTTSampler
 			}
 
 			result.sampleStart();
-			connection = ConnectionsManager.getInstance().createConnection(key, mqtt);
+			
 			Object connLock = new Object();
-			connection.connect(new ConnectionCallback(connection, connLock));
-			connLock.wait(TimeUnit.SECONDS.toMillis(Integer.parseInt(getConnTimeout())));
-
+			connection = ConnectionsManager.getInstance().createConnection(key, mqtt);
+			synchronized (connLock) {
+				connection.connect(new ConnectionCallback(connection, connLock));
+				connLock.wait(TimeUnit.SECONDS.toMillis(Integer.parseInt(getConnTimeout())));	
+			}
+			
 			Topic[] topics = { new Topic("topic_" + clientId, QoS.AT_LEAST_ONCE) };
 			connection.subscribe(topics, new Callback<byte[]>() {
 				@Override
@@ -187,8 +190,10 @@ public class ConnectionSampler extends AbstractMQTTSampler
 				ConnectionCallback callback = new ConnectionCallback(connection, lockObj);
 				connection.disconnect(callback);
 				try {
-					lockObj.wait();
-					logger.log(Priority.INFO, MessageFormat.format("The connection {0} disconneted successfully.", connection));
+					synchronized (lockObj) {
+						lockObj.wait();
+						logger.log(Priority.INFO, MessageFormat.format("The connection {0} disconneted successfully.", connection));	
+					}
 				} catch (InterruptedException ex) {
 					logger.error(ex.getMessage(), ex);
 				}
