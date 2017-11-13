@@ -8,20 +8,29 @@ import org.fusesource.mqtt.client.Callback;
 public class PubCallback implements Callback<Void>{
 	private static Logger logger = LoggingManager.getLoggerForClass();
 	private boolean successful = false;
+	private Object connLock;
 	
-	public PubCallback() {
+	public PubCallback(Object connLock) {
+		this.connLock = connLock;
 	}
 	
 	@Override
 	public void onSuccess(Void value) {
-		this.successful = true;
+		synchronized (connLock) {
+			System.out.println("PubCallback acquired lock..." );
+			this.successful = true;
+			System.out.println("PubCallback is notifying..." );
+			connLock.notify();
+		}
 	}
-	
 	
 	@Override
 	public void onFailure(Throwable value) {
-		this.successful = false;
-		logger.log(Priority.ERROR, value.getMessage(), value);
+		synchronized (connLock) {
+			this.successful = false;
+			logger.log(Priority.ERROR, value.getMessage(), value);
+			connLock.notify();
+		}
 	}
 
 	public boolean isSuccessful() {

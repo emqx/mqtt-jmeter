@@ -1,5 +1,6 @@
 package net.xmeter.samplers;
 
+import java.beans.Transient;
 import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
@@ -194,14 +195,23 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 				System.arraycopy(tmp, 0, toSend, 0 , tmp.length);
 			}
 			result.sampleStart();
-			PubCallback pubCallback = new PubCallback();
-			connection.publish(topicName, toSend, qos_enum, false, pubCallback);
+			
+			final Object connLock = new Object();
+			
+			PubCallback pubCallback = new PubCallback(connLock);
+			synchronized (connLock) {
+				System.out.println("Sampler acquired lock..." );
+				connection.publish(topicName, toSend, qos_enum, false, pubCallback);
+				System.out.println("PubSampler is waiting..." );
+				connLock.wait();
+			}
 			
 			result.sampleEnd();
 			result.setSamplerData(new String(toSend));
 			result.setSentBytes(toSend.length);
 			result.setLatency(result.getEndTime() - result.getStartTime());
 			result.setSuccessful(pubCallback.isSuccessful());
+			
 			if(pubCallback.isSuccessful()) {
 				result.setResponseData("Publish successfuly.".getBytes());
 				result.setResponseMessage(MessageFormat.format("publish successfully for Connection {0}.", connection));
