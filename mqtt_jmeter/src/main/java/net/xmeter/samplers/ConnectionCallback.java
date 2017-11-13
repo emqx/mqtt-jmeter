@@ -12,6 +12,7 @@ public class ConnectionCallback implements Callback<Void>{
 	private static Logger logger = LoggingManager.getLoggerForClass();
 	private Object connLock;
 	private CallbackConnection connection;
+	private boolean connectionSucc = false;
 	
 	public ConnectionCallback(CallbackConnection connection, Object connLock) {
 		this.connection = connection;
@@ -21,6 +22,7 @@ public class ConnectionCallback implements Callback<Void>{
 	public void onSuccess(Void value) {
 		synchronized (connLock) {
 			logger.info(MessageFormat.format("The connection {0} is established successfully.", this.connection + Thread.currentThread().getName()));
+			connectionSucc = true;
 			this.connLock.notify();	
 		}
 	}
@@ -28,8 +30,13 @@ public class ConnectionCallback implements Callback<Void>{
 	@Override
 	public void onFailure(Throwable value) {
 		synchronized (connLock) {
+			connectionSucc = false;
 			logger.log(Priority.ERROR, value.getMessage(), value);
 			this.connLock.notify();			
 		}
+	}
+	
+	public boolean isConnectionSucc() {
+		return connectionSucc;
 	}
 }

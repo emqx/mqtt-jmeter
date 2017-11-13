@@ -1,6 +1,5 @@
 package net.xmeter.samplers;
 
-import java.beans.Transient;
 import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 
@@ -139,11 +138,14 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 					Object connLock = new Object();
 					connection = ConnectionsManager.getInstance().createConnection(connKey, mqtt);
 					synchronized (connLock) {
-						connection.connect(new ConnectionCallback(connection, connLock));
+						ConnectionCallback callback = new ConnectionCallback(connection, connLock);
+						connection.connect(callback);
 						connLock.wait(TimeUnit.SECONDS.toMillis(Integer.parseInt(getConnTimeout())));
+						ConnectionsManager.getInstance().setConnectionStatus(connKey, callback.isConnectionSucc());
 					}
 				} catch (Exception e) {
 					logger.log(Priority.ERROR, e.getMessage(), e);
+					ConnectionsManager.getInstance().setConnectionStatus(connKey, false);
 				}
 			}
 		}
@@ -156,6 +158,16 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 		
 		SampleResult result = new SampleResult();
 		result.setSampleLabel(getName());
+		
+		if(!ConnectionsManager.getInstance().getConnectionStatus(connKey)) {
+			result.sampleStart();
+			result.setSuccessful(false);
+			result.sampleEnd();
+			result.setResponseMessage(MessageFormat.format("Publish failed for connection {0}.", connection));
+			result.setResponseData("Publish failed becasue the connection has not been established.".getBytes());
+			result.setResponseCode("500");
+			return result;
+		}
 		try {
 			byte[] toSend = new byte[]{};
 			byte[] tmp = new byte[]{};

@@ -7,6 +7,8 @@ import org.fusesource.mqtt.client.MQTT;
 
 public class ConnectionsManager {
 	private ConcurrentHashMap<String, CallbackConnection> connections = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<String, Boolean> connectionsStatus = new ConcurrentHashMap<>();
+	
 	private static ConnectionsManager connectionsManager = new ConnectionsManager();
 	private ConnectionsManager() {
 		
@@ -32,5 +34,16 @@ public class ConnectionsManager {
 	
 	public void removeConnection(String key) {
 		this.connections.remove(key);
+	}
+	
+	public void setConnectionStatus(String key, Boolean status) {
+		connectionsStatus.put(key, status);
+	}
+	
+	public boolean getConnectionStatus(String key) {
+		if(!connectionsStatus.containsKey(key)) {
+			throw new RuntimeException("Cannot find conn status for key: " + key);
+		}
+		return connectionsStatus.get(key);
 	}
 }

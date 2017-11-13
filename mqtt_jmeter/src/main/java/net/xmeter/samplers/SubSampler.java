@@ -186,11 +186,13 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 						@Override
 						public void onSuccess(Void value) {
 							listenToTopics(topicName);
+							ConnectionsManager.getInstance().setConnectionStatus(connKey, true);
 						}
 		
 						@Override
 						public void onFailure(Throwable value) {
 							connectFailed = true;
+							ConnectionsManager.getInstance().setConnectionStatus(connKey, false);
 						}
 					});
 				} catch (Exception e) {
