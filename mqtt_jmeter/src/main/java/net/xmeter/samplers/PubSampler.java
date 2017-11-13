@@ -135,20 +135,6 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 						mqtt.setPassword(getPasswordAuth());
 					}
 
-					int qos = Integer.parseInt(getQOS());
-					switch (qos) {
-					case 0:
-						qos_enum = QoS.AT_MOST_ONCE;
-						break;
-					case 1:
-						qos_enum = QoS.AT_LEAST_ONCE;
-						break;
-					case 2:
-						qos_enum = QoS.EXACTLY_ONCE;
-						break;
-					default:
-						break;
-					}
 					Object connLock = new Object();
 					connection = ConnectionsManager.getInstance().createConnection(connKey, mqtt);
 					synchronized (connLock) {
@@ -181,6 +167,22 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 				tmp = payload.getBytes();
 			}
 
+			
+			int qos = Integer.parseInt(getQOS());
+			switch (qos) {
+			case 0:
+				qos_enum = QoS.AT_MOST_ONCE;
+				break;
+			case 1:
+				qos_enum = QoS.AT_LEAST_ONCE;
+				break;
+			case 2:
+				qos_enum = QoS.EXACTLY_ONCE;
+				break;
+			default:
+				break;
+			}
+			
 			topicName = getTopic();
 			if (isAddTimestamp()) {
 				byte[] timePrefix = (System.currentTimeMillis() + TIME_STAMP_SEP_FLAG).getBytes();
