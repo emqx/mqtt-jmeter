@@ -197,13 +197,17 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 			result.sampleStart();
 			
 			final Object connLock = new Object();
-			
 			PubCallback pubCallback = new PubCallback(connLock);
-			synchronized (connLock) {
-				System.out.println("Sampler acquired lock..." );
+			
+			if(qos_enum == QoS.AT_MOST_ONCE) { 
+				//For QoS == 0, the callback is the same thread with sampler thread, so it cannot use the lock object wait() & notify() in else block;
+				//Otherwise the sampler thread will be blocked.
 				connection.publish(topicName, toSend, qos_enum, false, pubCallback);
-				System.out.println("PubSampler is waiting..." );
-				connLock.wait();
+			} else {
+				synchronized (connLock) {
+					connection.publish(topicName, toSend, qos_enum, false, pubCallback);
+					connLock.wait();
+				}
 			}
 			
 			result.sampleEnd();

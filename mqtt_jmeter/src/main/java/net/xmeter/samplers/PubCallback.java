@@ -16,10 +16,10 @@ public class PubCallback implements Callback<Void>{
 	
 	@Override
 	public void onSuccess(Void value) {
+		//If QoS == 0, then the current thread is the same thread of caller thread.
+		//Else if QoS == 1 | 2, then the current thread is hawtdispatch-DEFAULT-x
 		synchronized (connLock) {
-			System.out.println("PubCallback acquired lock..." );
 			this.successful = true;
-			System.out.println("PubCallback is notifying..." );
 			connLock.notify();
 		}
 	}
