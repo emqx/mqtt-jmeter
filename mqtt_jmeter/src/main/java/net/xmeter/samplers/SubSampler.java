@@ -207,11 +207,11 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 		
 		result.sampleStart();
 		if (connectFailed) {
-			return fillFailedResult(result, MessageFormat.format("Connection {0} connected failed.", connection));
+			return fillFailedResult(sampleByTime, result, MessageFormat.format("Connection {0} connected failed.", connection));
 		} else if (subFailed) {
-			return fillFailedResult(result, "Failed to subscribe to topic.");
+			return fillFailedResult(sampleByTime, result, "Failed to subscribe to topic.");
 		} else if (receivedMsgFailed) {
-			return fillFailedResult(result, "Failed to receive message.");
+			return fillFailedResult(sampleByTime, result, "Failed to receive message.");
 		}
 		
 		if(sampleByTime) {
@@ -393,12 +393,20 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 		return bean;
 	}
 
-	private SampleResult fillFailedResult(SampleResult result, String message) {
+	private SampleResult fillFailedResult(boolean sampleByTime, SampleResult result, String message) {
 		result.setResponseCode("500");
 		result.setSuccessful(false);
 		result.setResponseMessage(message);
 		result.setResponseData(message.getBytes());
 		result.setEndTime(result.getStartTime());
+		
+		if(sampleByTime) {
+			try {
+				TimeUnit.MILLISECONDS.sleep(Long.parseLong(getSampleElapsedTime()));
+			} catch (InterruptedException e) {
+				logger.info("Received exception when waiting for notification signal: " + e.getMessage());
+			}
+		}
 		return result;
 	}
 
