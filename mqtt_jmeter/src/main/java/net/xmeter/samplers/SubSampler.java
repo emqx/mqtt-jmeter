@@ -205,12 +205,14 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 		SampleResult result = new SampleResult();
 		result.setSampleLabel(getName());
 		
-		result.sampleStart();
 		if (connectFailed) {
-			return fillFailedResult(sampleByTime, result, MessageFormat.format("Connection {0} connected failed.", connection));
+			result.sampleStart();
+			return fillFailedResult(sampleByTime, result, "Connection failed.");
 		} else if (subFailed) {
+			result.sampleStart();
 			return fillFailedResult(sampleByTime, result, "Failed to subscribe to topic.");
 		} else if (receivedMsgFailed) {
+			result.sampleStart();
 			return fillFailedResult(sampleByTime, result, "Failed to receive message.");
 		}
 		
@@ -221,6 +223,7 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 				logger.info("Received exception when waiting for notification signal: " + e.getMessage());
 			}
 			synchronized (dataLock) {
+				result.sampleStart();
 				return produceResult(result);	
 			}
 		} else {
@@ -239,6 +242,7 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 						logger.info("Received exception when waiting for notification signal: " + e.getMessage());
 					}
 				}
+				result.sampleStart();
 				return produceResult(result);
 			}
 		}
@@ -282,23 +286,28 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 			logger.error(MessageFormat.format("Specified invalid QoS value {0}, set to default QoS value {1}!", ex.getMessage(), qos));
 			qos = QOS_0;
 		}
-		Topic[] topics = new Topic[1];
+		
+		final String[] paraTopics = topicName.split(",");
+		
+		Topic[] topics = new Topic[paraTopics.length];
 		if(qos < 0 || qos > 2) {
 			logger.error("Specified invalid QoS value, set to default QoS value " + qos);
 			qos = QOS_0;
 		}
-		if (qos == QOS_0) {
-			topics[0] = new Topic(topicName, QoS.AT_MOST_ONCE);
-		} else if (qos == QOS_1) {
-			topics[0] = new Topic(topicName, QoS.AT_LEAST_ONCE);
-		} else {
-			topics[0] = new Topic(topicName, QoS.EXACTLY_ONCE);
+		for(int i = 0; i < topics.length; i++) {
+			if (qos == QOS_0) {
+				topics[i] = new Topic(paraTopics[i], QoS.AT_MOST_ONCE);
+			} else if (qos == QOS_1) {
+				topics[i] = new Topic(paraTopics[i], QoS.AT_LEAST_ONCE);
+			} else {
+				topics[i] = new Topic(paraTopics[i], QoS.EXACTLY_ONCE);
+			}
 		}
 
 		connection.subscribe(topics, new Callback<byte[]>() {
 			@Override
 			public void onSuccess(byte[] value) {
-				logger.info("sub successful, topic is " + topicName);
+				logger.info("sub successful, topic length is " + paraTopics.length);
 			}
 
 			@Override
