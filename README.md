@@ -1,3 +1,6 @@
+# Release
+The version 1.0 is released at 18th, Dec, 2017. Now the plugin supports share MQTT connection in the same threadgroup. Also, this version fixed some of bugs reported in the community.
+
 # mqtt-jmeter
 MQTT JMeter Plugin, it's used for testing MQTT protocol. The plugin was used for EMQ's performance benchmark test, and here is [report link](https://github.com/emqtt/emq-xmeter-cn).
 The plugin is developed and maintained by [XMeter](https://www.xmeter.net). XMeter is a professional performance testing service provider.
