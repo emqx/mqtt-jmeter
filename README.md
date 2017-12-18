@@ -76,6 +76,7 @@ For **MQTT connection**, **User authentication**,  **Connection options** and **
 
 - **Share conn in thread**: This option allows all of pub and sub samplers in the same threadgroup shares the same connection, this can simulate the situation of one device can be either pub or sub. For example, one IoT device can either send message to server, or receive the control message from server. Please notice, only those samplers in the same threadgroup check this option, then the connection will be shared. Also, the connection settings of first pub/sub sampler in the threadgroup will be used for shared connections, rests of connection settings in other samplers will be ignored if the option is checked. Please take a look at following 3 examples.
 
+```
 ThreadGroupSample1
   PubSampler1 (shared connection), the connection settings will be used for the shared connection.
   SubSampler1 (shared connection), use shared connection of PubSampler1, the connection setting of this sampler will be ignored.
@@ -90,6 +91,8 @@ ThreadGroupSample3
   PubSampler1 (not shared connection), one connection will be created for the connection setting in this sampler.
   SubSampler1 (shared connection), the connection settings will be used for the shared connection.
   SubSampler2 (shared connection), use shared connection of SubSampler1, so the connection setting of this sampler will be ignored.
+
+```
 
 ### Pub options
 
