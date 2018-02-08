@@ -36,11 +36,11 @@ If MQTT JMeter plugin is installed successfully, then open JMeter and below 3 MQ
 
 This section includes basic connection settings.
 
-- **Server name or IP**: The server install with MQTT server, it can be either IP address or server name. The default value is 127.0.0.1. **DO NOT** add protocol (e,g tcp:// or ssl:// etc) before server name or IP address! 
+- **Server name or IP**: The server install with MQTT server, it can be either IP address or server name. The default value is 127.0.0.1. **DO NOT** add protocol (e.g. tcp:// or ssl://) before server name or IP address! 
 
 - **Port number**: The port that opens by MQTT server, the default value is 1883 for TCP protocol, and normally 8883 for SSL protocol.
 
-- **MQTT version**: The MQTT version, default is 3.1, and another option is 3.1.1. E,g, sometimes the version is probably required for establish connection to [Azure IoTHub](https://github.com/emqtt/mqtt-jmeter/issues/21).
+- **MQTT version**: The MQTT version, default is 3.1, and another option is 3.1.1. Sometimes the version is probably required for establish connection to [Azure IoTHub](https://github.com/emqtt/mqtt-jmeter/issues/21).
 
 - **Timeout(s)**: The connection timeout seconds while connecting to MQTT server. The default is 10 seconds.
 
@@ -48,7 +48,7 @@ This section includes basic connection settings.
 
 The sampler supports for 2 protocols, TCP and SSL. For the SSL protocol, it includes normal SSL and dual SSL authentication. 
 
-If **'Dual SSL authentication'** is checked, please follow 'Certification files for SSL/TLS connections' at end of this doc configure client SSL configuration.
+If **'Dual SSL authentication'** is checked, please follow 'Certification files for SSL/TLS connections' at end of this doc to set the client SSL configuration.
 
 ![protocol_setting](screenshots/protocol_setting.png)
 
@@ -62,11 +62,11 @@ User can configure MQTT server with user name & password authentication, refer t
 
 ### Connection options
 
-- **ClientId**: The client id, the plugin will add generated uuid after the prefix to identify the client if keep 'Add random client id suffix' selected. Default value is 'conn_'. If 'Add random client id suffix' is not selected, then the text of 'ClientId' will be passed as 'clientId' of current connection.
+- **ClientId**: Identification of the client. (Default value is 'conn_'.) If 'Add random client id suffix' is selected, JMeter plugin will append generated uuid as suffix to represent the client, otherwise, the text of 'ClientId' will be passed as 'clientId' of current connection.
 
 - **Keep alive(s)**: Ping packet send interval in seconds. Default value is 300, which means each connection sends a ping packet to MQTT server every 5 minutes.
 
-- **Connection keep time(s)**: The value is for setting the connection elapsed time after successfully established MQTT connection. The default value is 1800 seconds, which means that the connection will be alive within 30 minutes.
+- **Connection keep time(s)**: The value is to set the connection elapsed time after successfully establishing MQTT connection. The default value is 1800 seconds, which means that the connection will be alive within 30 minutes.
 
 - **Connect attampt max**: The maximum number of reconnect attempts before an error is reported back to the client on the first attempt by the client to connect to a server. Set to -1 to use unlimited attempts. Defaults to 0.
 
