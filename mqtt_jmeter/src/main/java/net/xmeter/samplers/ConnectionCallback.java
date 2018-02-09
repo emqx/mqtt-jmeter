@@ -1,28 +1,22 @@
 package net.xmeter.samplers;
 
-import java.text.MessageFormat;
+import java.util.logging.Logger;
 
-import org.apache.jorphan.logging.LoggingManager;
-import org.apache.log.Logger;
-import org.apache.log.Priority;
 import org.fusesource.mqtt.client.Callback;
 import org.fusesource.mqtt.client.CallbackConnection;
 
 public class ConnectionCallback implements Callback<Void>{
-	private static Logger logger = LoggingManager.getLoggerForClass();
+	private static final Logger logger = Logger.getLogger(ConnectionCallback.class.getCanonicalName());
 	private Object connLock;
-	private CallbackConnection connection;
-	private boolean connectionSucc = false;
+	private boolean connSucc = false;
 	
 	public ConnectionCallback(CallbackConnection connection, Object connLock) {
-		this.connection = connection;
 		this.connLock = connLock;
 	}
 	@Override
 	public void onSuccess(Void value) {
 		synchronized (connLock) {
-			logger.info(MessageFormat.format("The connection {0} is established successfully.", this.connection + Thread.currentThread().getName()));
-			connectionSucc = true;
+			connSucc = true;
 			this.connLock.notify();	
 		}
 	}
@@ -30,13 +24,13 @@ public class ConnectionCallback implements Callback<Void>{
 	@Override
 	public void onFailure(Throwable value) {
 		synchronized (connLock) {
-			connectionSucc = false;
-			logger.log(Priority.ERROR, value.getMessage(), value);
+			connSucc = false;
+			logger.severe(value.getMessage());
 			this.connLock.notify();			
 		}
 	}
 	
 	public boolean isConnectionSucc() {
-		return connectionSucc;
+		return connSucc;
 	}
 }

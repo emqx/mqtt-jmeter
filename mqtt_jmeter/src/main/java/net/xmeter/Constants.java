@@ -16,7 +16,6 @@ public interface Constants {
 	public static final String USER_NAME_AUTH = "mqtt.user_name";
 	public static final String PASSWORD_AUTH = "mqtt.password";
 	
-	public static final String CONN_KEEP_TIME = "mqtt.keep_time";
 	public static final String CONN_CLIENT_ID_PREFIX = "mqtt.client_id_prefix";
 	public static final String CONN_CLIENT_ID_SUFFIX = "mqtt.client_id_suffix";
 	
@@ -76,7 +75,6 @@ public interface Constants {
 	public static final String DEFAULT_CONN_PREFIX_FOR_SUB = "sub_";
 	
 	public static final String DEFAULT_CONN_KEEP_ALIVE = "300";
-	public static final String DEFAULT_CONN_KEEP_TIME = "1800";
 	public static final String DEFAULT_CONN_ATTAMPT_MAX = "0";
 	public static final String DEFAULT_CONN_RECONN_ATTAMPT_MAX = "0";
 	

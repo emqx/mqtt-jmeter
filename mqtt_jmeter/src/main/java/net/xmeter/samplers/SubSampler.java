@@ -6,34 +6,29 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
-import org.apache.jmeter.testelement.ThreadListener;
-import org.apache.jorphan.logging.LoggingManager;
-import org.apache.log.Logger;
-import org.apache.log.Priority;
+import org.apache.jmeter.threads.JMeterContextService;
+import org.apache.jmeter.threads.JMeterVariables;
 import org.fusesource.hawtbuf.Buffer;
 import org.fusesource.hawtbuf.UTF8Buffer;
 import org.fusesource.mqtt.client.Callback;
 import org.fusesource.mqtt.client.CallbackConnection;
 import org.fusesource.mqtt.client.Listener;
-import org.fusesource.mqtt.client.MQTT;
 import org.fusesource.mqtt.client.QoS;
 import org.fusesource.mqtt.client.Topic;
 
 import net.xmeter.SubBean;
-import net.xmeter.Util;
 
 @SuppressWarnings("deprecation")
-public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
-	private transient MQTT mqtt = new MQTT();
+public class SubSampler extends AbstractMQTTSampler {
+	private static final long serialVersionUID = 2979978053740194951L;
+	private static final Logger logger = Logger.getLogger(SubSampler.class.getCanonicalName());
+	
 	private transient CallbackConnection connection = null;
-	private transient static Logger logger = LoggingManager.getLoggerForClass();
-
-	private boolean connectFailed = false;
 	private boolean subFailed = false;
-	private boolean receivedMsgFailed = false;
 
 	private transient ConcurrentLinkedQueue<SubBean> batches = new ConcurrentLinkedQueue<>();
 	private boolean printFlag = false;
@@ -41,11 +36,6 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 	private transient Object dataLock = new Object();
 	
 	private int qos = QOS_0;
-	private String connKey = "";
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 2979978053740194951L;
 
 	public String getQOS() {
 		return getPropertyAsString(QOS_LEVEL, String.valueOf(QOS_0));
@@ -55,12 +45,12 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 		setProperty(QOS_LEVEL, qos);
 	}
 
-	public String getTopic() {
+	public String getTopics() {
 		return getPropertyAsString(TOPIC_NAME, DEFAULT_TOPIC_NAME);
 	}
 
-	public void setTopic(String topicName) {
-		setProperty(TOPIC_NAME, topicName);
+	public void setTopics(String topicsName) {
+		setProperty(TOPIC_NAME, topicsName);
 	}
 	
 	public String getSampleCondition() {
@@ -127,93 +117,29 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 	}
 
 	@Override
-	public boolean isConnectionShareShow() {
-		return true;
-	}
-	
-	private String getKey() {
-		String key = getThreadName();
-		if(!isConnectionShare()) {
-			key = new String(getThreadName() + this.hashCode());
-		}
-		return key;
-	}
-	
-	@Override
 	public SampleResult sample(Entry arg0) {
-		final boolean sampleByTime = SAMPLE_ON_CONDITION_OPTION1.equals(getSampleCondition());
-		final int sampleCount = Integer.parseInt(getSampleCount());
-		connKey = getKey();
-		if(connection == null) {
-			connection = ConnectionsManager.getInstance().getConnection(connKey);
-			final String topicName= getTopic();
-			if(connection != null) {
-				logger.info("Use the shared connection: " + connection);
-				setListener(sampleByTime, sampleCount);
-				listenToTopics(topicName);
-			} else {
-				 // first loop, initializing ..
-				try {
-					if (!DEFAULT_PROTOCOL.equals(getProtocol())) {
-						mqtt.setSslContext(Util.getContext(this));
-					}
-					
-					mqtt.setHost(getProtocol().toLowerCase() + "://" + getServer() + ":" + getPort());
-					mqtt.setVersion(getMqttVersion());
-					mqtt.setKeepAlive((short) Integer.parseInt(getConnKeepAlive()));
-		
-					String clientId = null;
-					if(isClientIdSuffix()) {
-						clientId = Util.generateClientId(getConnClientId());
-					} else {
-						clientId = getConnClientId();
-					}
-					mqtt.setClientId(clientId);
-		
-					mqtt.setConnectAttemptsMax(Integer.parseInt(getConnAttamptMax()));
-					mqtt.setReconnectAttemptsMax(Integer.parseInt(getConnReconnAttamptMax()));
-		
-					if (!"".equals(getUserNameAuth().trim())) {
-						mqtt.setUserName(getUserNameAuth());
-					}
-					if (!"".equals(getPasswordAuth().trim())) {
-						mqtt.setPassword(getPasswordAuth());
-					}
-					
-					connection = ConnectionsManager.getInstance().createConnection(connKey, mqtt);
-					setListener(sampleByTime, sampleCount);
-					connection.connect(new Callback<Void>() {
-						@Override
-						public void onSuccess(Void value) {
-							listenToTopics(topicName);
-							ConnectionsManager.getInstance().setConnectionStatus(connKey, true);
-						}
-		
-						@Override
-						public void onFailure(Throwable value) {
-							connectFailed = true;
-							ConnectionsManager.getInstance().setConnectionStatus(connKey, false);
-						}
-					});
-				} catch (Exception e) {
-					logger.log(Priority.ERROR, e.getMessage(), e);
-				}
-			
-			}
-		}
-		
 		SampleResult result = new SampleResult();
 		result.setSampleLabel(getName());
+	
+		JMeterVariables vars = JMeterContextService.getContext().getVariables();
+		connection = (CallbackConnection) vars.getObject("conn");
+		if (connection == null) {
+			result.setSuccessful(false);
+			result.setResponseMessage("Subscribe: Connection not found.");
+			result.setResponseData("Subscribe failed because connection is not established.".getBytes());
+			result.setResponseCode("500");
+			return result;
+		}
 		
-		if (connectFailed) {
-			result.sampleStart();
-			return fillFailedResult(sampleByTime, result, "Connection failed.");
-		} else if (subFailed) {
+		final boolean sampleByTime = SAMPLE_ON_CONDITION_OPTION1.equals(getSampleCondition());
+		final int sampleCount = Integer.parseInt(getSampleCount());
+		final String topicsName= getTopics();
+		setListener(sampleByTime, sampleCount);
+		listenToTopics(topicsName);
+		
+		if (subFailed) {
 			result.sampleStart();
 			return fillFailedResult(sampleByTime, result, "Failed to subscribe to topic.");
-		} else if (receivedMsgFailed) {
-			result.sampleStart();
-			return fillFailedResult(sampleByTime, result, "Failed to receive message.");
 		}
 		
 		if(sampleByTime) {
@@ -250,7 +176,7 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 	
 	private SampleResult produceResult(SampleResult result) {
 		SubBean bean = batches.poll();
-		if(bean == null) { //In case selected with time interval
+		if(bean == null) { //In "elapsed time" mode, return "dummy" when time is reached
 			bean = new SubBean();
 		}
 		int receivedCount = bean.getReceivedCount();
@@ -265,13 +191,13 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 		result = fillOKResult(result, bean.getReceivedMessageSize(), message, content.toString());
 		
 		if(receivedCount == 0) {
-			result.setEndTime(result.getStartTime());
+			result.setEndTime(result.getStartTime()); // dummy result, rectify sample time
 		} else {
 			if (isAddTimestamp()) {
-				result.setEndTime(result.getStartTime() + (long) bean.getAvgElapsedTime());
+				result.setEndTime(result.getStartTime() + (long) bean.getAvgElapsedTime()); // rectify sample time
 				result.setLatency((long) bean.getAvgElapsedTime());
 			} else {
-				result.setEndTime(result.getStartTime());	
+				result.setEndTime(result.getStartTime()); // TODO: any better solution?
 			}
 		}
 		result.setSampleCount(receivedCount);
@@ -279,19 +205,19 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 		return result;
 	}
 	
-	private void listenToTopics(final String topicName) {
+	private void listenToTopics(final String topicsName) {
 		try {
 			qos = Integer.parseInt(getQOS());
 		} catch(Exception ex) {
-			logger.error(MessageFormat.format("Specified invalid QoS value {0}, set to default QoS value {1}!", ex.getMessage(), qos));
+			logger.severe(MessageFormat.format("Specified invalid QoS value {0}, set to default QoS value {1}!", ex.getMessage(), qos));
 			qos = QOS_0;
 		}
 		
-		final String[] paraTopics = topicName.split(",");
+		final String[] paraTopics = topicsName.split(",");
 		
 		Topic[] topics = new Topic[paraTopics.length];
 		if(qos < 0 || qos > 2) {
-			logger.error("Specified invalid QoS value, set to default QoS value " + qos);
+			logger.severe("Specified invalid QoS value, set to default QoS value " + qos);
 			qos = QOS_0;
 		}
 		for(int i = 0; i < topics.length; i++) {
@@ -313,7 +239,6 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 			@Override
 			public void onFailure(Throwable value) {
 				subFailed = true;
-				connection.kill(null);
 			}
 		});
 	}
@@ -335,21 +260,18 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 					} else {
 						synchronized (dataLock) {
 							SubBean bean = handleSubBean(sampleByTime, msg, sampleCount);
-							//logger.info(System.currentTimeMillis() + ": need notify? receivedCount=" + bean.getReceivedCount() + ", sampleCount=" + sampleCount);
 							if(bean.getReceivedCount() == sampleCount) {
 								dataLock.notify();
 							}
 						}
 					}
 				} catch (IOException e) {
-					logger.log(Priority.ERROR, e.getMessage(), e);
+					logger.severe(e.getMessage());
 				}
 			}
 
 			@Override
 			public void onFailure(Throwable value) {
-				connectFailed = true;
-				connection.kill(null);
 			}
 
 			@Override
@@ -430,33 +352,4 @@ public class SubSampler extends AbstractMQTTSampler implements ThreadListener {
 		return result;
 	}
 
-	@Override
-	public void threadStarted() {
-		//logger.info("*** in threadStarted");
-		boolean sampleByTime = SAMPLE_ON_CONDITION_OPTION1.equals(getSampleCondition());
-		if(!sampleByTime) {
-			logger.info("Configured with sampled on message count, will not check message sent time.");
-			return;
-		}
-	}
-	
-	@Override
-	public void threadFinished() {
-		//logger.info(System.currentTimeMillis() + ", threadFinished");
-		//logger.info("*** in threadFinished");
-		this.connection.disconnect(new Callback<Void>() {
-			@Override
-			public void onSuccess(Void value) {
-				logger.info(MessageFormat.format("Connection {0} disconnect successfully.", connection));
-			}
-
-			@Override
-			public void onFailure(Throwable value) {
-				logger.info(MessageFormat.format("Connection {0} failed to disconnect.", connection));
-			}
-		});
-		if(ConnectionsManager.getInstance().containsConnection(connKey)) {
-			ConnectionsManager.getInstance().removeConnection(connKey);	
-		}
-	}
 }

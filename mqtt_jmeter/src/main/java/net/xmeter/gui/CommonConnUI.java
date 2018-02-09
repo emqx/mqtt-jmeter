@@ -55,8 +55,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	
 	private final JLabeledTextField connKeepAlive = new JLabeledTextField("Keep alive(s):", 4);
 	
-	private final JLabeledTextField connKeeptime = new JLabeledTextField("Connection keep time(s):", 4);
-	
 	private final JLabeledTextField connAttmptMax = new JLabeledTextField("Connect attampt max:", 0);
 	private final JLabeledTextField reconnAttmptMax = new JLabeledTextField("Reconnect attampt max:", 0);
 	
@@ -91,7 +89,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		
 		JPanel optsPanel1 = new HorizontalPanel();
 		optsPanel1.add(connKeepAlive);
-		optsPanel1.add(connKeeptime);
 		optsPanelCon.add(optsPanel1);
 		
 		optsPanel1.add(connAttmptMax);
@@ -240,10 +237,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	}
 	
 	public void configure(AbstractMQTTSampler sampler) {
-		if(!sampler.isKeepTimeShow()) {
-			connKeeptime.setVisible(false);
-		}
-		
 		if(!sampler.isConnectionShareShow()) {
 			connShared.setVisible(false);
 		}
@@ -251,7 +244,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		certificationFilePath2.setText(sampler.getClientCertFilePath());
 		connAttmptMax.setText(sampler.getConnAttamptMax());
 		connKeepAlive.setText(sampler.getConnKeepAlive());
-		connKeeptime.setText(sampler.getConnKeepTime());
 		connShared.setSelected(sampler.isConnectionShare());
 		connNamePrefix.setText(sampler.getConnPrefix());
 		
@@ -296,7 +288,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		sampler.setClientCertFilePath(certificationFilePath2.getText());
 		sampler.setConnKeepAlive(connKeepAlive.getText());
 		sampler.setConnAttamptMax(connAttmptMax.getText());
-		sampler.setConnKeepTime(connKeeptime.getText());
 		sampler.setConnPrefix(connNamePrefix.getText());
 		sampler.setConnectionShare(connShared.isSelected());
 		sampler.setClientIdSuffix(connNameSuffix.isSelected());
@@ -326,7 +317,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		dualAuth.setSelected(false);
 		connAttmptMax.setText(DEFAULT_CONN_ATTAMPT_MAX);
 		connKeepAlive.setText(DEFAULT_CONN_KEEP_ALIVE);
-		connKeeptime.setText(DEFAULT_CONN_KEEP_TIME);
 		connNamePrefix.setText(DEFAULT_CONN_PREFIX_FOR_CONN);
 		connShared.setSelected(DEFAULT_CONNECTION_SHARE);
 		protocols.setSelectedIndex(0);	

@@ -1,36 +1,27 @@
 package net.xmeter.samplers;
 
 import java.text.MessageFormat;
-import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import javax.xml.bind.DatatypeConverter;
 
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
-import org.apache.jmeter.testelement.ThreadListener;
-import org.apache.jorphan.logging.LoggingManager;
-import org.apache.log.Logger;
-import org.apache.log.Priority;
-import org.fusesource.mqtt.client.Callback;
+import org.apache.jmeter.threads.JMeterContextService;
+import org.apache.jmeter.threads.JMeterVariables;
 import org.fusesource.mqtt.client.CallbackConnection;
-import org.fusesource.mqtt.client.MQTT;
 import org.fusesource.mqtt.client.QoS;
 
 import net.xmeter.Util;
 
-public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -4312341622759500786L;
-	private transient static Logger logger = LoggingManager.getLoggerForClass();
-	private transient MQTT mqtt = new MQTT();
+public class PubSampler extends AbstractMQTTSampler {
+	private static final long serialVersionUID = 4312341622759500786L;
+	private static final Logger logger = Logger.getLogger(PubSampler.class.getCanonicalName());
+	
 	private transient CallbackConnection connection = null;
 	private String payload = null;
-	private String clientId = "";
 	private QoS qos_enum = QoS.AT_MOST_ONCE;
 	private String topicName = "";
-	private String connKey = "";
 
 	public String getQOS() {
 		return getPropertyAsString(QOS_LEVEL, String.valueOf(QOS_0));
@@ -80,94 +71,25 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 		setProperty(MESSAGE_TO_BE_SENT, message);
 	}
 
-	public String getConnPrefix() {
-		return getPropertyAsString(CONN_CLIENT_ID_PREFIX, DEFAULT_CONN_PREFIX_FOR_PUB);
-	}
-	
 	public static byte[] hexToBinary(String hex) {
 	    return DatatypeConverter.parseHexBinary(hex);
 	}
 	
 	@Override
-	public boolean isConnectionShareShow() {
-		return true;
-	}
-	
-	private String getKey() {
-		String key = getThreadName();
-		if(!isConnectionShare()) {
-			key = new String(getThreadName() + this.hashCode());
-		}
-		return key;
-	}
-	
-	@Override
 	public SampleResult sample(Entry arg0) {
-		this.connKey = getKey();
-		if(connection == null) {
-			connection = ConnectionsManager.getInstance().getConnection(connKey);
-			if(connection != null) {
-				logger.info("Use the shared connection: " + connection);
-			} else {
-				try {
-					if (!DEFAULT_PROTOCOL.equals(getProtocol())) {
-						mqtt.setSslContext(Util.getContext(this));
-					}
-					
-					mqtt.setVersion(getMqttVersion());
-					mqtt.setHost(getProtocol().toLowerCase() + "://" + getServer() + ":" + getPort());
-					mqtt.setKeepAlive((short) Integer.parseInt(getConnKeepAlive()));
-
-					if(isClientIdSuffix()) {
-						clientId = Util.generateClientId(getConnPrefix());
-					} else {
-						clientId = getConnPrefix();
-					}
-					mqtt.setClientId(clientId);
-
-					mqtt.setConnectAttemptsMax(Integer.parseInt(getConnAttamptMax()));
-					mqtt.setReconnectAttemptsMax(Integer.parseInt(getConnReconnAttamptMax()));
-
-					if (!"".equals(getUserNameAuth().trim())) {
-						mqtt.setUserName(getUserNameAuth());
-					}
-					if (!"".equals(getPasswordAuth().trim())) {
-						mqtt.setPassword(getPasswordAuth());
-					}
-
-					Object connLock = new Object();
-					connection = ConnectionsManager.getInstance().createConnection(connKey, mqtt);
-					synchronized (connLock) {
-						ConnectionCallback callback = new ConnectionCallback(connection, connLock);
-						connection.connect(callback);
-						connLock.wait(TimeUnit.SECONDS.toMillis(Integer.parseInt(getConnTimeout())));
-						ConnectionsManager.getInstance().setConnectionStatus(connKey, callback.isConnectionSucc());
-					}
-				} catch (Exception e) {
-					logger.log(Priority.ERROR, e.getMessage(), e);
-					ConnectionsManager.getInstance().setConnectionStatus(connKey, false);
-				}
-			}
-		}
-		
-		if(payload == null) {
-			if (MESSAGE_TYPE_RANDOM_STR_WITH_FIX_LEN.equals(getMessageType())) {
-				payload = Util.generatePayload(Integer.parseInt(getMessageLength()));
-			}
-		}
-		
 		SampleResult result = new SampleResult();
 		result.setSampleLabel(getName());
-		
-		if(!ConnectionsManager.getInstance().getConnectionStatus(connKey)) {
-			result.sampleStart();
+	
+		JMeterVariables vars = JMeterContextService.getContext().getVariables();
+		connection = (CallbackConnection) vars.getObject("conn");
+		if (connection == null) {
 			result.setSuccessful(false);
-			result.sampleEnd();
-			result.setResponseMessage(MessageFormat.format("Publish failed for connection {0}.", connection));
-			result.setResponseData("Publish failed becasue the connection has not been established.".getBytes());
+			result.setResponseMessage("Publish: Connection not found.");
+			result.setResponseData("Publish failed because connection is not established.".getBytes());
 			result.setResponseCode("500");
 			return result;
 		}
+		
 		try {
 			byte[] toSend = new byte[]{};
 			byte[] tmp = new byte[]{};
@@ -177,6 +99,9 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 			} else if (MESSAGE_TYPE_STRING.equals(getMessageType())) {
 				tmp = getMessage().getBytes();
 			} else if(MESSAGE_TYPE_RANDOM_STR_WITH_FIX_LEN.equals(getMessageType())) {
+				if (payload == null) {
+					payload = Util.generatePayload(Integer.parseInt(getMessageLength()));
+				}
 				tmp = payload.getBytes();
 			}
 
@@ -206,19 +131,19 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 				toSend = new byte[tmp.length];
 				System.arraycopy(tmp, 0, toSend, 0 , tmp.length);
 			}
-			result.sampleStart();
 			
-			final Object connLock = new Object();
-			PubCallback pubCallback = new PubCallback(connLock);
+			result.sampleStart();
+			final Object pubLock = new Object();
+			PubCallback pubCallback = new PubCallback(pubLock);
 			
 			if(qos_enum == QoS.AT_MOST_ONCE) { 
 				//For QoS == 0, the callback is the same thread with sampler thread, so it cannot use the lock object wait() & notify() in else block;
 				//Otherwise the sampler thread will be blocked.
 				connection.publish(topicName, toSend, qos_enum, false, pubCallback);
 			} else {
-				synchronized (connLock) {
+				synchronized (pubLock) {
 					connection.publish(topicName, toSend, qos_enum, false, pubCallback);
-					connLock.wait();
+					pubLock.wait();
 				}
 			}
 			
@@ -239,8 +164,8 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 				result.setResponseCode("500");
 			}
 		} catch (Exception ex) {
-			logger.log(Priority.ERROR, ex.getMessage(), ex);
-			result.sampleEnd();
+			logger.severe(ex.getMessage());
+			if (result.getEndTime() == 0) result.sampleEnd();
 			result.setLatency(result.getEndTime() - result.getStartTime());
 			result.setSuccessful(false);
 			result.setResponseMessage(MessageFormat.format("Publish failed for connection {0}.", connection));
@@ -249,30 +174,5 @@ public class PubSampler extends AbstractMQTTSampler implements ThreadListener {
 		}
 		return result;
 	}
-
-	@Override
-	public void threadStarted() {
-		
-	}
-
-	@Override
-	public void threadFinished() {
-		if (this.connection != null) {
-			this.connection.disconnect(new Callback<Void>() {
-				
-				@Override
-				public void onSuccess(Void value) {
-					logger.info(MessageFormat.format("The connection {0} disconneted successfully.", connection));		
-				}
-				
-				@Override
-				public void onFailure(Throwable value) {
-					logger.log(Priority.ERROR, value.getMessage(), value);
-				}
-			});
-		}
-		if(ConnectionsManager.getInstance().containsConnection(connKey)) {
-			ConnectionsManager.getInstance().removeConnection(connKey);	
-		}
-	}
+	
 }

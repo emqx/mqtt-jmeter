@@ -1,6 +1,7 @@
 package net.xmeter.gui;
 
 import java.awt.BorderLayout;
+import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
@@ -16,19 +17,13 @@ import org.apache.jmeter.samplers.gui.AbstractSamplerGui;
 import org.apache.jmeter.testelement.TestElement;
 import org.apache.jorphan.gui.JLabeledChoice;
 import org.apache.jorphan.gui.JLabeledTextField;
-import org.apache.jorphan.logging.LoggingManager;
-import org.apache.log.Logger;
 
 import net.xmeter.Constants;
 import net.xmeter.samplers.PubSampler;
 
 public class PubSamplerUI extends AbstractSamplerGui implements Constants, ChangeListener {
-	private static final Logger logger = LoggingManager.getLoggerForClass();
-	private CommonConnUI connUI = new CommonConnUI();
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 2479085966683186422L;
+	private static final Logger logger = Logger.getLogger(PubSamplerUI.class.getCanonicalName());
 
 	private JLabeledChoice qosChoice;
 	private final JLabeledTextField topicName = new JLabeledTextField("Topic name:");
@@ -44,18 +39,12 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 	}
 
 	private void init() {
-		logger.info("Initializing the UI.");
 		setLayout(new BorderLayout());
 		setBorder(makeBorder());
 
 		add(makeTitlePanel(), BorderLayout.NORTH);
 		JPanel mainPanel = new VerticalPanel();
 		add(mainPanel, BorderLayout.CENTER);
-
-		mainPanel.add(connUI.createConnPanel());
-		mainPanel.add(connUI.createProtocolPanel());
-		mainPanel.add(connUI.createAuthentication());
-		mainPanel.add(connUI.createConnOptions());
 
 		mainPanel.add(createPubOption());
 		mainPanel.add(createPayload());
@@ -137,7 +126,6 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 		super.configure(element);
 		PubSampler sampler = (PubSampler) element;
 		
-		connUI.configure(sampler);
 		if(sampler.getQOS().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1){
 			this.qosChoice.setSelectedIndex(Integer.parseInt(sampler.getQOS()));	
 		} else {
@@ -167,7 +155,6 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 
 	private void setupSamplerProperties(PubSampler sampler) {
 		this.configureTestElement(sampler);
-		connUI.setupSamplerProperties(sampler);
 		sampler.setTopic(this.topicName.getText());
 		
 		if(this.qosChoice.getText().indexOf(JMETER_VARIABLE_PREFIX) == -1) {
@@ -196,8 +183,6 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 	@Override
 	public void clearGui() {
 		super.clearGui();
-		connUI.clearUI();
-		connUI.connNamePrefix.setText(DEFAULT_CONN_PREFIX_FOR_PUB);
 		this.topicName.setText(DEFAULT_TOPIC_NAME);
 		this.qosChoice.setText(String.valueOf(QOS_0));
 		this.timestamp.setSelected(false);

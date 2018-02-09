@@ -7,6 +7,7 @@ import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -15,8 +16,6 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.jmeter.services.FileServer;
-import org.apache.jorphan.logging.LoggingManager;
-import org.apache.log.Logger;
 
 import net.xmeter.samplers.AbstractMQTTSampler;
 
@@ -24,7 +23,7 @@ public class Util implements Constants {
 	
 	private static SecureRandom random = new SecureRandom();
     private static char[] seeds = "abcdefghijklmnopqrstuvwxmy0123456789".toCharArray();
-    private transient static Logger logger = LoggingManager.getLoggerForClass();
+    private static final Logger logger = Logger.getLogger(Util.class.getCanonicalName());
 
 	public static String generateClientId(String prefix) {
 		int leng = prefix.length();

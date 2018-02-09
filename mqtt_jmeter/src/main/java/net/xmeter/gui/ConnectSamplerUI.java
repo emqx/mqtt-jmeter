@@ -7,26 +7,19 @@ import javax.swing.JPanel;
 import org.apache.jmeter.gui.util.VerticalPanel;
 import org.apache.jmeter.samplers.gui.AbstractSamplerGui;
 import org.apache.jmeter.testelement.TestElement;
-import org.apache.jorphan.logging.LoggingManager;
-import org.apache.log.Logger;
 
 import net.xmeter.Constants;
-import net.xmeter.samplers.ConnectionSampler;
+import net.xmeter.samplers.ConnectSampler;
 
-public class ConnectionSamplerUI extends AbstractSamplerGui implements Constants {
-	private static final Logger logger = LoggingManager.getLoggerForClass();
+public class ConnectSamplerUI extends AbstractSamplerGui implements Constants {
 	private CommonConnUI connUI = new CommonConnUI();
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1666890646673145131L;
 
-	public ConnectionSamplerUI() {
+	public ConnectSamplerUI() {
 		this.init();
 	}
 
 	private void init() {
-		logger.info("Initializing the UI.");
 		setLayout(new BorderLayout());
 		setBorder(makeBorder());
 
@@ -43,13 +36,13 @@ public class ConnectionSamplerUI extends AbstractSamplerGui implements Constants
 	@Override
 	public void configure(TestElement element) {
 		super.configure(element);
-		ConnectionSampler sampler = (ConnectionSampler)element;
+		ConnectSampler sampler = (ConnectSampler)element;
 		connUI.configure(sampler);
 	}
 
 	@Override
 	public TestElement createTestElement() {
-		ConnectionSampler sampler = new ConnectionSampler();
+		ConnectSampler sampler = new ConnectSampler();
 		this.configureTestElement(sampler);
 		connUI.setupSamplerProperties(sampler);
 		return sampler;
@@ -62,12 +55,12 @@ public class ConnectionSamplerUI extends AbstractSamplerGui implements Constants
 
 	@Override
 	public String getStaticLabel() {
-		return "MQTT Connection Sampler";
+		return "MQTT Connect";
 	}
 
 	@Override
 	public void modifyTestElement(TestElement arg0) {
-		ConnectionSampler sampler = (ConnectionSampler)arg0;
+		ConnectSampler sampler = (ConnectSampler)arg0;
 		this.configureTestElement(sampler);
 		connUI.setupSamplerProperties(sampler);
 	}
