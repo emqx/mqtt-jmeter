@@ -30,8 +30,7 @@ If MQTT JMeter plugin is successfully installed, you can find these MQTT sampler
 ![mqtt_jmeter_plugin](screenshots/mqtt_jmeter_plugin.png)
 
 
-## Connection sampler
-
+## Connect Sampler
 ![conn_sampler](screenshots/conn_sampler.png)
 
 ### MQTT connection
@@ -72,18 +71,19 @@ User can configure MQTT server with user name & password authentication, refer t
 
 - **Reconnect attampt max**:  The maximum number of reconnect attempts before an error is reported back to the client after a server connection had previously been established. Set to -1 to use unlimited attempts. Defaults to 0.
 
-## Pub sampler
+
+## Pub Sampler
 ![pub_sampler](screenshots/pub_sampler.png)
 
-Pub sampler reuses previously established connection (by Connect sampler) to publish a message. If connection is ready, this sampler will fail immediately.
+Pub sampler reuses previously established connection (by Connect sampler) to publish a message. If connection is not ready at this moment, pub sampler will just fail immediately.
 
 ### Pub options
 
 - **QoS level**: The available QoS value, 0 is AT_MOST_ONCE, 1 is AT_LEAST_ONCE and 2 is EXACTLY_ONCE.
 
-- **Topic name**: The topic name that the message will send to.
+- **Topic name**: Name of the topic that the message will be sent to.
 
-- **Add timestamp in payload**: Add timestamp in the payload or not. If the checkbox is enabled, then timestamp of running pub sampler will be added ahead of payload. Mostly it can be used together with **Sub sampler** to calculate message latency time.
+- **Add timestamp in payload**: Add timestamp in the payload or not. If the checkbox is enabled, then timestamp of running pub sampler will be added before real payload. Mostly it's used together with **Sub sampler** to calculate message latency time.
 
 ### Payloads
 
@@ -97,18 +97,17 @@ Pub sampler reuses previously established connection (by Connect sampler) to pub
 
 ![payload_setting](screenshots/payload_setting.png)
 
-## Sub sampler
+
+## Sub Sampler
 ![sub_sampler](screenshots/sub_sampler.png)
 
-For **MQTT connection**, **User authentication**,  **Connection options** and **MQTT version** section settings, please refer to *Connection sampler* for more detailed information.
-
-For **Share conn in thread**, please refer to the Pub sampler.
+Sub sampler reuses previously established connection (by Connect sampler) to subscribe message(s). If connection is not ready at this moment, sub sampler will just fail immediately.
 
 ### Sub options
 
 -  **QoS level**: The available QoS value, 0 is AT_MOST_ONCE, 1 is AT_LEAST_ONCE and 2 is EXACTLY_ONCE.
 
--  **Topic name**: The topic name that subscriber will subscribe to.
+-  **Topic name(s)**: A list of topic names (comma-separated) that will be subscribed to.
 
 -  **Payload includes timestamp**: If the checkbox is enabled, then it means the payload includes timestamp. It can be used to calcuate the message latency time.
 
@@ -118,9 +117,16 @@ message_latency = timestamp_in_sub_when_receive_msg - timestamp_in_payload (time
 Please notice, if the machine publish message is not the same as subscriber, then the calculated message latency time is not accurate. 
 It's because the time is almost not the same in different machines. So the latency time calculated by sub sampler could be only be a reference.
 ```
-- **Sample on**: It controls how to sample. The default value is '**elapsed with specified time(ms)**', which means a sub sampler will be occurred every ms specified in next text field (default is 1000ms). During the 1000 ms, multiple messages could be received, and result in report is the summarized data during 1000 ms. If the value is set to 2000, then means summarized report during 2000 ms. Another option is '**received number of message**', which means a sub sampler will be occurred when received number of message that specified in next text field (default is 1). 
+- **Sample on**: It controls how to sample. The default value is '**elapsed with specified time(ms)**', which means a sub sampler will  occur every specified milli-seconds (default is 1000ms). During the 1000 ms, multiple messages could be received, and result in report is the summarized data during 1000 ms. If the value is set to 2000, then means summarized report during 2000 ms. Another option is '**number of received messages**', which means a sub sampler will occur after receiving these specified number of messages (default is 1). 
 
--  **Debug response**: If it's checked, then the received message will be print in response. It's recommend to enable it when you're debugging script.
+- **Debug response**: If checked, the received message will be print in response. It's recommended to enable this option when you debug your script.
+
+
+## DisConnect Sampler
+![disconn_sampler](screenshots/disconn_sampler.png)
+
+This sampler is very simple, it just clear the previous created connection. Therefore, next time you run Connect sampler, it will initiate a new MQTT server connection for you. As you can imagine, Disconnect sample will fail immediately if no connection is detected at this moment.
+
 
 ## Certification files for SSL/TLS connections
 After deploying emqtt server, you get the following OOTB (out of the box) SSL/TLS certification files under ${EMQTTD_HOME}/etc/certs directory:
@@ -150,3 +156,4 @@ openssl pkcs12 -export -inkey client-key.pem -in client-cert.pem -out client.p12
 #### Specify key store, client certfication and corresponding pass phrases in plugin sampler:
 
 ![ssl_conn](screenshots/ssl_conn.png)
+

@@ -27,7 +27,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 	private JLabeledChoice sampleOnCondition;
 	
 	private final JLabeledTextField sampleConditionValue = new JLabeledTextField("");
-	private final JLabeledTextField topicName = new JLabeledTextField("Topic name:");
+	private final JLabeledTextField topicNames = new JLabeledTextField("Topic name(s):");
 	
 	private JCheckBox debugResponse = new JCheckBox("Debug response");
 	private JCheckBox timestamp = new JCheckBox("Payload includes timestamp");
@@ -56,7 +56,8 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 
 		JPanel optsPanel1 = new HorizontalPanel();
 		optsPanel1.add(qosChoice);
-		optsPanel1.add(topicName);
+		optsPanel1.add(topicNames);
+		topicNames.setToolTipText("A list of topics to be subscribed to, comma-separated.");
 		optsPanel1.add(timestamp);
 		optsPanelCon.add(optsPanel1);
 		
@@ -98,7 +99,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 			this.qosChoice.setText(sampler.getQOS());
 		}
 		
-		this.topicName.setText(sampler.getTopics());
+		this.topicNames.setText(sampler.getTopics());
 		this.timestamp.setSelected(sampler.isAddTimestamp());
 		this.debugResponse.setSelected(sampler.isDebugResponse());
 		this.sampleOnCondition.setText(sampler.getSampleCondition());
@@ -123,7 +124,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 
 	private void setupSamplerProperties(SubSampler sampler) {
 		this.configureTestElement(sampler);
-		sampler.setTopics(this.topicName.getText());
+		sampler.setTopics(this.topicNames.getText());
 		
 		if(this.qosChoice.getText().indexOf(JMETER_VARIABLE_PREFIX) == -1) {
 			int qos = QOS_0;
@@ -156,7 +157,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 	@Override
 	public void clearGui() {
 		super.clearGui();
-		this.topicName.setText(DEFAULT_TOPIC_NAME);
+		this.topicNames.setText(DEFAULT_TOPIC_NAME);
 		this.qosChoice.setText(String.valueOf(QOS_0));
 		this.timestamp.setSelected(false);
 		this.debugResponse.setSelected(false);

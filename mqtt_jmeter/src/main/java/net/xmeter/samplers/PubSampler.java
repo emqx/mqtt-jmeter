@@ -170,7 +170,7 @@ public class PubSampler extends AbstractMQTTSampler {
 			result.setSuccessful(false);
 			result.setResponseMessage(MessageFormat.format("Publish failed for connection {0}.", connection));
 			result.setResponseData(ex.getMessage().getBytes());
-			result.setResponseCode("500");
+			result.setResponseCode("501");
 		}
 		return result;
 	}

@@ -60,6 +60,7 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 		JPanel optsPanel = new HorizontalPanel();
 		optsPanel.add(qosChoice);
 		optsPanel.add(topicName);
+		topicName.setToolTipText("Name of topic that the message will be sent to.");
 		optsPanel.add(timestamp);
 		optsPanelCon.add(optsPanel);
 

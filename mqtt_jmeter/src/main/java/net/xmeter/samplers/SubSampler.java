@@ -135,7 +135,7 @@ public class SubSampler extends AbstractMQTTSampler {
 		final int sampleCount = Integer.parseInt(getSampleCount());
 		final String topicsName= getTopics();
 		setListener(sampleByTime, sampleCount);
-		listenToTopics(topicsName);
+		listenToTopics(topicsName);  // TODO: run once or multiple times ?
 		
 		if (subFailed) {
 			result.sampleStart();
