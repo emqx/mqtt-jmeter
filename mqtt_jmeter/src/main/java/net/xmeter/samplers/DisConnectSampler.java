@@ -10,10 +10,10 @@ import org.apache.jmeter.threads.JMeterVariables;
 import org.fusesource.mqtt.client.CallbackConnection;
 
 public class DisConnectSampler extends AbstractMQTTSampler {
-	private transient CallbackConnection connection = null;
-	private static final long serialVersionUID = 1859006013465470528L;
-
+	private static final long serialVersionUID = 4360869021667126983L;
 	private static final Logger logger = Logger.getLogger(DisConnectSampler.class.getCanonicalName());
+
+	private transient CallbackConnection connection = null;
 
 	@Override
 	public SampleResult sample(Entry entry) {

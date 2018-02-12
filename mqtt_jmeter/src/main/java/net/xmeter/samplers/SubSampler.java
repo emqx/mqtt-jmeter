@@ -80,7 +80,7 @@ public class SubSampler extends AbstractMQTTSampler {
 	}
 	
 	public String getSampleElapsedTime() {
-		return getPropertyAsString(SAMPLE_CONDITION_VALUE, DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_SEC);
+		return getPropertyAsString(SAMPLE_CONDITION_VALUE, DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_MILLI_SEC);
 	}
 	
 	public void setSampleElapsedTime(String elapsedTime) {
@@ -92,7 +92,7 @@ public class SubSampler extends AbstractMQTTSampler {
 			setProperty(SAMPLE_CONDITION_VALUE, elapsedTime);
 		}catch(Exception ex) {
 			logger.info("Invalid elapsed time value, set to default value: " + elapsedTime);
-			setProperty(SAMPLE_CONDITION_VALUE, DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_SEC);
+			setProperty(SAMPLE_CONDITION_VALUE, DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_MILLI_SEC);
 		}
 	}
 

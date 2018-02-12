@@ -37,7 +37,6 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 	}
 	
 	private void init() {
-		logger.info("Initializing the UI.");
 		setLayout(new BorderLayout());
 		setBorder(makeBorder());
 
@@ -162,14 +161,14 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 		this.timestamp.setSelected(false);
 		this.debugResponse.setSelected(false);
 		this.sampleOnCondition.setText(SAMPLE_ON_CONDITION_OPTION1);
-		this.sampleConditionValue.setText(DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_SEC);
+		this.sampleConditionValue.setText(DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_MILLI_SEC);
 	}
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		if(this.sampleOnCondition == e.getSource()) {
 			if(SAMPLE_ON_CONDITION_OPTION1.equalsIgnoreCase(sampleOnCondition.getText())) {
-				sampleConditionValue.setText(DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_SEC);
+				sampleConditionValue.setText(DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_MILLI_SEC);
 			} else if(SAMPLE_ON_CONDITION_OPTION2.equalsIgnoreCase(sampleOnCondition.getText())) {
 				sampleConditionValue.setText(DEFAULT_SAMPLE_VALUE_COUNT);
 			}

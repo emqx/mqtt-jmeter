@@ -14,11 +14,11 @@ import org.fusesource.mqtt.client.MQTT;
 import net.xmeter.Util;
 
 public class ConnectSampler extends AbstractMQTTSampler {
-	private transient MQTT mqtt = new MQTT();
-	private transient CallbackConnection connection = null;
 	private static final long serialVersionUID = 1859006013465470528L;
-
 	private static final Logger logger = Logger.getLogger(ConnectSampler.class.getCanonicalName());
+	
+	private transient CallbackConnection connection = null;
+	private transient MQTT mqtt = new MQTT();
 
 	@Override
 	public SampleResult sample(Entry entry) {
