@@ -1,26 +1,31 @@
-# mqtt-jmeter
-MQTT JMeter Plugin, it's used for testing MQTT protocol. The plugin was used for EMQ's performance benchmark test, and here is [report link](https://github.com/emqtt/emq-xmeter-cn).
-The plugin is developed and maintained by [XMeter](https://www.xmeter.net). XMeter is a professional performance testing service provider.
+# mqtt-jmeter Overview
+MQTT JMeter Plugin extends your JMeter's capability to test against MQTT protocol, just as easy as ordinary HTTP protocal. 
+
+It has been used to benchmark EMQ server performance, and here is the [report link](https://github.com/emqtt/emq-xmeter-cn).
+
+This plugin is developed and maintained by [XMeter](https://www.xmeter.net). XMeter is a professional performance testing service provider.
 
 # Install instruction
-The plugin is a standard JMeter plugin. You can download the latest version of mqtt-jmeter from [here](https://github.com/emqtt/mqtt-jmeter/releases), and then copy the downloaded JAR files into $JMETER_HOME/lib/ext folder. After restart the JMeter, then you can see the 3 samplers provided by this plugin.
+The plugin is a standard JMeter plugin. You can download the latest version of mqtt-jmeter from [here](https://github.com/emqtt/mqtt-jmeter/releases), and then copy the downloaded JAR files into $JMETER_HOME/lib/ext folder. After restarting the JMeter, you can see "MQTT samplers" provided by this plugin.
 
-We recommend to use JMeter 3.0 or above. 
+To use this plugin, we recommend you to install JMeter 3.2 or above.
 
 ## Build from source code
 
 If you'd like to build binary by yourself, please clone the project and run 'mvn install'. Maven will download some JMeter dependency binary files, so the build elapsed time will up to your network status.
 
 # How to use
-The plugin includes 3 samplers: 
+The plugin includes 4 samplers: 
 
-- Connection sampler, which can be used for connection mock. For example, in a large scale system, there could have lots of backend connections with no data transimission except some hearbeat signal. The sampler can be used in this case.
+- Connect sampler: Initiate MQTT server connection on behalf of a device. In addition to normal connection setup, this sampler can be used to simulate massive "background" connections(no data transimission but regular hearbeat signals) to the designated MQTT server or cluster system. 
 
-- Pub sampler, which can be used for publish message to MQTT server.
+- Pub sampler: publish various messages to the target MQTT server.
 
-- Sub sampler, which can be used for sub message from MQTT server.
+- Sub sampler: subscribe message(s) from target MQTT server.
 
-If MQTT JMeter plugin is installed successfully, then open JMeter and below 3 MQTT samplers can be found under 'Sampler'.
+- DisConnect sampler: Reset the connection to target MQTT server.
+
+If MQTT JMeter plugin is successfully installed, you can find these MQTT samplers under JMeter 'Sampler' context menu.
 
 ![mqtt_jmeter_plugin](screenshots/mqtt_jmeter_plugin.png)
 
@@ -33,19 +38,19 @@ If MQTT JMeter plugin is installed successfully, then open JMeter and below 3 MQ
 
 This section includes basic connection settings.
 
-- **Server name or IP**: The server install with MQTT server, it can be either IP address or server name. The default value is 127.0.0.1. **DO NOT** add protocol (e.g. tcp:// or ssl://) before server name or IP address! 
+- **Server name or IP**: The MQTT target to be tested. It can be either IP address or server name. The default value is 127.0.0.1. **DO NOT** add protocol (e.g. tcp:// or ssl://) before server name or IP address! 
 
-- **Port number**: The port that opens by MQTT server, the default value is 1883 for TCP protocol, and normally 8883 for SSL protocol.
+- **Port number**: The port opened by MQTT server. Typically 1883 is for TCP protocol, and 8883 for SSL protocol.
 
-- **MQTT version**: The MQTT version, default is 3.1, and another option is 3.1.1. Sometimes the version is probably required for establish connection to [Azure IoTHub](https://github.com/emqtt/mqtt-jmeter/issues/21).
+- **MQTT version**: The MQTT version, default is 3.1, and another option is 3.1.1. Sometimes we found version 3.1.1 is required to  establish connection to [Azure IoTHub](https://github.com/emqtt/mqtt-jmeter/issues/21).
 
 - **Timeout(s)**: The connection timeout seconds while connecting to MQTT server. The default is 10 seconds.
 
 ### MQTT Protocol
 
-The sampler supports for 2 protocols, TCP and SSL. For the SSL protocol, it includes normal SSL and dual SSL authentication. 
+The sampler supports 2 protocols, TCP and SSL. For SSL protocol, it includes normal SSL and dual SSL authentication. 
 
-If **'Dual SSL authentication'** is checked, please follow 'Certification files for SSL/TLS connections' at end of this doc to set the client SSL configuration.
+If **'Dual SSL authentication'** is checked, please follow 'Certification files for SSL/TLS connections' at end of this doc to set the client SSL configuration properly.
 
 ![protocol_setting](screenshots/protocol_setting.png)
 
@@ -53,17 +58,15 @@ If **'Dual SSL authentication'** is checked, please follow 'Certification files 
 
 User can configure MQTT server with user name & password authentication, refer to [EMQ user name and password authentication guide](http://emqtt.com/docs/v2/guide.html#id3).
 
-- **User name**: If MQTT server configured with user name, then specify user name here.
+- **User name**: If MQTT server is configured with user name, then specify user name here.
 
-- **Password**: If MQTT server configured with password, then specify password here.
+- **Password**: If MQTT server is configured with password, then specify password here.
 
 ### Connection options
 
-- **ClientId**: Identification of the client. (Default value is 'conn_'.) If 'Add random client id suffix' is selected, JMeter plugin will append generated uuid as suffix to represent the client, otherwise, the text of 'ClientId' will be passed as 'clientId' of current connection.
+- **ClientId**: Identification of the client, i.e. virtual user or JMeter thread. Default value is 'conn_'. If 'Add random client id suffix' is selected, JMeter plugin will append generated uuid as suffix to represent the client, otherwise, the text of 'ClientId' will be passed as 'clientId' of current connection.
 
 - **Keep alive(s)**: Ping packet send interval in seconds. Default value is 300, which means each connection sends a ping packet to MQTT server every 5 minutes.
-
-- **Connection keep time(s)**: The value is to set the connection elapsed time after successfully establishing MQTT connection. The default value is 1800 seconds, which means that the connection will be alive within 30 minutes.
 
 - **Connect attampt max**: The maximum number of reconnect attempts before an error is reported back to the client on the first attempt by the client to connect to a server. Set to -1 to use unlimited attempts. Defaults to 0.
 
@@ -72,27 +75,7 @@ User can configure MQTT server with user name & password authentication, refer t
 ## Pub sampler
 ![pub_sampler](screenshots/pub_sampler.png)
 
-For **MQTT connection**, **User authentication**,  **Connection options** and **MQTT version** section settings, please refer to *Connection sampler* for more detailed information.
-
-- **Share conn in thread**: This option allows all of pub and sub samplers in the same threadgroup shares the same connection, this can simulate the situation of one device can be either pub or sub. For example, one IoT device can either send message to server, or receive the control message from server. Please notice, only those samplers in the same threadgroup check this option, then the connection will be shared. Also, the connection settings of first pub/sub sampler in the threadgroup will be used for shared connections, rests of connection settings in other samplers will be ignored if the option is checked. Please take a look at following 3 examples.
-
-```
-ThreadGroupSample1
-  PubSampler1 (shared connection), the connection settings will be used for the shared connection.
-  SubSampler1 (shared connection), use shared connection of PubSampler1, the connection setting of this sampler will be ignored.
-
-
-ThreadGroupSample2
-  PubSampler1 (shared connection), the connection settings will be used for the shared connection.
-  SubSampler1 (not shared connection), another connection will be created with configuration in this sampler.
-
-
-ThreadGroupSample3
-  PubSampler1 (not shared connection), one connection will be created for the connection setting in this sampler.
-  SubSampler1 (shared connection), the connection settings will be used for the shared connection.
-  SubSampler2 (shared connection), use shared connection of SubSampler1, so the connection setting of this sampler will be ignored.
-
-```
+Pub sampler reuses previously established connection (by Connect sampler) to publish a message. If connection is ready, this sampler will fail immediately.
 
 ### Pub options
 
