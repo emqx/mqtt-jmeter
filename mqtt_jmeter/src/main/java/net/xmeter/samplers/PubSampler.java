@@ -83,10 +83,12 @@ public class PubSampler extends AbstractMQTTSampler {
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
 		connection = (CallbackConnection) vars.getObject("conn");
 		if (connection == null) {
+			result.sampleStart();
 			result.setSuccessful(false);
 			result.setResponseMessage("Publish: Connection not found.");
 			result.setResponseData("Publish failed because connection is not established.".getBytes());
 			result.setResponseCode("500");
+			result.sampleEnd(); // avoid endtime=0 exposed in trace log
 			return result;
 		}
 		
@@ -161,7 +163,7 @@ public class PubSampler extends AbstractMQTTSampler {
 				result.setSuccessful(false);
 				result.setResponseMessage(MessageFormat.format("Publish failed for connection {0}.", connection));
 				result.setResponseData("Publish failed.".getBytes());
-				result.setResponseCode("500");
+				result.setResponseCode("501");
 			}
 		} catch (Exception ex) {
 			logger.severe(ex.getMessage());
@@ -170,7 +172,7 @@ public class PubSampler extends AbstractMQTTSampler {
 			result.setSuccessful(false);
 			result.setResponseMessage(MessageFormat.format("Publish failed for connection {0}.", connection));
 			result.setResponseData(ex.getMessage().getBytes());
-			result.setResponseCode("501");
+			result.setResponseCode("502");
 		}
 		return result;
 	}

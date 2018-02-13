@@ -28,10 +28,12 @@ public class ConnectSampler extends AbstractMQTTSampler {
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
 		connection = (CallbackConnection) vars.getObject("conn");
 		if (connection != null) {
+			result.sampleStart();
 			result.setSuccessful(false);
 			result.setResponseMessage(MessageFormat.format("Connection {0} is already established.", connection));
 			result.setResponseData("Failed.".getBytes());
 			result.setResponseCode("500");
+			result.sampleEnd(); // avoid endtime=0 exposed in trace log
 			return result;
 		}
 		

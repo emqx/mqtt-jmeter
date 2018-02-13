@@ -124,10 +124,12 @@ public class SubSampler extends AbstractMQTTSampler {
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
 		connection = (CallbackConnection) vars.getObject("conn");
 		if (connection == null) {
+			result.sampleStart();
 			result.setSuccessful(false);
 			result.setResponseMessage("Subscribe: Connection not found.");
 			result.setResponseData("Subscribe failed because connection is not established.".getBytes());
 			result.setResponseCode("500");
+			result.sampleEnd(); // avoid endtime=0 exposed in trace log
 			return result;
 		}
 		
@@ -325,7 +327,7 @@ public class SubSampler extends AbstractMQTTSampler {
 	}
 
 	private SampleResult fillFailedResult(boolean sampleByTime, SampleResult result, String message) {
-		result.setResponseCode("500");
+		result.setResponseCode("501");
 		result.setSuccessful(false);
 		result.setResponseMessage(message);
 		result.setResponseData(message.getBytes());
