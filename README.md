@@ -128,6 +128,18 @@ It's because the time is almost not the same in different machines. So the laten
 This sampler is very simple, it just clear the previous created connection. Therefore, next time you run Connect sampler, it will initiate a new MQTT server connection for you. As you can imagine, Disconnect sample will fail immediately if no connection is detected at this moment.
 
 
+## Example JMeter Scripts
+As a reference, you can check out some example scripts in SampleScripts folder.
+1) background_connection.jmx:
+Simulate massive background MQTT connections to server. You can optionally subscribe to a topic when connecting. (Please modify "xmeter_runtime_vars" UDV to fit your needs.)
+
+2) pubsub_unidirection.jmx:
+Demonstrate how sub sampler can get messages from corresponding pub sampler, with two JMeter user groups and delay between opertions.
+
+3) pubsub_bidirection.jmx:
+Demonstrate how a set of Devices and Mobiles exchange messages in both directions. 
+
+
 ## Certification files for SSL/TLS connections
 After deploying emqtt server, you get the following OOTB (out of the box) SSL/TLS certification files under ${EMQTTD_HOME}/etc/certs directory:
 
