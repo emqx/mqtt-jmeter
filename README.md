@@ -139,6 +139,7 @@ Demonstrate how sub sampler can get messages from corresponding pub sampler, wit
 3) pubsub_bidirection.jmx:
 Demonstrate how a set of Devices and Mobiles exchange messages in both directions. 
 
+![example_scripts](screenshots/example_scripts.png "example script structure")
 
 ## Certification files for SSL/TLS connections
 After deploying emqtt server, you get the following OOTB (out of the box) SSL/TLS certification files under ${EMQTTD_HOME}/etc/certs directory:
