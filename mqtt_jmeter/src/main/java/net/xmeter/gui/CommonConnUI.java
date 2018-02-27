@@ -43,7 +43,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private final JLabeledTextField certificationFilePath2 = new JLabeledTextField("Client Certification(*.p12):", 25);
 	
 	private final JLabeledTextField tksPassword = new JLabeledTextField("Secret:", 10);
-	private final JLabeledTextField cksPassword = new JLabeledTextField("Secret:", 10);
+	private final JLabeledTextField ccPassword = new JLabeledTextField("Secret:", 10);
 
 	private JButton browse1;
 	private JButton browse2;
@@ -175,8 +175,8 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		
 		c.gridx = 3;
 		c.gridy = 1;
-		panel.add(cksPassword, c);
-		cksPassword.setVisible(false);
+		panel.add(ccPassword, c);
+		ccPassword.setVisible(false);
 		
 		protocolPanel.add(pPanel);
 		protocolPanel.add(panel);
@@ -214,14 +214,14 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 				certificationFilePath1.setVisible(true);
 				certificationFilePath2.setVisible(true);
 				tksPassword.setVisible(true);
-				cksPassword.setVisible(true);
+				ccPassword.setVisible(true);
 				browse1.setVisible(true);
 				browse2.setVisible(true);
 			} else {
 				certificationFilePath1.setVisible(false);
 				certificationFilePath2.setVisible(false);
 				tksPassword.setVisible(false);
-				cksPassword.setVisible(false);
+				ccPassword.setVisible(false);
 				browse1.setVisible(false);
 				browse2.setVisible(false);
 			}
@@ -257,7 +257,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 			dualAuth.setVisible(true);
 			dualAuth.setSelected(sampler.isDualSSLAuth());	
 		}
-		cksPassword.setText(sampler.getKeyStorePassword());
+		ccPassword.setText(sampler.getKeyStorePassword());
 		
 		if(sampler.getProtocol().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1){
 			if(DEFAULT_PROTOCOL.equals(sampler.getProtocol())) {
@@ -294,8 +294,8 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		sampler.setConnReconnAttamptMax(reconnAttmptMax.getText());
 		sampler.setConnTimeout(timeout.getText());
 		sampler.setDualSSLAuth(dualAuth.isSelected());
-		sampler.setKeyStorePassword(cksPassword.getText());
-		sampler.setClientCertPassword(tksPassword.getText());
+		sampler.setKeyStorePassword(tksPassword.getText());
+		sampler.setClientCertPassword(ccPassword.getText());
 		sampler.setPort(serverPort.getText());
 		sampler.setProtocol(protocols.getText());
 		sampler.setServer(serverAddr.getText());
@@ -320,7 +320,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		connNamePrefix.setText(DEFAULT_CONN_PREFIX_FOR_CONN);
 		connShared.setSelected(DEFAULT_CONNECTION_SHARE);
 		protocols.setSelectedIndex(0);	
-		cksPassword.setText("");
+		ccPassword.setText("");
 		reconnAttmptMax.setText(DEFAULT_CONN_RECONN_ATTAMPT_MAX);
 		serverAddr.setText(DEFAULT_SERVER);
 		serverPort.setText(DEFAULT_PORT);
