@@ -8,7 +8,10 @@ import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
+import org.fusesource.hawtbuf.Buffer;
+import org.fusesource.hawtbuf.UTF8Buffer;
 import org.fusesource.mqtt.client.CallbackConnection;
+import org.fusesource.mqtt.client.Listener;
 import org.fusesource.mqtt.client.MQTT;
 
 import net.xmeter.Util;
@@ -73,19 +76,34 @@ public class ConnectSampler extends AbstractMQTTSampler {
 				connection.connect(callback);
 				connLock.wait(TimeUnit.SECONDS.toMillis(Integer.parseInt(getConnTimeout())));
 			}
+			
+			Object lock1 = new Object();
+			DefaultListener listener = new DefaultListener(lock1);
+			synchronized (lock1) {
+				connection.listener(listener);
+				lock1.wait(TimeUnit.SECONDS.toMillis(10));
+			}
+			
 			result.sampleEnd();
-
 			if (callback.isConnectionSucc()) {
 				vars.putObject("conn", connection); // save connection object as thread local variable !!
-				result.setSuccessful(true);
-				result.setResponseData("Successful.".getBytes());
-				result.setResponseMessage(MessageFormat.format("Connection {0} established successfully.", connection));
-				result.setResponseCodeOK();
+				if(listener.isSucc()) {
+					result.setSuccessful(true);
+					result.setResponseData(listener.getReceived().getBytes());
+					result.setResponseMessage("OK");
+					result.setResponseCodeOK();	
+					return result;
+				} else {
+					result.setSuccessful(false);
+					result.setResponseMessage(MessageFormat.format("Failed to receive message for connection {0}.", connection));
+					result.setResponseData("Failed.".getBytes());
+					result.setResponseCode("503");
+				}
 			} else {
 				result.setSuccessful(false);
 				result.setResponseMessage(MessageFormat.format("Failed to establish Connection {0}.", connection));
 				result.setResponseData("Failed.".getBytes());
-				result.setResponseCode("501");
+				result.setResponseCode("501");				
 			}
 		} catch (Exception e) {
 			logger.severe(e.getMessage());
