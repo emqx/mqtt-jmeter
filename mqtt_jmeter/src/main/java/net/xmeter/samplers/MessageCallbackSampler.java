@@ -4,6 +4,7 @@ import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
 import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
@@ -14,11 +15,22 @@ import org.fusesource.mqtt.client.CallbackConnection;
 public class MessageCallbackSampler extends AbstractJavaSamplerClient {
 	private transient CallbackConnection connection = null;
 	private static final Logger logger = Logger.getLogger(MessageCallbackSampler.class.getCanonicalName());
+	private static final String keyname = "lock_wait_time";
+	
+	@Override
+	public Arguments getDefaultParameters() {
+		Arguments defaultParameters = new Arguments();
+		defaultParameters.addArgument(keyname, "120");
+		return defaultParameters;
+	}
 	
 	@Override
 	public SampleResult runTest(JavaSamplerContext context) {
+		int wait_time = context.getIntParameter(keyname, 120);
+		logger.info("** wait_time = " + wait_time);
+		
 		SampleResult result = new SampleResult();
-
+		
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
 		connection = (CallbackConnection) vars.getObject("conn");
 		if (connection == null) {
@@ -37,7 +49,7 @@ public class MessageCallbackSampler extends AbstractJavaSamplerClient {
 			synchronized (lock1) {
 				DefaultListener listener = new DefaultListener(lock1);
 				connection.listener(listener);
-				lock1.wait(TimeUnit.SECONDS.toMillis(10));
+				lock1.wait(TimeUnit.SECONDS.toMillis(wait_time));
 				if(listener.isSucc()) {
 					result.setSuccessful(true);
 					result.setResponseData(listener.getReceived().getBytes());
@@ -62,7 +74,7 @@ public class MessageCallbackSampler extends AbstractJavaSamplerClient {
 	}
 	
 	private SampleResult fillFailedResult(SampleResult result, String code, String message) {
-		result.sampleStart();
+		//result.sampleStart();
 		result.setResponseCode(code); // 5xx means various failures
 		result.setSuccessful(false);
 		result.setResponseMessage(message);

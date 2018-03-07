@@ -30,6 +30,7 @@ public class DefaultListener implements Listener {
 
 	@Override
 	public void onPublish(UTF8Buffer topic, Buffer body, Runnable ack) {
+		logger.info("** in onPublish");
 		synchronized (lock) {
 			this.received = topic + "," + body.hex();
 			ack.run();
@@ -40,8 +41,10 @@ public class DefaultListener implements Listener {
 
 	@Override
 	public void onFailure(Throwable value) {
+		logger.info("** in onFailure");
 		synchronized (lock) {
 			logger.severe(value.getMessage());
+			value.printStackTrace();
 			this.succ = false;
 			this.lock.notify();
 		}
