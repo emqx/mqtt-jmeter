@@ -11,8 +11,8 @@ public class DefaultListener implements Listener {
 
 	private static final Logger logger = Logger.getLogger(DefaultListener.class.getCanonicalName());
 	protected Object lock;
-	private String received;
-	private boolean succ = true;
+	private String received = "";
+	private boolean succ = false;
 
 	public DefaultListener(Object connLock) {
 		this.lock = connLock;
