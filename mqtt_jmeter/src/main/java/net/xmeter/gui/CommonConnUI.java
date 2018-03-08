@@ -39,16 +39,16 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 
 	private JCheckBox dualAuth = new JCheckBox("Dual SSL authentication");
 
-	private final JLabeledTextField certificationFilePath1 = new JLabeledTextField("Trust Key Store(*.jks):       ", 25);
-	private final JLabeledTextField certificationFilePath2 = new JLabeledTextField("Client Certification(*.p12):", 25);
+	private final JLabeledTextField tksFilePath = new JLabeledTextField("Trust Key Store(*.jks):       ", 25);
+	private final JLabeledTextField ccFilePath = new JLabeledTextField("Client Certification(*.p12):", 25);
 	
 	private final JLabeledTextField tksPassword = new JLabeledTextField("Secret:", 10);
 	private final JLabeledTextField ccPassword = new JLabeledTextField("Secret:", 10);
 
-	private JButton browse1;
-	private JButton browse2;
-	private static final String BROWSE1 = "browse1";
-	private static final String BROWSE2 = "browse2";
+	private JButton tksBrowseButton;
+	private JButton ccBrowseButton;
+	private static final String TKS_BROWSE = "tks_browse";
+	private static final String CC_BROWSE = "cc_browse";
 	
 	public final JLabeledTextField connNamePrefix = new JLabeledTextField("ClientId:", 8);
 	private JCheckBox connNameSuffix = new JCheckBox("Add random suffix for ClientId");
@@ -136,50 +136,36 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		GridBagConstraints c = new GridBagConstraints();
 		c.anchor = GridBagConstraints.SOUTHWEST;
 		
-		c.gridx = 0;
-		c.gridy = 0;
-		c.gridwidth = 2;
-		panel.add(certificationFilePath1, c);
-		certificationFilePath1.setVisible(false);
+		c.gridx = 0; c.gridy = 0; c.gridwidth = 2;
+		tksFilePath.setVisible(false);
+		panel.add(tksFilePath, c);
 
-		browse1 = new JButton(JMeterUtils.getResString("browse"));
-		browse1.setActionCommand(BROWSE1);
-		browse1.addActionListener(this);
-		browse1.setVisible(false);
+		c.gridx = 2; c.gridy = 0; c.gridwidth = 1;
+		tksBrowseButton = new JButton(JMeterUtils.getResString("browse"));
+		tksBrowseButton.setActionCommand(TKS_BROWSE);
+		tksBrowseButton.addActionListener(this);
+		tksBrowseButton.setVisible(false);
+		panel.add(tksBrowseButton, c);
 		
-		c.gridx = 2;
-		c.gridy = 0;
-		c.gridwidth = 1;
-		panel.add(browse1, c);
-		
-		c.gridx = 3;
-		c.gridy = 0;
-		c.gridwidth = 2;
-		panel.add(tksPassword, c);
+		c.gridx = 3; c.gridy = 0; c.gridwidth = 2;
 		tksPassword.setVisible(false);
+		panel.add(tksPassword, c);
 		
-		certificationFilePath2.setVisible(false);
-
 		//c.weightx = 0.0;
-		c.gridx = 0;
-		c.gridy = 1;
-		c.gridwidth = 2;
-		panel.add(certificationFilePath2, c);
-
-		browse2 = new JButton(JMeterUtils.getResString("browse"));
-		browse2.setActionCommand(BROWSE2);
-		browse2.addActionListener(this);
-		browse2.setVisible(false);
+		c.gridx = 0; c.gridy = 1; c.gridwidth = 2;
+		ccFilePath.setVisible(false);
+		panel.add(ccFilePath, c);
 		
-		c.gridx = 2;
-		c.gridy = 1;
-		c.gridwidth = 1;
-		panel.add(browse2, c);
+		c.gridx = 2; c.gridy = 1; c.gridwidth = 1;
+		ccBrowseButton = new JButton(JMeterUtils.getResString("browse"));
+		ccBrowseButton.setActionCommand(CC_BROWSE);
+		ccBrowseButton.addActionListener(this);
+		ccBrowseButton.setVisible(false);
+		panel.add(ccBrowseButton, c);
 		
-		c.gridx = 3;
-		c.gridy = 1;
-		panel.add(ccPassword, c);
+		c.gridx = 3; c.gridy = 1; c.gridwidth = 2;
 		ccPassword.setVisible(false);
+		panel.add(ccPassword, c);
 		
 		protocolPanel.add(pPanel);
 		protocolPanel.add(panel);
@@ -190,12 +176,12 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String action = e.getActionCommand();
-		if(BROWSE1.equals(action)) {
+		if(TKS_BROWSE.equals(action)) {
 			String path = browseAndGetFilePath();
-			certificationFilePath1.setText(path);
-		}else if(BROWSE2.equals(action)) {
+			tksFilePath.setText(path);
+		}else if(CC_BROWSE.equals(action)) {
 			String path = browseAndGetFilePath();
-			certificationFilePath2.setText(path);
+			ccFilePath.setText(path);
 		}
 	}
 	private String browseAndGetFilePath() {
@@ -214,19 +200,19 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	public void stateChanged(ChangeEvent e) {
 		if(e.getSource() == dualAuth) {
 			if(dualAuth.isSelected()) {
-				certificationFilePath1.setVisible(true);
-				certificationFilePath2.setVisible(true);
+				tksFilePath.setVisible(true);
+				tksBrowseButton.setVisible(true);
 				tksPassword.setVisible(true);
+				ccFilePath.setVisible(true);
+				ccBrowseButton.setVisible(true);
 				ccPassword.setVisible(true);
-				browse1.setVisible(true);
-				browse2.setVisible(true);
 			} else {
-				certificationFilePath1.setVisible(false);
-				certificationFilePath2.setVisible(false);
+				tksFilePath.setVisible(false);
+				tksBrowseButton.setVisible(false);
 				tksPassword.setVisible(false);
+				ccFilePath.setVisible(false);
+				ccBrowseButton.setVisible(false);
 				ccPassword.setVisible(false);
-				browse1.setVisible(false);
-				browse2.setVisible(false);
 			}
 		} else if(e.getSource() == protocols) {
 			if("TCP".equals(protocols.getText())) {
@@ -240,32 +226,18 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	}
 	
 	public void configure(AbstractMQTTSampler sampler) {
-		if(!sampler.isKeepTimeShow()) {
-			connKeeptime.setVisible(false);
+		serverAddr.setText(sampler.getServer());
+		serverPort.setText(sampler.getPort());
+		if(sampler.getMqttVersion().equals(MQTT_VERSION_3_1)) {
+			mqttVersion.setSelectedIndex(0);
+		} else if(sampler.getMqttVersion().equals(MQTT_VERSION_3_1_1)) {
+			mqttVersion.setSelectedIndex(1);
 		}
-		
+		connShared.setSelected(sampler.isConnectionShare());
 		if(!sampler.isConnectionShareShow()) {
 			connShared.setVisible(false);
 		}
-		certificationFilePath1.setText(sampler.getKeyStoreFilePath());
-		certificationFilePath2.setText(sampler.getClientCertFilePath());
-		connAttmptMax.setText(sampler.getConnAttamptMax());
-		connKeepAlive.setText(sampler.getConnKeepAlive());
-		connKeeptime.setText(sampler.getConnKeepTime());
-		connShared.setSelected(sampler.isConnectionShare());
-		connNamePrefix.setText(sampler.getConnPrefix());
-		
-		if(sampler.isClientIdSuffix()) {
-			connNameSuffix.setSelected(true);
-		} else {
-			connNameSuffix.setSelected(false);
-		}
-		
-		if(sampler.isDualSSLAuth()) {
-			dualAuth.setVisible(true);
-			dualAuth.setSelected(sampler.isDualSSLAuth());	
-		}
-		ccPassword.setText(sampler.getKeyStorePassword());
+		timeout.setText(sampler.getConnTimeout());
 		
 		if(sampler.getProtocol().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1){
 			if(DEFAULT_PROTOCOL.equals(sampler.getProtocol())) {
@@ -276,41 +248,59 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		} else {
 			protocols.setText(sampler.getProtocol());
 		}
-		reconnAttmptMax.setText(sampler.getConnReconnAttamptMax());
-		serverAddr.setText(sampler.getServer());
-		if(sampler.getMqttVersion().equals(MQTT_VERSION_3_1)) {
-			mqttVersion.setSelectedIndex(0);
-		} else if(sampler.getMqttVersion().equals(MQTT_VERSION_3_1_1)) {
-			mqttVersion.setSelectedIndex(1);
+		if(sampler.isDualSSLAuth()) {
+			dualAuth.setVisible(true);
+			dualAuth.setSelected(sampler.isDualSSLAuth());	
 		}
-		serverPort.setText(sampler.getPort());
-		timeout.setText(sampler.getConnTimeout());
-		tksPassword.setText(sampler.getClientCertPassword());
+		tksFilePath.setText(sampler.getKeyStoreFilePath());
+		tksPassword.setText(sampler.getKeyStorePassword());
+		ccFilePath.setText(sampler.getClientCertFilePath());
+		ccPassword.setText(sampler.getClientCertPassword());
+		
 		userNameAuth.setText(sampler.getUserNameAuth());
 		passwordAuth.setText(sampler.getPasswordAuth());
+		
+		connNamePrefix.setText(sampler.getConnPrefix());
+		if(sampler.isClientIdSuffix()) {
+			connNameSuffix.setSelected(true);
+		} else {
+			connNameSuffix.setSelected(false);
+		}
+		
+		connKeepAlive.setText(sampler.getConnKeepAlive());
+		connKeeptime.setText(sampler.getConnKeepTime());
+		if(!sampler.isKeepTimeShow()) {
+			connKeeptime.setVisible(false);
+		}
+		connAttmptMax.setText(sampler.getConnAttamptMax());
+		reconnAttmptMax.setText(sampler.getConnReconnAttamptMax());
 	}
 	
 	
 	public void setupSamplerProperties(AbstractMQTTSampler sampler) {
-		sampler.setKeyStoreFilePath(certificationFilePath1.getText());
-		sampler.setClientCertFilePath(certificationFilePath2.getText());
-		sampler.setConnKeepAlive(connKeepAlive.getText());
-		sampler.setConnAttamptMax(connAttmptMax.getText());
-		sampler.setConnKeepTime(connKeeptime.getText());
-		sampler.setConnPrefix(connNamePrefix.getText());
-		sampler.setConnectionShare(connShared.isSelected());
-		sampler.setClientIdSuffix(connNameSuffix.isSelected());
-		sampler.setConnReconnAttamptMax(reconnAttmptMax.getText());
-		sampler.setConnTimeout(timeout.getText());
-		sampler.setDualSSLAuth(dualAuth.isSelected());
-		sampler.setKeyStorePassword(tksPassword.getText());
-		sampler.setClientCertPassword(ccPassword.getText());
-		sampler.setPort(serverPort.getText());
-		sampler.setProtocol(protocols.getText());
 		sampler.setServer(serverAddr.getText());
+		sampler.setPort(serverPort.getText());
 		sampler.setMqttVersion(mqttVersion.getText());
+		sampler.setConnectionShare(connShared.isSelected());
+		sampler.setConnTimeout(timeout.getText());
+		
+		sampler.setProtocol(protocols.getText());
+		sampler.setDualSSLAuth(dualAuth.isSelected());
+		sampler.setKeyStoreFilePath(tksFilePath.getText());
+		sampler.setKeyStorePassword(tksPassword.getText());
+		sampler.setClientCertFilePath(ccFilePath.getText());
+		sampler.setClientCertPassword(ccPassword.getText());
+		
 		sampler.setUserNameAuth(userNameAuth.getText());
 		sampler.setPasswordAuth(passwordAuth.getText());
+		
+		sampler.setConnPrefix(connNamePrefix.getText());
+		sampler.setClientIdSuffix(connNameSuffix.isSelected());
+		
+		sampler.setConnKeepAlive(connKeepAlive.getText());
+		sampler.setConnKeepTime(connKeeptime.getText());
+		sampler.setConnAttamptMax(connAttmptMax.getText());
+		sampler.setConnReconnAttamptMax(reconnAttmptMax.getText());
 	}
 	
 	public static int parseInt(String value) {
@@ -321,23 +311,28 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	}
 	
 	public void clearUI() {
-		certificationFilePath1.setText("");
-		certificationFilePath2.setText("");
-		dualAuth.setSelected(false);
-		connAttmptMax.setText(DEFAULT_CONN_ATTAMPT_MAX);
-		connKeepAlive.setText(DEFAULT_CONN_KEEP_ALIVE);
-		connKeeptime.setText(DEFAULT_CONN_KEEP_TIME);
-		connNamePrefix.setText(DEFAULT_CONN_PREFIX_FOR_CONN);
-		connShared.setSelected(DEFAULT_CONNECTION_SHARE);
-		protocols.setSelectedIndex(0);	
-		ccPassword.setText("");
-		reconnAttmptMax.setText(DEFAULT_CONN_RECONN_ATTAMPT_MAX);
 		serverAddr.setText(DEFAULT_SERVER);
 		serverPort.setText(DEFAULT_PORT);
 		mqttVersion.setSelectedIndex(0);
+		connShared.setSelected(DEFAULT_CONNECTION_SHARE);
 		timeout.setText(DEFAULT_CONN_TIME_OUT);
+		
+		protocols.setSelectedIndex(0);	
+		dualAuth.setSelected(false);
+		tksFilePath.setText("");
+		tksPassword.setText("");
+		ccFilePath.setText("");
+		ccPassword.setText("");
+		
 		userNameAuth.setText("");
 		passwordAuth.setText("");
+		
+		connNamePrefix.setText(DEFAULT_CONN_PREFIX_FOR_CONN);
 		connNameSuffix.setSelected(true);
+		
+		connKeepAlive.setText(DEFAULT_CONN_KEEP_ALIVE);
+		connKeeptime.setText(DEFAULT_CONN_KEEP_TIME);
+		connAttmptMax.setText(DEFAULT_CONN_ATTAMPT_MAX);
+		reconnAttmptMax.setText(DEFAULT_CONN_RECONN_ATTAMPT_MAX);
 	}
 }
