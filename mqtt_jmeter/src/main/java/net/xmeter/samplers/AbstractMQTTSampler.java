@@ -34,14 +34,6 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 		setProperty(PORT, port);
 	}
 
-	public boolean isConnectionShare() {
-		return getPropertyAsBoolean(CONN_SHARE_CONNECTION, DEFAULT_CONNECTION_SHARE);
-	}
-	
-	public void setConnectionShare(boolean shared) {
-		setProperty(CONN_SHARE_CONNECTION, shared);
-	}
-	
 	public String getConnTimeout() {
 		return getPropertyAsString(CONN_TIMEOUT, DEFAULT_CONN_TIME_OUT);
 	}
@@ -153,9 +145,5 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 
 	public void setPasswordAuth(String password) {
 		setProperty(PASSWORD_AUTH, password);
-	}
-	
-	public boolean isConnectionShareShow() {
-		return false;
 	}
 }
