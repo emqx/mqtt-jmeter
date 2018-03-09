@@ -97,10 +97,6 @@ public class SubSampler extends AbstractMQTTSampler {
 		setProperty(DEBUG_RESPONSE, debugResponse);
 	}
 
-	public String getConnClientId() {
-		return getPropertyAsString(CONN_CLIENT_ID_PREFIX, DEFAULT_CONN_PREFIX_FOR_SUB);
-	}
-
 	@Override
 	public SampleResult sample(Entry arg0) {
 		SampleResult result = new SampleResult();
