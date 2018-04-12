@@ -136,7 +136,7 @@ public class PubSampler extends AbstractMQTTSampler {
 			
 			result.sampleStart();
 			final Object pubLock = new Object();
-			PubCallback pubCallback = new PubCallback(pubLock);
+			PubCallback pubCallback = new PubCallback(pubLock, qos_enum);
 			
 			if(qos_enum == QoS.AT_MOST_ONCE) { 
 				//For QoS == 0, the callback is the same thread with sampler thread, so it cannot use the lock object wait() & notify() in else block;
@@ -162,7 +162,7 @@ public class PubSampler extends AbstractMQTTSampler {
 			} else {
 				result.setSuccessful(false);
 				result.setResponseMessage(MessageFormat.format("Publish failed for connection {0}.", connection));
-				result.setResponseData("Publish failed.".getBytes());
+				result.setResponseData(pubCallback.getErrorMessage().getBytes());
 				result.setResponseCode("501");
 			}
 		} catch (Exception ex) {
