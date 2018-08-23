@@ -1,6 +1,7 @@
 package net.xmeter.gui;
 
 import java.awt.BorderLayout;
+import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
@@ -14,49 +15,34 @@ import org.apache.jmeter.samplers.gui.AbstractSamplerGui;
 import org.apache.jmeter.testelement.TestElement;
 import org.apache.jorphan.gui.JLabeledChoice;
 import org.apache.jorphan.gui.JLabeledTextField;
-import org.apache.jorphan.logging.LoggingManager;
-import org.apache.log.Logger;
 
 import net.xmeter.Constants;
 import net.xmeter.samplers.SubSampler;
 
 public class SubSamplerUI extends AbstractSamplerGui implements Constants, ChangeListener{
-	private static final Logger logger = LoggingManager.getLoggerForClass();
-	
-	private CommonConnUI connUI = new CommonConnUI();
+	private static final long serialVersionUID = 1715399546099472610L;
+	private static final Logger logger = Logger.getLogger(SubSamplerUI.class.getCanonicalName());
 	
 	private JLabeledChoice qosChoice;
-	
 	private JLabeledChoice sampleOnCondition;
 	
 	private final JLabeledTextField sampleConditionValue = new JLabeledTextField("");
-	private final JLabeledTextField topicName = new JLabeledTextField("Topic name:");
+	private final JLabeledTextField topicNames = new JLabeledTextField("Topic name(s):");
 	
 	private JCheckBox debugResponse = new JCheckBox("Debug response");
 	private JCheckBox timestamp = new JCheckBox("Payload includes timestamp");
 	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -1715399546099472610L;
-
 	public SubSamplerUI() {
 		this.init();
 	}
 	
 	private void init() {
-		logger.info("Initializing the UI.");
 		setLayout(new BorderLayout());
 		setBorder(makeBorder());
 
 		add(makeTitlePanel(), BorderLayout.NORTH);
 		JPanel mainPanel = new VerticalPanel();
 		add(mainPanel, BorderLayout.CENTER);
-
-		mainPanel.add(connUI.createConnPanel());
-		mainPanel.add(connUI.createProtocolPanel());
-		mainPanel.add(connUI.createAuthentication());
-		mainPanel.add(connUI.createConnOptions());
 
 		mainPanel.add(createSubOption());
 	}
@@ -70,7 +56,8 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 
 		JPanel optsPanel1 = new HorizontalPanel();
 		optsPanel1.add(qosChoice);
-		optsPanel1.add(topicName);
+		optsPanel1.add(topicNames);
+		topicNames.setToolTipText("A list of topics to be subscribed to, comma-separated.");
 		optsPanel1.add(timestamp);
 		optsPanelCon.add(optsPanel1);
 		
@@ -105,7 +92,6 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 	public void configure(TestElement element) {
 		super.configure(element);
 		SubSampler sampler = (SubSampler) element;
-		connUI.configure(sampler);
 
 		if(sampler.getQOS().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1){
 			this.qosChoice.setSelectedIndex(Integer.parseInt(sampler.getQOS()));	
@@ -113,7 +99,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 			this.qosChoice.setText(sampler.getQOS());
 		}
 		
-		this.topicName.setText(sampler.getTopic());
+		this.topicNames.setText(sampler.getTopics());
 		this.timestamp.setSelected(sampler.isAddTimestamp());
 		this.debugResponse.setSelected(sampler.isDebugResponse());
 		this.sampleOnCondition.setText(sampler.getSampleCondition());
@@ -138,8 +124,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 
 	private void setupSamplerProperties(SubSampler sampler) {
 		this.configureTestElement(sampler);
-		connUI.setupSamplerProperties(sampler);
-		sampler.setTopic(this.topicName.getText());
+		sampler.setTopics(this.topicNames.getText());
 		
 		if(this.qosChoice.getText().indexOf(JMETER_VARIABLE_PREFIX) == -1) {
 			int qos = QOS_0;
@@ -172,21 +157,19 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 	@Override
 	public void clearGui() {
 		super.clearGui();
-		connUI.clearUI();
-		connUI.connNamePrefix.setText(DEFAULT_CONN_PREFIX_FOR_SUB);
-		this.topicName.setText(DEFAULT_TOPIC_NAME);
+		this.topicNames.setText(DEFAULT_TOPIC_NAME);
 		this.qosChoice.setText(String.valueOf(QOS_0));
 		this.timestamp.setSelected(false);
 		this.debugResponse.setSelected(false);
 		this.sampleOnCondition.setText(SAMPLE_ON_CONDITION_OPTION1);
-		this.sampleConditionValue.setText(DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_SEC);
+		this.sampleConditionValue.setText(DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_MILLI_SEC);
 	}
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		if(this.sampleOnCondition == e.getSource()) {
 			if(SAMPLE_ON_CONDITION_OPTION1.equalsIgnoreCase(sampleOnCondition.getText())) {
-				sampleConditionValue.setText(DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_SEC);
+				sampleConditionValue.setText(DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_MILLI_SEC);
 			} else if(SAMPLE_ON_CONDITION_OPTION2.equalsIgnoreCase(sampleOnCondition.getText())) {
 				sampleConditionValue.setText(DEFAULT_SAMPLE_VALUE_COUNT);
 			}

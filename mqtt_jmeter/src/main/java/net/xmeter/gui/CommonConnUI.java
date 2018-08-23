@@ -28,7 +28,6 @@ import net.xmeter.samplers.AbstractMQTTSampler;
 public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private final JLabeledTextField serverAddr = new JLabeledTextField("Server name or IP:");
 	private final JLabeledTextField serverPort = new JLabeledTextField("Port number:", 5);
-	private JCheckBox connShared = new JCheckBox("Share conn in thread");
 	private JLabeledChoice mqttVersion = new JLabeledChoice("MQTT version:", new String[] { MQTT_VERSION_3_1, MQTT_VERSION_3_1_1 }, false, false);;
 	private final JLabeledTextField timeout = new JLabeledTextField("Timeout(s):", 5);
 	
@@ -55,8 +54,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	
 	private final JLabeledTextField connKeepAlive = new JLabeledTextField("Keep alive(s):", 4);
 	
-	private final JLabeledTextField connKeeptime = new JLabeledTextField("Connection keep time(s):", 4);
-	
 	private final JLabeledTextField connAttmptMax = new JLabeledTextField("Connect attampt max:", 0);
 	private final JLabeledTextField reconnAttmptMax = new JLabeledTextField("Reconnect attampt max:", 0);
 	
@@ -68,7 +65,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		connPanel.add(serverAddr);
 		connPanel.add(serverPort);
 		connPanel.add(mqttVersion);
-		connPanel.add(connShared);
 		
 		JPanel timeoutPannel = new HorizontalPanel();
 		timeoutPannel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Timeout"));
@@ -91,7 +87,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		
 		JPanel optsPanel1 = new HorizontalPanel();
 		optsPanel1.add(connKeepAlive);
-		optsPanel1.add(connKeeptime);
 		optsPanelCon.add(optsPanel1);
 		
 		optsPanel1.add(connAttmptMax);
@@ -150,12 +145,12 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		c.gridx = 3; c.gridy = 0; c.gridwidth = 2;
 		tksPassword.setVisible(false);
 		panel.add(tksPassword, c);
-		
+
 		//c.weightx = 0.0;
 		c.gridx = 0; c.gridy = 1; c.gridwidth = 2;
 		ccFilePath.setVisible(false);
 		panel.add(ccFilePath, c);
-		
+
 		c.gridx = 2; c.gridy = 1; c.gridwidth = 1;
 		ccBrowseButton = new JButton(JMeterUtils.getResString("browse"));
 		ccBrowseButton.setActionCommand(CC_BROWSE);
@@ -233,11 +228,8 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		} else if(sampler.getMqttVersion().equals(MQTT_VERSION_3_1_1)) {
 			mqttVersion.setSelectedIndex(1);
 		}
-		connShared.setSelected(sampler.isConnectionShare());
-		if(!sampler.isConnectionShareShow()) {
-			connShared.setVisible(false);
-		}
 		timeout.setText(sampler.getConnTimeout());
+		
 		
 		if(sampler.getProtocol().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1){
 			if(DEFAULT_PROTOCOL.equals(sampler.getProtocol())) {
@@ -256,7 +248,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		tksPassword.setText(sampler.getKeyStorePassword());
 		ccFilePath.setText(sampler.getClientCertFilePath());
 		ccPassword.setText(sampler.getClientCertPassword());
-		
+
 		userNameAuth.setText(sampler.getUserNameAuth());
 		passwordAuth.setText(sampler.getPasswordAuth());
 		
@@ -268,10 +260,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		}
 		
 		connKeepAlive.setText(sampler.getConnKeepAlive());
-		connKeeptime.setText(sampler.getConnKeepTime());
-		if(!sampler.isKeepTimeShow()) {
-			connKeeptime.setVisible(false);
-		}
 		connAttmptMax.setText(sampler.getConnAttamptMax());
 		reconnAttmptMax.setText(sampler.getConnReconnAttamptMax());
 	}
@@ -281,7 +269,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		sampler.setServer(serverAddr.getText());
 		sampler.setPort(serverPort.getText());
 		sampler.setMqttVersion(mqttVersion.getText());
-		sampler.setConnectionShare(connShared.isSelected());
 		sampler.setConnTimeout(timeout.getText());
 		
 		sampler.setProtocol(protocols.getText());
@@ -290,15 +277,14 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		sampler.setKeyStorePassword(tksPassword.getText());
 		sampler.setClientCertFilePath(ccFilePath.getText());
 		sampler.setClientCertPassword(ccPassword.getText());
-		
+
 		sampler.setUserNameAuth(userNameAuth.getText());
 		sampler.setPasswordAuth(passwordAuth.getText());
-		
+
 		sampler.setConnPrefix(connNamePrefix.getText());
 		sampler.setClientIdSuffix(connNameSuffix.isSelected());
 		
 		sampler.setConnKeepAlive(connKeepAlive.getText());
-		sampler.setConnKeepTime(connKeeptime.getText());
 		sampler.setConnAttamptMax(connAttmptMax.getText());
 		sampler.setConnReconnAttamptMax(reconnAttmptMax.getText());
 	}
@@ -314,9 +300,8 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		serverAddr.setText(DEFAULT_SERVER);
 		serverPort.setText(DEFAULT_PORT);
 		mqttVersion.setSelectedIndex(0);
-		connShared.setSelected(DEFAULT_CONNECTION_SHARE);
 		timeout.setText(DEFAULT_CONN_TIME_OUT);
-		
+
 		protocols.setSelectedIndex(0);	
 		dualAuth.setSelected(false);
 		tksFilePath.setText("");
@@ -326,13 +311,12 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		
 		userNameAuth.setText("");
 		passwordAuth.setText("");
-		
+
 		connNamePrefix.setText(DEFAULT_CONN_PREFIX_FOR_CONN);
 		connNameSuffix.setSelected(true);
-		
-		connKeepAlive.setText(DEFAULT_CONN_KEEP_ALIVE);
-		connKeeptime.setText(DEFAULT_CONN_KEEP_TIME);
+
 		connAttmptMax.setText(DEFAULT_CONN_ATTAMPT_MAX);
+		connKeepAlive.setText(DEFAULT_CONN_KEEP_ALIVE);
 		reconnAttmptMax.setText(DEFAULT_CONN_RECONN_ATTAMPT_MAX);
 	}
 }

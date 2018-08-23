@@ -16,16 +16,12 @@ public interface Constants {
 	public static final String USER_NAME_AUTH = "mqtt.user_name";
 	public static final String PASSWORD_AUTH = "mqtt.password";
 	
-	public static final String CONN_KEEP_TIME = "mqtt.keep_time";
 	public static final String CONN_CLIENT_ID_PREFIX = "mqtt.client_id_prefix";
 	public static final String CONN_CLIENT_ID_SUFFIX = "mqtt.client_id_suffix";
 	
-	public static final String CONN_ELAPSED_TIME = "mqtt.conn_elapsed_time";
-	public static final String CONN_CLIENT_AUTH = "mqtt.conn_client_auth";
-	public static final String CONN_ATTAMPT_MAX = "mqtt.conn_attampt_max";
 	public static final String CONN_KEEP_ALIVE = "mqtt.conn_keep_alive";
+	public static final String CONN_ATTAMPT_MAX = "mqtt.conn_attampt_max";
 	public static final String CONN_RECONN_ATTAMPT_MAX = "mqtt.reconn_attampt_max";
-	public static final String CONN_SHARE_CONNECTION = "mqtt.conn_share";
 	
 	public static final String MESSAGE_TYPE = "mqtt.message_type";
 	public static final String MESSAGE_FIX_LENGTH = "mqtt.message_type_fixed_length";
@@ -34,12 +30,10 @@ public interface Constants {
 	public static final String TOPIC_NAME = "mqtt.topic_name";
 	public static final String QOS_LEVEL = "mqtt.qos_level";
 	public static final String ADD_TIMESTAMP = "mqtt.add_timestamp";
-	public static final String PAYLOAD_SIZE = "mqtt.payload_size";
 	
 	public static final String SAMPLE_CONDITION_VALUE = "mqtt.sample_condition_value";
 	public static final String SAMPLE_CONDITION = "mqtt.sample_condition";
 	
-	public static final String TIME_STAMP = "mqtt.time_stamp";
 	public static final String TIME_STAMP_SEP_FLAG = "ts_sep_flag";
 	
 	public static final String DEBUG_RESPONSE = "mqtt.debug_response";
@@ -65,27 +59,23 @@ public interface Constants {
 	public static final String DEFAULT_PORT = "1883";
 	public static final String DEFAULT_CONN_TIME_OUT = "10";
 	public static final String DEFAULT_PROTOCOL = "TCP";
-	public static final boolean DEFAULT_CONNECTION_SHARE = false;
 	
 	public static final String JMETER_VARIABLE_PREFIX = "${";
 	
 	public static final String DEFAULT_TOPIC_NAME = "test_topic";
 	
 	public static final String DEFAULT_CONN_PREFIX_FOR_CONN = "conn_";
-	public static final String DEFAULT_CONN_PREFIX_FOR_PUB = "pub_";
-	public static final String DEFAULT_CONN_PREFIX_FOR_SUB = "sub_";
 	
 	public static final String DEFAULT_CONN_KEEP_ALIVE = "300";
-	public static final String DEFAULT_CONN_KEEP_TIME = "1800";
 	public static final String DEFAULT_CONN_ATTAMPT_MAX = "0";
 	public static final String DEFAULT_CONN_RECONN_ATTAMPT_MAX = "0";
 	
 	public static final String DEFAULT_SAMPLE_VALUE_COUNT = "1";
-	public static final String DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_SEC = "1000";
+	public static final String DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_MILLI_SEC = "1000";
 	
-	public static final boolean DEFAULT_ADD_TIMESTAMP = false;
 	public static final String DEFAULT_MESSAGE_FIX_LENGTH = "1024";
 	
 	public static final boolean DEFAULT_ADD_CLIENT_ID_SUFFIX = true;
 	
+	public static final int SUB_FAIL_PENALTY = 1000; // force to delay 1s if sub fails for whatever reason
 }
