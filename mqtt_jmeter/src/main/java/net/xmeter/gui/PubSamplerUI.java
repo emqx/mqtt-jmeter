@@ -26,7 +26,7 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 	private static final Logger logger = Logger.getLogger(PubSamplerUI.class.getCanonicalName());
 
 	private JLabeledChoice qosChoice;
-	private final JLabeledTextField retainedMsg = new JLabeledTextField("Retained message:", 1);
+	private final JLabeledTextField retainedMsg = new JLabeledTextField("Retained messages:", 1);
 	private final JLabeledTextField topicName = new JLabeledTextField("Topic name:");
 	private JCheckBox timestamp = new JCheckBox("Add timestamp in payload");
 

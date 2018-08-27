@@ -64,12 +64,10 @@ User can configure MQTT server with user name & password authentication, refer t
 ### Connection options
 
 - **ClientId**: Identification of the client, i.e. virtual user or JMeter thread. Default value is 'conn_'. If 'Add random client id suffix' is selected, JMeter plugin will append generated uuid as suffix to represent the client, otherwise, the text of 'ClientId' will be passed as 'clientId' of current connection.
-
 - **Keep alive(s)**: Ping packet send interval in seconds. Default value is 300, which means each connection sends a ping packet to MQTT server every 5 minutes.
-
 - **Connect attampt max**: The maximum number of reconnect attempts before an error is reported back to the client on the first attempt by the client to connect to a server. Set to -1 to use unlimited attempts. Defaults to 0.
-
 - **Reconnect attampt max**:  The maximum number of reconnect attempts before an error is reported back to the client after a server connection had previously been established. Set to -1 to use unlimited attempts. Defaults to 0.
+- **Clean session**: If you want to maintaining state information between sessions, set it to false; otherwise, set it to true.
 
 
 ## Pub Sampler
@@ -80,9 +78,8 @@ Pub sampler reuses previously established connection (by Connect sampler) to pub
 ### Pub options
 
 - **QoS level**: The available QoS value, 0 is AT_MOST_ONCE, 1 is AT_LEAST_ONCE and 2 is EXACTLY_ONCE.
-
+- **Retained messages**: Set it to true if the Pub sampler wants the broker to keep the last message on that topic, so the client subscribed to that topic receives the retained message immediately after subscription.
 - **Topic name**: Name of the topic that the message will be sent to.
-
 - **Add timestamp in payload**: Add timestamp in the payload or not. If the checkbox is enabled, then timestamp of running pub sampler will be added before real payload. Mostly it's used together with **Sub sampler** to calculate message latency time.
 
 ### Payloads
