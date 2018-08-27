@@ -22,6 +22,7 @@ public class PubSampler extends AbstractMQTTSampler {
 	private String payload = null;
 	private QoS qos_enum = QoS.AT_MOST_ONCE;
 	private String topicName = "";
+	private boolean retainedMsg = false;
 
 	public String getQOS() {
 		return getPropertyAsString(QOS_LEVEL, String.valueOf(QOS_0));
@@ -69,6 +70,14 @@ public class PubSampler extends AbstractMQTTSampler {
 
 	public void setMessage(String message) {
 		setProperty(MESSAGE_TO_BE_SENT, message);
+	}
+	
+	public void setRetainedMessage(Boolean retained) {
+		setProperty(RETAINED_MESSAGE, retained);
+	}
+	
+	public Boolean getRetainedMessage() {
+		return getPropertyAsBoolean(RETAINED_MESSAGE, false);
 	}
 
 	public static byte[] hexToBinary(String hex) {
@@ -124,6 +133,7 @@ public class PubSampler extends AbstractMQTTSampler {
 			}
 			
 			topicName = getTopic();
+			retainedMsg = getRetainedMessage();
 			if (isAddTimestamp()) {
 				byte[] timePrefix = (System.currentTimeMillis() + TIME_STAMP_SEP_FLAG).getBytes();
 				toSend = new byte[timePrefix.length + tmp.length];
@@ -141,10 +151,10 @@ public class PubSampler extends AbstractMQTTSampler {
 			if(qos_enum == QoS.AT_MOST_ONCE) { 
 				//For QoS == 0, the callback is the same thread with sampler thread, so it cannot use the lock object wait() & notify() in else block;
 				//Otherwise the sampler thread will be blocked.
-				connection.publish(topicName, toSend, qos_enum, false, pubCallback);
+				connection.publish(topicName, toSend, qos_enum, retainedMsg, pubCallback);
 			} else {
 				synchronized (pubLock) {
-					connection.publish(topicName, toSend, qos_enum, false, pubCallback);
+					connection.publish(topicName, toSend, qos_enum, retainedMsg, pubCallback);
 					pubLock.wait();
 				}
 			}

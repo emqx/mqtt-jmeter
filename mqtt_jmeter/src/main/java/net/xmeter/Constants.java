@@ -24,8 +24,6 @@ public interface Constants {
 	public static final String CONN_RECONN_ATTAMPT_MAX = "mqtt.reconn_attampt_max";
 	
 	public static final String CONN_CLEAN_SESSION = "mqtt.conn_clean_session";
-	public static final String CONN_RETAINED_MESSAGE = "mqtt.conn_retained_message";
-	
 	
 	public static final String MESSAGE_TYPE = "mqtt.message_type";
 	public static final String MESSAGE_FIX_LENGTH = "mqtt.message_type_fixed_length";
@@ -34,6 +32,7 @@ public interface Constants {
 	public static final String TOPIC_NAME = "mqtt.topic_name";
 	public static final String QOS_LEVEL = "mqtt.qos_level";
 	public static final String ADD_TIMESTAMP = "mqtt.add_timestamp";
+	public static final String RETAINED_MESSAGE = "mqtt.retained_message";
 	
 	public static final String SAMPLE_CONDITION_VALUE = "mqtt.sample_condition_value";
 	public static final String SAMPLE_CONDITION = "mqtt.sample_condition";

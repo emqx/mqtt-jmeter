@@ -26,6 +26,7 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 	private static final Logger logger = Logger.getLogger(PubSamplerUI.class.getCanonicalName());
 
 	private JLabeledChoice qosChoice;
+	private final JLabeledTextField retainedMsg = new JLabeledTextField("Retained message:", 1);
 	private final JLabeledTextField topicName = new JLabeledTextField("Topic name:");
 	private JCheckBox timestamp = new JCheckBox("Add timestamp in payload");
 
@@ -59,6 +60,7 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 
 		JPanel optsPanel = new HorizontalPanel();
 		optsPanel.add(qosChoice);
+		optsPanel.add(retainedMsg);
 		optsPanel.add(topicName);
 		topicName.setToolTipText("Name of topic that the message will be sent to.");
 		optsPanel.add(timestamp);
@@ -134,6 +136,7 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 		}
 		
 		this.topicName.setText(sampler.getTopic());
+		this.retainedMsg.setText(sampler.getRetainedMessage().toString());
 		this.timestamp.setSelected(sampler.isAddTimestamp());
 		if(MESSAGE_TYPE_STRING.equalsIgnoreCase(sampler.getMessageType())) {
 			this.messageTypes.setSelectedIndex(0);	
@@ -179,6 +182,7 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 		sampler.setMessageType(this.messageTypes.getText());
 		sampler.setMessageLength(this.stringLength.getText());
 		sampler.setMessage(this.sendMessage.getText());
+		sampler.setRetainedMessage(Boolean.parseBoolean(this.retainedMsg.getText()));
 	}
 
 	@Override

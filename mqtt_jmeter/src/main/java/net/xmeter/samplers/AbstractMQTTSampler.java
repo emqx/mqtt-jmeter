@@ -154,12 +154,4 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 	public Boolean getConnCleanSession() {
 		return getPropertyAsBoolean(CONN_CLEAN_SESSION, true);
 	}
-	
-	public void setConnRetainedMessage(Boolean retained) {
-		setProperty(CONN_RETAINED_MESSAGE, retained);
-	}
-	
-	public Boolean getConnRetainedMessage() {
-		return getPropertyAsBoolean(CONN_RETAINED_MESSAGE, false);
-	}
 }

@@ -52,13 +52,12 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	public final JLabeledTextField connNamePrefix = new JLabeledTextField("ClientId:", 8);
 	private JCheckBox connNameSuffix = new JCheckBox("Add random suffix for ClientId");
 	
-	private final JLabeledTextField connKeepAlive = new JLabeledTextField("Keep alive(s):", 4);
+	private final JLabeledTextField connKeepAlive = new JLabeledTextField("Keep alive(s):", 3);
 	
-	private final JLabeledTextField connAttmptMax = new JLabeledTextField("Connect attampt max:", 0);
-	private final JLabeledTextField reconnAttmptMax = new JLabeledTextField("Reconnect attampt max:", 0);
-	
-	private final JLabeledTextField connCleanSession = new JLabeledTextField("Clean session:", 6);
-	private final JLabeledTextField connRetainedMsg = new JLabeledTextField("Retained message:", 6);
+	private final JLabeledTextField connAttmptMax = new JLabeledTextField("Connect attampt max:", 3);
+	private final JLabeledTextField reconnAttmptMax = new JLabeledTextField("Reconnect attampt max:", 3);
+
+	private final JLabeledTextField connCleanSession = new JLabeledTextField("Clean session:", 3);
 	
 	public JPanel createConnPanel() {
 		JPanel con = new HorizontalPanel();
@@ -94,12 +93,8 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		
 		optsPanel1.add(connAttmptMax);
 		optsPanel1.add(reconnAttmptMax);
+		optsPanel1.add(connCleanSession);
 		optsPanelCon.add(optsPanel1);
-		
-		JPanel optsPanel2 = new HorizontalPanel();
-		optsPanel2.add(connCleanSession);
-		optsPanel2.add(connRetainedMsg);
-		optsPanelCon.add(optsPanel2);
 		
 		return optsPanelCon;
 	}
@@ -272,7 +267,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		reconnAttmptMax.setText(sampler.getConnReconnAttamptMax());
 		
 		connCleanSession.setText(sampler.getConnCleanSession().toString());
-		connRetainedMsg.setText(sampler.getConnRetainedMessage().toString());
 	}
 	
 	
@@ -300,7 +294,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		sampler.setConnReconnAttamptMax(reconnAttmptMax.getText());
 		
 		sampler.setConnCleanSession(Boolean.parseBoolean(connCleanSession.getText()));
-		sampler.setConnRetainedMessage(Boolean.parseBoolean(connRetainedMsg.getText()));
 	}
 	
 	public static int parseInt(String value) {
