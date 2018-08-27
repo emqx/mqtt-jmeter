@@ -63,6 +63,8 @@ public class ConnectSampler extends AbstractMQTTSampler {
 			if (!"".equals(getPasswordAuth().trim())) {
 				mqtt.setPassword(getPasswordAuth());
 			}
+			mqtt.setCleanSession(getConnCleanSession());
+			mqtt.setWillRetain(getConnRetainedMessage());
 
 			result.sampleStart();
 			// TODO: Optionally connection can subscribe to topics ??

@@ -23,6 +23,10 @@ public interface Constants {
 	public static final String CONN_ATTAMPT_MAX = "mqtt.conn_attampt_max";
 	public static final String CONN_RECONN_ATTAMPT_MAX = "mqtt.reconn_attampt_max";
 	
+	public static final String CONN_CLEAN_SESSION = "mqtt.conn_clean_session";
+	public static final String CONN_RETAINED_MESSAGE = "mqtt.conn_retained_message";
+	
+	
 	public static final String MESSAGE_TYPE = "mqtt.message_type";
 	public static final String MESSAGE_FIX_LENGTH = "mqtt.message_type_fixed_length";
 	public static final String MESSAGE_TO_BE_SENT = "mqtt.message_to_sent";

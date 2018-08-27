@@ -57,6 +57,9 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private final JLabeledTextField connAttmptMax = new JLabeledTextField("Connect attampt max:", 0);
 	private final JLabeledTextField reconnAttmptMax = new JLabeledTextField("Reconnect attampt max:", 0);
 	
+	private final JLabeledTextField connCleanSession = new JLabeledTextField("Clean session:", 6);
+	private final JLabeledTextField connRetainedMsg = new JLabeledTextField("Retained message:", 6);
+	
 	public JPanel createConnPanel() {
 		JPanel con = new HorizontalPanel();
 		
@@ -92,6 +95,11 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		optsPanel1.add(connAttmptMax);
 		optsPanel1.add(reconnAttmptMax);
 		optsPanelCon.add(optsPanel1);
+		
+		JPanel optsPanel2 = new HorizontalPanel();
+		optsPanel2.add(connCleanSession);
+		optsPanel2.add(connRetainedMsg);
+		optsPanelCon.add(optsPanel2);
 		
 		return optsPanelCon;
 	}
@@ -262,6 +270,9 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		connKeepAlive.setText(sampler.getConnKeepAlive());
 		connAttmptMax.setText(sampler.getConnAttamptMax());
 		reconnAttmptMax.setText(sampler.getConnReconnAttamptMax());
+		
+		connCleanSession.setText(sampler.getConnCleanSession().toString());
+		connRetainedMsg.setText(sampler.getConnRetainedMessage().toString());
 	}
 	
 	
@@ -287,6 +298,9 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		sampler.setConnKeepAlive(connKeepAlive.getText());
 		sampler.setConnAttamptMax(connAttmptMax.getText());
 		sampler.setConnReconnAttamptMax(reconnAttmptMax.getText());
+		
+		sampler.setConnCleanSession(Boolean.parseBoolean(connCleanSession.getText()));
+		sampler.setConnRetainedMessage(Boolean.parseBoolean(connRetainedMsg.getText()));
 	}
 	
 	public static int parseInt(String value) {
