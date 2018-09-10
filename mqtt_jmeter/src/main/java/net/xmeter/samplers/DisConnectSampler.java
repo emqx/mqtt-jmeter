@@ -7,6 +7,7 @@ import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
+import org.fusesource.hawtbuf.UTF8Buffer;
 import org.fusesource.mqtt.client.CallbackConnection;
 
 public class DisConnectSampler extends AbstractMQTTSampler {
@@ -22,11 +23,12 @@ public class DisConnectSampler extends AbstractMQTTSampler {
 		
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
 		connection = (CallbackConnection) vars.getObject("conn");
+		UTF8Buffer clientId = (UTF8Buffer) vars.getObject("clientId");
 		if (connection == null) {
 			result.sampleStart();
 			result.setSuccessful(false);
 			result.setResponseMessage("Connection not found.");
-			result.setResponseData("Failed.".getBytes());
+			result.setResponseData("Failed. Connection not found.".getBytes());
 			result.setResponseCode("500");
 			result.sampleEnd(); // avoid endtime=0 exposed in trace log
 			return result;
@@ -39,6 +41,7 @@ public class DisConnectSampler extends AbstractMQTTSampler {
 				logger.info(MessageFormat.format("Disconnect connection {0}.", connection));
 				connection.disconnect(null);
 				vars.remove("conn"); // clean up thread local var as well
+				topicSubscribed.remove(clientId);
 			}
 			
 			result.sampleEnd();
@@ -52,7 +55,7 @@ public class DisConnectSampler extends AbstractMQTTSampler {
 			if (result.getEndTime() == 0) result.sampleEnd(); //avoid re-enter sampleEnd()
 			result.setSuccessful(false);
 			result.setResponseMessage(MessageFormat.format("Failed to disconnect Connection {0}.", connection));
-			result.setResponseData("Failed.".getBytes());
+			result.setResponseData(MessageFormat.format("Client [{0}] failed. Couldn't disconnect connection.", (clientId == null ? "null" : clientId.toString())).getBytes());
 			result.setResponseCode("501");
 		}
 		return result;

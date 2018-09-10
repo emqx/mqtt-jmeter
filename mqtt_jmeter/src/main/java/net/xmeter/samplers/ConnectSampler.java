@@ -1,6 +1,7 @@
 package net.xmeter.samplers;
 
 import java.text.MessageFormat;
+import java.util.HashSet;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -10,6 +11,7 @@ import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
 import org.fusesource.mqtt.client.CallbackConnection;
 import org.fusesource.mqtt.client.MQTT;
+import org.fusesource.mqtt.client.Tracer;
 
 import net.xmeter.Util;
 
@@ -31,7 +33,7 @@ public class ConnectSampler extends AbstractMQTTSampler {
 			result.sampleStart();
 			result.setSuccessful(false);
 			result.setResponseMessage(MessageFormat.format("Connection {0} is already established.", connection));
-			result.setResponseData("Failed.".getBytes());
+			result.setResponseData("Failed. Connection is already established.".getBytes());
 			result.setResponseCode("500");
 			result.sampleEnd(); // avoid endtime=0 exposed in trace log
 			return result;
@@ -64,6 +66,12 @@ public class ConnectSampler extends AbstractMQTTSampler {
 				mqtt.setPassword(getPasswordAuth());
 			}
 			mqtt.setCleanSession(getConnCleanSession());
+			
+			mqtt.setTracer(new Tracer() {
+				 public void debug(String message, Object...args) {
+					 logger.info("MQTT Tracer: " + message);
+				 }
+			});
 
 			result.sampleStart();
 			// TODO: Optionally connection can subscribe to topics ??
@@ -78,6 +86,8 @@ public class ConnectSampler extends AbstractMQTTSampler {
 
 			if (callback.isConnectionSucc()) {
 				vars.putObject("conn", connection); // save connection object as thread local variable !!
+				vars.putObject("clientId", mqtt.getClientId());	//save client id as thread local variable
+				topicSubscribed.put(mqtt.getClientId(), new HashSet<String>());
 				result.setSuccessful(true);
 				result.setResponseData("Successful.".getBytes());
 				result.setResponseMessage(MessageFormat.format("Connection {0} established successfully.", connection));
@@ -85,7 +95,7 @@ public class ConnectSampler extends AbstractMQTTSampler {
 			} else {
 				result.setSuccessful(false);
 				result.setResponseMessage(MessageFormat.format("Failed to establish Connection {0}.", connection));
-				result.setResponseData("Failed.".getBytes());
+				result.setResponseData(MessageFormat.format("Client [{0}] failed. Couldn't establish connection.", mqtt.getClientId().toString()).getBytes());
 				result.setResponseCode("501");
 			}
 		} catch (Exception e) {
@@ -93,7 +103,7 @@ public class ConnectSampler extends AbstractMQTTSampler {
 			if (result.getEndTime() == 0) result.sampleEnd(); //avoid re-enter sampleEnd()
 			result.setSuccessful(false);
 			result.setResponseMessage(MessageFormat.format("Failed to establish Connection {0}.", connection));
-			result.setResponseData("Failed with exception.".getBytes());
+			result.setResponseData(MessageFormat.format("Client [{0}] failed with exception.", mqtt.getClientId().toString()).getBytes());
 			result.setResponseCode("502");
 		}
 		

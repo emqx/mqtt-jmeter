@@ -1,6 +1,11 @@
 package net.xmeter.samplers;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.jmeter.samplers.AbstractSampler;
+import org.fusesource.hawtbuf.UTF8Buffer;
 
 import net.xmeter.Constants;
 
@@ -9,6 +14,9 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 	 * 
 	 */
 	private static final long serialVersionUID = 7163793218595455807L;
+	
+	//<connection client id, topics>
+	protected static Map<UTF8Buffer, Set<String>> topicSubscribed = new HashMap<UTF8Buffer, Set<String>>();
 
 	public String getServer() {
 		return getPropertyAsString(SERVER, DEFAULT_SERVER);

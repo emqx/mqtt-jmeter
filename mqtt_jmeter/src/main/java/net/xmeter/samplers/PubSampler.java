@@ -9,6 +9,7 @@ import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
+import org.fusesource.hawtbuf.UTF8Buffer;
 import org.fusesource.mqtt.client.CallbackConnection;
 import org.fusesource.mqtt.client.QoS;
 
@@ -91,6 +92,7 @@ public class PubSampler extends AbstractMQTTSampler {
 	
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
 		connection = (CallbackConnection) vars.getObject("conn");
+		UTF8Buffer clientId = (UTF8Buffer) vars.getObject("clientId");
 		if (connection == null) {
 			result.sampleStart();
 			result.setSuccessful(false);
@@ -101,8 +103,8 @@ public class PubSampler extends AbstractMQTTSampler {
 			return result;
 		}
 		
+		byte[] toSend = new byte[]{};
 		try {
-			byte[] toSend = new byte[]{};
 			byte[] tmp = new byte[]{};
 
 			if (MESSAGE_TYPE_HEX_STRING.equals(getMessageType())) {
@@ -147,6 +149,7 @@ public class PubSampler extends AbstractMQTTSampler {
 			result.sampleStart();
 			final Object pubLock = new Object();
 			PubCallback pubCallback = new PubCallback(pubLock, qos_enum);
+			logger.fine("pub [topic]: " + topicName + ", [payload]: " + new String(toSend));
 			
 			if(qos_enum == QoS.AT_MOST_ONCE) { 
 				//For QoS == 0, the callback is the same thread with sampler thread, so it cannot use the lock object wait() & notify() in else block;
@@ -172,8 +175,11 @@ public class PubSampler extends AbstractMQTTSampler {
 			} else {
 				result.setSuccessful(false);
 				result.setResponseMessage(MessageFormat.format("Publish failed for connection {0}.", connection));
-				result.setResponseData(pubCallback.getErrorMessage().getBytes());
+				result.setResponseData(MessageFormat.format("Client [{0}] publish failed: {1}", (clientId == null ? "null" : clientId.toString()), pubCallback.getErrorMessage()).getBytes());
 				result.setResponseCode("501");
+				logger.info(MessageFormat.format("** [clientId: {0}, topic: {1}, payload: {2}] Publish failed for connection {3}.", (clientId == null ? "null" : clientId.toString()), 
+						topicName, new String(toSend), connection));
+				logger.info(pubCallback.getErrorMessage());
 			}
 		} catch (Exception ex) {
 			logger.severe(ex.getMessage());
@@ -181,8 +187,10 @@ public class PubSampler extends AbstractMQTTSampler {
 			result.setLatency(result.getEndTime() - result.getStartTime());
 			result.setSuccessful(false);
 			result.setResponseMessage(MessageFormat.format("Publish failed for connection {0}.", connection));
-			result.setResponseData(ex.getMessage().getBytes());
+			result.setResponseData(MessageFormat.format("Client [{0}] publish failed: {1}", (clientId == null ? "null" : clientId.toString()), ex.getMessage()).getBytes());
 			result.setResponseCode("502");
+			logger.info(MessageFormat.format("** [clientId: {0}, topic: {1}, payload: {2}] Publish failed for connection {3}.", (clientId == null ? "null" : clientId.toString()), 
+					topicName, new String(toSend), connection));
 		}
 		return result;
 	}

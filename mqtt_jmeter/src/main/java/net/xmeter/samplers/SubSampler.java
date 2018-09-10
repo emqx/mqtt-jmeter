@@ -3,7 +3,9 @@ package net.xmeter.samplers;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -28,6 +30,7 @@ public class SubSampler extends AbstractMQTTSampler {
 	private static final Logger logger = Logger.getLogger(SubSampler.class.getCanonicalName());
 	
 	private transient CallbackConnection connection = null;
+	private transient UTF8Buffer clientId;
 	private boolean subFailed = false;
 	
 	private boolean sampleByTime = true; // initial values
@@ -104,6 +107,8 @@ public class SubSampler extends AbstractMQTTSampler {
 	
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
 		connection = (CallbackConnection) vars.getObject("conn");
+		clientId = (UTF8Buffer) vars.getObject("clientId");
+		UTF8Buffer clientId = (UTF8Buffer) vars.getObject("clientId");
 		if (connection == null) {
 			return fillFailedResult(result, "500", "Subscribe failed because connection is not established.");
 		}
@@ -127,7 +132,21 @@ public class SubSampler extends AbstractMQTTSampler {
 		
 		final String topicsName= getTopics();
 		setListener(sampleByTime, sampleCount);
-		listenToTopics(topicsName);  // TODO: run once or multiple times ?
+		Set<String> topics = topicSubscribed.get(clientId);
+		if (topics == null) {
+			logger.severe("subscribed topics haven't been initiated. [clientId: " + (clientId == null ? "null" : clientId.toString()) + "]");
+			topics = new HashSet<String>();
+			topics.add(topicsName);
+			topicSubscribed.put(clientId, topics);
+			listenToTopics(topicsName);  // TODO: run once or multiple times ?
+		} else {
+			if (!topics.contains(topicsName)) {
+				topics.add(topicsName);
+				topicSubscribed.put(clientId, topics);
+				logger.fine("Listen to topics: " + topicsName);
+				listenToTopics(topicsName);  // TODO: run once or multiple times ?
+			}
+		}
 		
 		if (subFailed) {
 			return fillFailedResult(result, "501", "Failed to subscribe to topic(s):" + topicsName);
@@ -141,7 +160,7 @@ public class SubSampler extends AbstractMQTTSampler {
 			}
 			synchronized (dataLock) {
 				result.sampleStart();
-				return produceResult(result);	
+				return produceResult(result, topicsName);
 			}
 		} else {
 			synchronized (dataLock) {
@@ -159,12 +178,12 @@ public class SubSampler extends AbstractMQTTSampler {
 					}
 				}
 				result.sampleStart();
-				return produceResult(result);
+				return produceResult(result, topicsName);
 			}
 		}
 	}
 	
-	private SampleResult produceResult(SampleResult result) {
+	private SampleResult produceResult(SampleResult result, String topicName) {
 		SubBean bean = batches.poll();
 		if(bean == null) { // In "elapsed time" mode, return "dummy" when time is reached
 			bean = new SubBean();
@@ -175,10 +194,11 @@ public class SubSampler extends AbstractMQTTSampler {
 		StringBuffer content = new StringBuffer("");
 		if (isDebugResponse()) {
 			for (int i = 0; i < contents.size(); i++) {
-				content.append(contents.get(i) + " \n");
+				content.append(contents.get(i) + "\n");
 			}
 		}
 		result = fillOKResult(result, bean.getReceivedMessageSize(), message, content.toString());
+		logger.fine("sub [topic]: " + topicName + ", [payload]: " + content.toString());
 		
 		if(receivedCount == 0) {
 			result.setEndTime(result.getStartTime()); // dummy result, rectify sample time
@@ -228,6 +248,7 @@ public class SubSampler extends AbstractMQTTSampler {
 
 			@Override
 			public void onFailure(Throwable value) {
+				logger.info("subscribe failed: " + value.getMessage());
 				subFailed = true;
 			}
 		});
@@ -319,7 +340,11 @@ public class SubSampler extends AbstractMQTTSampler {
 		result.setResponseCode(code); // 5xx means various failures
 		result.setSuccessful(false);
 		result.setResponseMessage(message);
-		result.setResponseData(message.getBytes());
+		if (clientId != null) {
+			result.setResponseData(MessageFormat.format("Client [{0}]: {1}", clientId.toString(), message).getBytes());
+		} else {
+			result.setResponseData(message.getBytes());
+		}
 		result.sampleEnd();
 		
 		// avoid massive repeated "early stage" failures in a short period of time
