@@ -75,7 +75,14 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 			SampleResult subResult = new SampleResult();
 			long cur = 0;
 			try {
-				mqtt = createMqttInstance();
+				String clientId = null;
+				if(isClientIdSuffix()) {
+					clientId = Util.generateClientId(getConnPrefix());
+				} else {
+					clientId = getConnPrefix() + "-xmeter-suffix-" + i;
+				}
+				
+				mqtt = createMqttInstance(clientId);
 				cur = System.currentTimeMillis();
 				subResult.sampleStart();
 				subResult.setSampleLabel(getName());
@@ -141,7 +148,7 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 		return result;
 	}
 	
-	private MQTT createMqttInstance() throws Exception {
+	private MQTT createMqttInstance(String clientId) throws Exception {
 		MQTT mqtt = new MQTT();
 		if (!DEFAULT_PROTOCOL.equals(getProtocol())) {
 			mqtt.setSslContext(Util.getContext(this));
@@ -151,12 +158,6 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 		mqtt.setVersion(getMqttVersion());
 		mqtt.setKeepAlive((short) Integer.parseInt(getConnKeepAlive()));
 		
-		String clientId = null;
-		if(isClientIdSuffix()) {
-			clientId = Util.generateClientId(getConnPrefix());
-		} else {
-			clientId = getConnPrefix();
-		}
 		mqtt.setClientId(clientId);
 		
 		mqtt.setConnectAttemptsMax(Integer.parseInt(getConnAttamptMax()));
