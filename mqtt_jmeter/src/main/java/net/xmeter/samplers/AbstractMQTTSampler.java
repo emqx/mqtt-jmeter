@@ -15,6 +15,13 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 	 */
 	private static final long serialVersionUID = 7163793218595455807L;
 	
+//	protected static final String LABEL_PREFIX = "xmeter-mqtt-batch-con-mode-";
+	
+//	protected boolean useEfficientCon = Boolean.parseBoolean(System.getProperty("batchCon"));
+	protected boolean useEfficientCon = true;
+	
+//	protected static int conCapacity = 1;
+	
 	//<connection client id, topics>
 	protected static Map<UTF8Buffer, Set<String>> topicSubscribed = new HashMap<UTF8Buffer, Set<String>>();
 
@@ -162,4 +169,29 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 	public Boolean getConnCleanSession() {
 		return getPropertyAsBoolean(CONN_CLEAN_SESSION, true);
 	}
+	
+	public void setTopicSubscribed(UTF8Buffer clientId, Set<String> topics) {
+		topicSubscribed.put(clientId, topics);
+	}
+	
+	public void removeTopicSubscribed(UTF8Buffer clientId) {
+		topicSubscribed.remove(clientId);
+	}
+	
+	public String getLabelPrefix() {
+		String labelPrefix = System.getProperty("batchConLabelPrefix");
+		if (labelPrefix == null) {
+			labelPrefix = "xmeter-mqtt-batch-con-mode-";
+		}
+		return labelPrefix;
+	}
+
+//	public int getConCapacity() {
+//		return conCapacity;
+//	}
+//
+//	public void setConCapacity(int conCapacity) {
+//		this.conCapacity = conCapacity;
+//	}
+	
 }

@@ -81,4 +81,6 @@ public interface Constants {
 	public static final boolean DEFAULT_ADD_CLIENT_ID_SUFFIX = true;
 	
 	public static final int SUB_FAIL_PENALTY = 1000; // force to delay 1s if sub fails for whatever reason
+	
+	public static final boolean DEFAULT_SUBSCRIBE_WHEN_CONNECTED = false;
 }
