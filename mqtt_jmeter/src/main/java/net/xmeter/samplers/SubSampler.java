@@ -190,7 +190,7 @@ public class SubSampler extends AbstractMQTTSampler {
 		}
 		int receivedCount = bean.getReceivedCount();
 		List<String> contents = bean.getContents();
-		String message = MessageFormat.format("Received {0} of message\n.", receivedCount);
+		String message = MessageFormat.format("Received {0} of message.", receivedCount);
 		StringBuffer content = new StringBuffer("");
 		if (isDebugResponse()) {
 			for (int i = 0; i < contents.size(); i++) {
