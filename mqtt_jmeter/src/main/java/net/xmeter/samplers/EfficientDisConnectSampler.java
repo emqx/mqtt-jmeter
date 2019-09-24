@@ -70,7 +70,6 @@ public class EfficientDisConnectSampler extends AbstractMQTTSampler {
 			} finally {
 				totalSampleCount += subResult.getSampleCount();
 				subResult.sampleEnd();
-				System.out.println("dis-connect: " + (System.currentTimeMillis() - cur));
 				result.addSubResult(subResult);
 			}
 		}

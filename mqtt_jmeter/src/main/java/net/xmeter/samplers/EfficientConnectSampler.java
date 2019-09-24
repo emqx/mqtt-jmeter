@@ -1,7 +1,6 @@
 package net.xmeter.samplers;
 
 import java.text.MessageFormat;
-import java.util.HashSet;
 import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -18,7 +17,6 @@ import org.fusesource.mqtt.client.Listener;
 import org.fusesource.mqtt.client.MQTT;
 import org.fusesource.mqtt.client.QoS;
 import org.fusesource.mqtt.client.Topic;
-import org.fusesource.mqtt.client.Tracer;
 
 import net.xmeter.Util;
 
@@ -79,7 +77,10 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 				if(isClientIdSuffix()) {
 					clientId = Util.generateClientId(getConnPrefix());
 				} else {
-					clientId = getConnPrefix() + "-xmeter-suffix-" + i;
+					clientId = getConnPrefix();
+					if (clientId != null && !clientId.isEmpty()) {
+						 clientId += "-xmeter-suffix-" + i;
+					}
 				}
 				
 				mqtt = createMqttInstance(clientId);
@@ -132,7 +133,6 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 			} finally {
 				totalSampleCount += subResult.getSampleCount();
 				subResult.sampleEnd();
-				System.out.println("connect: " + (System.currentTimeMillis() - cur));
 				result.addSubResult(subResult);
 			}
 			
