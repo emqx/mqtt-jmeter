@@ -1,13 +1,11 @@
 package net.xmeter.samplers;
 
+import net.xmeter.Constants;
+import org.apache.jmeter.samplers.AbstractSampler;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import org.apache.jmeter.samplers.AbstractSampler;
-import org.fusesource.hawtbuf.UTF8Buffer;
-
-import net.xmeter.Constants;
 
 public abstract class AbstractMQTTSampler extends AbstractSampler implements Constants {
 	/**
@@ -23,7 +21,7 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 //	protected static int conCapacity = 1;
 	
 	//<connection client id, topics>
-	protected static Map<UTF8Buffer, Set<String>> topicSubscribed = new HashMap<UTF8Buffer, Set<String>>();
+	protected static Map<String, Set<String>> topicSubscribed = new HashMap<>();
 
 	public String getServer() {
 		return getPropertyAsString(SERVER, DEFAULT_SERVER);
@@ -63,6 +61,14 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 
 	public void setProtocol(String protocol) {
 		setProperty(PROTOCOL, protocol);
+	}
+
+	public String getWsPath() {
+		return getPropertyAsString(WS_PATH, "");
+	}
+
+	public void setWsPath(String wsPath) {
+		setProperty(WS_PATH, wsPath);
 	}
 
 	public boolean isDualSSLAuth() {
@@ -170,11 +176,11 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 		return getPropertyAsBoolean(CONN_CLEAN_SESSION, true);
 	}
 	
-	public void setTopicSubscribed(UTF8Buffer clientId, Set<String> topics) {
+	public void setTopicSubscribed(String clientId, Set<String> topics) {
 		topicSubscribed.put(clientId, topics);
 	}
 	
-	public void removeTopicSubscribed(UTF8Buffer clientId) {
+	public void removeTopicSubscribed(String clientId) {
 		topicSubscribed.remove(clientId);
 	}
 	

@@ -1,24 +1,19 @@
 package net.xmeter.samplers;
 
-import java.text.MessageFormat;
-import java.util.Vector;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
-
+import net.xmeter.Util;
+import net.xmeter.samplers.mqtt.ConnectionParameters;
+import net.xmeter.samplers.mqtt.MQTT;
+import net.xmeter.samplers.mqtt.MQTTClient;
+import net.xmeter.samplers.mqtt.MQTTConnection;
+import net.xmeter.samplers.mqtt.MQTTQoS;
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
-import org.fusesource.hawtbuf.Buffer;
-import org.fusesource.hawtbuf.UTF8Buffer;
-import org.fusesource.mqtt.client.Callback;
-import org.fusesource.mqtt.client.CallbackConnection;
-import org.fusesource.mqtt.client.Listener;
-import org.fusesource.mqtt.client.MQTT;
-import org.fusesource.mqtt.client.QoS;
-import org.fusesource.mqtt.client.Topic;
 
-import net.xmeter.Util;
+import java.text.MessageFormat;
+import java.util.Vector;
+import java.util.logging.Logger;
 
 public class EfficientConnectSampler extends AbstractMQTTSampler {
 
@@ -28,7 +23,7 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 	public static final String SUBSCRIBE_WHEN_CONNECTED = "mqtt.sub_when_connected";
 	public static final String CONN_CAPACITY = "mqtt.conn_capacity";
 	
-	private transient Vector<ConnectionInfo> connections;
+	private transient Vector<MQTTConnection> connections;
 	
 	private Boolean subSucc = null;
 	private Object lock = new Object();
@@ -40,7 +35,7 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 		result.setSuccessful(true);
 		
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
-		connections = (Vector<ConnectionInfo>) vars.getObject("conns");
+		connections = (Vector<MQTTConnection>) vars.getObject("conns");
 		if (connections != null) {
 			result.sampleStart();
 			result.setSuccessful(false);
@@ -68,37 +63,28 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 		result.sampleStart();
 		int totalSampleCount = 0;
 		for (int i=0; i<conCapacity; i++) {
-			MQTT mqtt = null;
-			ConnectionInfo conInfo = null;
 			SampleResult subResult = new SampleResult();
 			long cur = 0;
-			try {
-				String clientId = null;
-				if(isClientIdSuffix()) {
-					clientId = Util.generateClientId(getConnPrefix());
-				} else {
-					clientId = getConnPrefix();
-					if (clientId != null && !clientId.isEmpty()) {
-						 clientId += "-xmeter-suffix-" + i;
-					}
+            String clientId;
+            if(isClientIdSuffix()) {
+                clientId = Util.generateClientId(getConnPrefix());
+            } else {
+				clientId = getConnPrefix();
+				if (clientId != null && !clientId.isEmpty()) {
+					clientId += "-xmeter-suffix-" + i;
 				}
-				
-				mqtt = createMqttInstance(clientId);
+            }
+
+			try {
+				MQTTClient client = createMqttInstance(clientId);
 				cur = System.currentTimeMillis();
 				subResult.sampleStart();
 				subResult.setSampleLabel(getName());
 				// TODO: Optionally connection can subscribe to topics ??
-				CallbackConnection connection = mqtt.callbackConnection();
-				Object connLock = new Object();
-				ConnectionCallback callback = new ConnectionCallback(connection, connLock);
-				synchronized (connLock) {
-					connection.connect(callback);
-					connLock.wait(TimeUnit.SECONDS.toMillis(Integer.parseInt(getConnTimeout())));
-				}
-				
-				if (callback.isConnectionSucc()) {
-					conInfo = new ConnectionInfo(connection, mqtt.getClientId());
-					connections.add(conInfo);
+				MQTTConnection connection = client.connect();
+
+				if (connection.isConnectionSucc()) {
+					connections.add(connection);
 //					setTopicSubscribed(mqtt.getClientId(), new HashSet<String>());
 					//check if subscription needed
 					boolean suc = true;
@@ -112,7 +98,7 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 						subResult.setResponseCodeOK();
 					} else {
 						subResult.setSuccessful(false);
-						subResult.setResponseData(MessageFormat.format("Client [{0}] failed. Could not subscribe to topic(s) {1}.", mqtt.getClientId().toString(), getTopics()).getBytes());
+						subResult.setResponseData(MessageFormat.format("Client [{0}] failed. Could not subscribe to topic(s) {1}.", client.getClientId(), getTopics()).getBytes());
 						subResult.setResponseMessage(MessageFormat.format("Failed to subscripbe to topics(s) {0}.", getTopics()));
 						subResult.setResponseCode("501");
 					}
@@ -120,7 +106,7 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 //					failedConnCount += 1;
 					subResult.setSuccessful(false);
 					subResult.setResponseMessage(MessageFormat.format("Failed to establish Connection {0}.", connection));
-					subResult.setResponseData(MessageFormat.format("Client [{0}] failed. Couldn't establish connection.", mqtt.getClientId().toString()).getBytes());
+					subResult.setResponseData(MessageFormat.format("Client [{0}] failed. Couldn't establish connection.", client.getClientId()).getBytes());
 					subResult.setResponseCode("501");
 				}
 			} catch (Exception e) {
@@ -128,7 +114,7 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 //				failedConnCount += 1;
 				subResult.setSuccessful(false);
 				subResult.setResponseMessage("Failed to establish Connections.");
-				subResult.setResponseData(MessageFormat.format("Client [{0}] failed with exception.", mqtt.getClientId().toString()).getBytes());
+				subResult.setResponseData(MessageFormat.format("Client [{0}] failed with exception.", clientId));
 				subResult.setResponseCode("502");
 			} finally {
 				totalSampleCount += subResult.getSampleCount();
@@ -148,40 +134,36 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 		return result;
 	}
 	
-	private MQTT createMqttInstance(String clientId) throws Exception {
-		MQTT mqtt = new MQTT();
-		if (!DEFAULT_PROTOCOL.equals(getProtocol())) {
-			mqtt.setSslContext(Util.getContext(this));
+	private MQTTClient createMqttInstance(String clientId) throws Exception {
+        ConnectionParameters parameters = new ConnectionParameters();
+        parameters.setClientId(clientId);
+		if (parameters.isSecureProtocol()) {
+			parameters.setSsl(MQTT.getInstance().createSsl(this));
 		}
-		
-		mqtt.setHost(getProtocol().toLowerCase() + "://" + getServer() + ":" + getPort());
-		mqtt.setVersion(getMqttVersion());
-		mqtt.setKeepAlive((short) Integer.parseInt(getConnKeepAlive()));
-		
-		mqtt.setClientId(clientId);
-		
-		mqtt.setConnectAttemptsMax(Integer.parseInt(getConnAttamptMax()));
-		mqtt.setReconnectAttemptsMax(Integer.parseInt(getConnReconnAttamptMax()));
+
+		parameters.setProtocol(getProtocol());
+		parameters.setHost(getServer());
+		parameters.setPort(Integer.parseInt(getPort()));
+        parameters.setVersion(getMqttVersion());
+        parameters.setKeepAlive((short) Integer.parseInt(getConnKeepAlive()));
+
+        parameters.setConnectMaxAttempts(Integer.parseInt(getConnAttamptMax()));
+        parameters.setReconnectMaxAttempts(Integer.parseInt(getConnReconnAttamptMax()));
 //		System.out.println("!!max reconnect:" + mqtt.getReconnectAttemptsMax());
 
 		if (!"".equals(getUserNameAuth().trim())) {
-			mqtt.setUserName(getUserNameAuth());
+			parameters.setUsername(getUserNameAuth());
 		}
 		if (!"".equals(getPasswordAuth().trim())) {
-			mqtt.setPassword(getPasswordAuth());
+			parameters.setPassword(getPasswordAuth());
 		}
-		mqtt.setCleanSession(getConnCleanSession());
-		
-//		mqtt.setTracer(new Tracer() {
-//			 public void debug(String message, Object...args) {
-//				 logger.info("[" + mqtt.getClientId().toString() + "] MQTT Tracer: " + String.format(message, args));
-//			 }
-//		});
-		
-		return mqtt;
+		parameters.setCleanSession(getConnCleanSession());
+		parameters.setConnectTimeout(Integer.parseInt(getConnTimeout()));
+
+		return MQTT.getInstance().createClient(parameters);
 	}
 	
-	private boolean handleSubscription(CallbackConnection connection) throws InterruptedException {
+	private boolean handleSubscription(MQTTConnection connection) throws InterruptedException {
 		final String topicsName= getTopics();
 		listenToTopics(connection, topicsName);
 		synchronized (lock) {
@@ -196,26 +178,8 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 		}
 	}
 	
-	private void listenToTopics(CallbackConnection connection, final String topicsName) {
-		connection.listener(new Listener() {
-
-			@Override
-			public void onConnected() {
-			}
-
-			@Override
-			public void onDisconnected() {
-			}
-
-			@Override
-			public void onPublish(UTF8Buffer topic, Buffer body, Runnable ack) {
-			}
-
-			@Override
-			public void onFailure(Throwable value) {
-			}
-			
-		});
+	private void listenToTopics(MQTTConnection connection, final String topicsName) {
+	    connection.setSubListener((topic, message, ack) -> {});
 		int qos = 0;
 		try {
 			qos = Integer.parseInt(getQOS());
@@ -225,41 +189,24 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 		}
 		
 		final String[] paraTopics = topicsName.split(",");
-		
-		Topic[] topics = new Topic[paraTopics.length];
+
 		if(qos < 0 || qos > 2) {
 			logger.severe("Specified invalid QoS value, set to default QoS value " + qos);
 			qos = QOS_0;
 		}
-		for(int i = 0; i < topics.length; i++) {
-			if (qos == QOS_0) {
-				topics[i] = new Topic(paraTopics[i], QoS.AT_MOST_ONCE);
-			} else if (qos == QOS_1) {
-				topics[i] = new Topic(paraTopics[i], QoS.AT_LEAST_ONCE);
-			} else {
-				topics[i] = new Topic(paraTopics[i], QoS.EXACTLY_ONCE);
-			}
-		}
-
-		connection.subscribe(topics, new Callback<byte[]>() {
-			@Override
-			public void onSuccess(byte[] value) {
-				synchronized (lock) {
-					logger.fine("sub successful, topic length is " + paraTopics.length);
-					subSucc = true;
-					lock.notify();
-				}
-			}
-
-			@Override
-			public void onFailure(Throwable value) {
-				synchronized (lock) {
-					logger.info("subscribe failed: " + value.getMessage());
-					subSucc = false;
-					lock.notify();
-				}
-			}
-		});
+		connection.subscribe(paraTopics, MQTTQoS.fromValue(qos), () -> {
+            synchronized (lock) {
+                logger.fine("sub successful, topic length is " + paraTopics.length);
+                subSucc = true;
+                lock.notify();
+            }
+        }, error -> {
+            synchronized (lock) {
+                logger.info("subscribe failed: " + error.getMessage());
+                subSucc = false;
+                lock.notify();
+            }
+        });
 	}
 	
 	public boolean isSubWhenConnected() {

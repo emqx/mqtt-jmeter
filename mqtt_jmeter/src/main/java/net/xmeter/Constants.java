@@ -7,6 +7,7 @@ public interface Constants {
 	public static final String CONN_TIMEOUT = "mqtt.conn_timeout";
 	
 	public static final String PROTOCOL = "mqtt.protocol";
+	public static final String WS_PATH = "mqtt.ws_path";
 	public static final String DUAL_AUTH = "mqtt.dual_ssl_authentication";
 	public static final String CERT_FILE_PATH1 = "mqtt.keystore_file_path";
 	public static final String CERT_FILE_PATH2 = "mqtt.clientcert_file_path";
@@ -61,7 +62,11 @@ public interface Constants {
 	public static final String DEFAULT_MQTT_VERSION = "3.1";
 	public static final String DEFAULT_PORT = "1883";
 	public static final String DEFAULT_CONN_TIME_OUT = "10";
-	public static final String DEFAULT_PROTOCOL = "TCP";
+	public static final String TCP_PROTOCOL = "TCP";
+	public static final String SSL_PROTOCOL = "SSL";
+	public static final String WS_PROTOCOL = "WS";
+	public static final String WSS_PROTOCOL = "WSS";
+	public static final String DEFAULT_PROTOCOL = TCP_PROTOCOL;
 	
 	public static final String JMETER_VARIABLE_PREFIX = "${";
 	

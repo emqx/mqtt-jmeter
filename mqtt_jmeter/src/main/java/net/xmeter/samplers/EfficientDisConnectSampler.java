@@ -1,21 +1,20 @@
 package net.xmeter.samplers;
 
-import java.text.MessageFormat;
-import java.util.Vector;
-import java.util.logging.Logger;
-
+import net.xmeter.samplers.mqtt.MQTTConnection;
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
-import org.fusesource.hawtbuf.UTF8Buffer;
-import org.fusesource.mqtt.client.CallbackConnection;
+
+import java.text.MessageFormat;
+import java.util.Vector;
+import java.util.logging.Logger;
 
 public class EfficientDisConnectSampler extends AbstractMQTTSampler {
 	private static final long serialVersionUID = 4360869021667126983L;
 	private static final Logger logger = Logger.getLogger(EfficientDisConnectSampler.class.getCanonicalName());
 
-	private transient Vector<ConnectionInfo> connections = new Vector<>();
+	private transient Vector<MQTTConnection> connections = new Vector<>();
 
 	@Override
 	public SampleResult sample(Entry entry) {
@@ -25,7 +24,7 @@ public class EfficientDisConnectSampler extends AbstractMQTTSampler {
 		
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
 		int conCapacity = (int) vars.getObject("conCapacity");
-		connections = (Vector<ConnectionInfo>) vars.getObject("conns");
+		connections = (Vector<MQTTConnection>) vars.getObject("conns");
 		
 		if (connections == null) {
 			result.sampleStart();
@@ -46,16 +45,15 @@ public class EfficientDisConnectSampler extends AbstractMQTTSampler {
 		
 		result.sampleStart();
 		int totalSampleCount = 0;
-		for (ConnectionInfo conInfo : connections) {
-			CallbackConnection connection = conInfo.getConnection();
-			UTF8Buffer clientId = conInfo.getClientId();
+		for (MQTTConnection connection : connections) {
+			String clientId = connection.getClientId();
 			SampleResult subResult = new SampleResult();
 			long cur = System.currentTimeMillis();
 			subResult.sampleStart();
 			subResult.setSampleLabel(getName());
 			try {
 				logger.info(MessageFormat.format("Disconnect connection {0}.", connection));
-				connection.disconnect(null);
+				connection.disconnect();
 //				removeTopicSubscribed(clientId);
 				subResult.setSuccessful(true);
 				subResult.setResponseData("Successful.".getBytes());
@@ -65,11 +63,12 @@ public class EfficientDisConnectSampler extends AbstractMQTTSampler {
 				logger.severe(e.getMessage());
 				subResult.setSuccessful(false);
 				subResult.setResponseMessage(MessageFormat.format("Failed to disconnect Connection {0}.", connection));
-				subResult.setResponseData(MessageFormat.format("Client [{0}] failed. Couldn't disconnect connection.", (clientId == null ? "null" : clientId.toString())).getBytes());
+				subResult.setResponseData(MessageFormat.format("Client [{0}] failed. Couldn't disconnect connection.", (clientId == null ? "null" : clientId)).getBytes());
 				subResult.setResponseCode("501");
 			} finally {
 				totalSampleCount += subResult.getSampleCount();
 				subResult.sampleEnd();
+				System.out.println("dis-connect: " + (System.currentTimeMillis() - cur));
 				result.addSubResult(subResult);
 			}
 		}

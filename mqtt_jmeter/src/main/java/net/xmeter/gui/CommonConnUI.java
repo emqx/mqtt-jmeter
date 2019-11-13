@@ -1,20 +1,8 @@
 package net.xmeter.gui;
 
-import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
-import javax.swing.JPanel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
+import net.xmeter.Constants;
+import net.xmeter.Util;
+import net.xmeter.samplers.AbstractMQTTSampler;
 import org.apache.jmeter.gui.util.FileDialoger;
 import org.apache.jmeter.gui.util.HorizontalPanel;
 import org.apache.jmeter.gui.util.VerticalPanel;
@@ -22,8 +10,16 @@ import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jorphan.gui.JLabeledChoice;
 import org.apache.jorphan.gui.JLabeledTextField;
 
-import net.xmeter.Constants;
-import net.xmeter.samplers.AbstractMQTTSampler;
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private final JLabeledTextField serverAddr = new JLabeledTextField("Server name or IP:");
@@ -37,6 +33,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private JLabeledChoice protocols;
 
 	private JCheckBox dualAuth = new JCheckBox("Dual SSL authentication");
+	private JLabeledTextField wsPath = new JLabeledTextField("WS Path: ", 10);
 
 	private final JLabeledTextField tksFilePath = new JLabeledTextField("Trust Key Store(*.jks):       ", 25);
 	private final JLabeledTextField ccFilePath = new JLabeledTextField("Client Certification(*.p12):", 25);
@@ -58,7 +55,9 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private final JLabeledTextField reconnAttmptMax = new JLabeledTextField("Reconnect attampt max:", 3);
 
 	private final JLabeledTextField connCleanSession = new JLabeledTextField("Clean session:", 3);
-	
+
+	private final List<String> protocolsList = new ArrayList<>(Arrays.asList(TCP_PROTOCOL, SSL_PROTOCOL, WS_PROTOCOL, WSS_PROTOCOL));
+
 	public JPanel createConnPanel() {
 		JPanel con = new HorizontalPanel();
 		
@@ -118,7 +117,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		JPanel pPanel = new HorizontalPanel();
 		//pPanel.setLayout(new GridLayout(1, 2));
 
-		protocols = new JLabeledChoice("Protocols:", new String[] { "TCP", "SSL" }, true, false);
+		protocols = new JLabeledChoice("Protocols:", protocolsList.toArray(new String[] {}), true, false);
 		//JComboBox<String> component = (JComboBox) protocols.getComponentList().get(1);
 		//component.setSize(new Dimension(40, component.getHeight()));
 		protocols.addChangeListener(this);
@@ -129,6 +128,10 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		dualAuth.setVisible(false);
 		dualAuth.addChangeListener(this);
 		pPanel.add(dualAuth, BorderLayout.CENTER);
+
+		wsPath.setFont(null);
+		wsPath.setVisible(false);
+		pPanel.add(wsPath, BorderLayout.EAST);
 
 		JPanel panel = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
@@ -213,16 +216,15 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 				ccPassword.setVisible(false);
 			}
 		} else if(e.getSource() == protocols) {
-			if("TCP".equals(protocols.getText())) {
-				dualAuth.setVisible(false);
-				dualAuth.setSelected(false);
-			} else if("SSL".equals(protocols.getText())) {
-				dualAuth.setVisible(true);
-				dualAuth.setEnabled(true);
-			}
+			boolean isSecure = Util.isSecureProtocol(protocols.getText());
+			dualAuth.setVisible(isSecure);
+			dualAuth.setEnabled(isSecure);
+			boolean wsProtocol = Util.isWebSocketProtocol(protocols.getText());
+			wsPath.setVisible(wsProtocol);
+			wsPath.setEnabled(wsProtocol);
 		}
 	}
-	
+
 	public void configure(AbstractMQTTSampler sampler) {
 		serverAddr.setText(sampler.getServer());
 		serverPort.setText(sampler.getPort());
@@ -232,17 +234,18 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 			mqttVersion.setSelectedIndex(1);
 		}
 		timeout.setText(sampler.getConnTimeout());
-		
-		
-		if(sampler.getProtocol().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1){
-			if(DEFAULT_PROTOCOL.equals(sampler.getProtocol())) {
-				protocols.setSelectedIndex(0);	
-			} else {
-				protocols.setSelectedIndex(1);
-			}
+
+		if(sampler.getProtocol().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1) {
+			int index = protocolsList.indexOf(sampler.getProtocol());
+			protocols.setSelectedIndex(index);
 		} else {
 			protocols.setText(sampler.getProtocol());
 		}
+		boolean wsProtocol = Util.isWebSocketProtocol(sampler.getProtocol());
+		wsPath.setText(sampler.getWsPath());
+		wsPath.setVisible(wsProtocol);
+		wsPath.setEnabled(wsProtocol);
+
 		if(sampler.isDualSSLAuth()) {
 			dualAuth.setVisible(true);
 			dualAuth.setSelected(sampler.isDualSSLAuth());	
@@ -277,6 +280,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		sampler.setConnTimeout(timeout.getText());
 		
 		sampler.setProtocol(protocols.getText());
+		sampler.setWsPath(wsPath.getText());
 		sampler.setDualSSLAuth(dualAuth.isSelected());
 		sampler.setKeyStoreFilePath(tksFilePath.getText());
 		sampler.setKeyStorePassword(tksPassword.getText());
@@ -311,6 +315,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 
 		protocols.setSelectedIndex(0);	
 		dualAuth.setSelected(false);
+		wsPath.setText("");
 		tksFilePath.setText("");
 		tksPassword.setText("");
 		ccFilePath.setText("");
