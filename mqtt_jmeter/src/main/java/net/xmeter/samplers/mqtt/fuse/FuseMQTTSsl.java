@@ -1,8 +1,8 @@
 package net.xmeter.samplers.mqtt.fuse;
 
-import net.xmeter.samplers.mqtt.MQTTSsl;
-
 import javax.net.ssl.SSLContext;
+
+import net.xmeter.samplers.mqtt.MQTTSsl;
 
 class FuseMQTTSsl implements MQTTSsl {
     private final SSLContext sslContext;

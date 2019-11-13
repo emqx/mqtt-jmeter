@@ -1,12 +1,13 @@
 package net.xmeter.samplers.mqtt.fuse;
 
-import net.xmeter.samplers.mqtt.ConnectionParameters;
-import org.fusesource.mqtt.client.Callback;
-import org.fusesource.mqtt.client.MQTT;
-
 import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.fusesource.mqtt.client.Callback;
+import org.fusesource.mqtt.client.MQTT;
+
+import net.xmeter.samplers.mqtt.ConnectionParameters;
 
 class ConnectionCallback implements Callback<Void> {
 	private static final Logger logger = Logger.getLogger(ConnectionCallback.class.getCanonicalName());

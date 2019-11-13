@@ -1,15 +1,5 @@
 package net.xmeter.samplers.mqtt.fuse;
 
-import net.xmeter.Constants;
-import net.xmeter.samplers.mqtt.ConnectionParameters;
-import net.xmeter.samplers.mqtt.MQTTClient;
-import net.xmeter.samplers.mqtt.MQTTConnection;
-import net.xmeter.samplers.mqtt.MQTTException;
-import org.fusesource.mqtt.client.Callback;
-import org.fusesource.mqtt.client.CallbackConnection;
-import org.fusesource.mqtt.client.MQTT;
-import org.fusesource.mqtt.client.Tracer;
-
 import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,6 +7,17 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.fusesource.mqtt.client.Callback;
+import org.fusesource.mqtt.client.CallbackConnection;
+import org.fusesource.mqtt.client.MQTT;
+import org.fusesource.mqtt.client.Tracer;
+
+import net.xmeter.Constants;
+import net.xmeter.samplers.mqtt.ConnectionParameters;
+import net.xmeter.samplers.mqtt.MQTTClient;
+import net.xmeter.samplers.mqtt.MQTTConnection;
+import net.xmeter.samplers.mqtt.MQTTException;
 
 class FuseMQTTClient implements MQTTClient {
     private static final Logger logger = Logger.getLogger(FuseMQTTClient.class.getCanonicalName());

@@ -1,12 +1,13 @@
 package net.xmeter.samplers.mqtt.fuse;
 
-import net.xmeter.samplers.mqtt.MQTTQoS;
+import java.util.function.Consumer;
+
 import org.fusesource.mqtt.client.Callback;
 import org.fusesource.mqtt.client.CallbackConnection;
 import org.fusesource.mqtt.client.QoS;
 import org.fusesource.mqtt.client.Topic;
 
-import java.util.function.Consumer;
+import net.xmeter.samplers.mqtt.MQTTQoS;
 
 class FuseSubscription {
     private final String[] topics;

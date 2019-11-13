@@ -1,5 +1,7 @@
 package net.xmeter.samplers.mqtt.hivemq;
 
+import java.util.logging.Logger;
+
 import com.hivemq.client.mqtt.MqttClientSslConfig;
 import com.hivemq.client.mqtt.MqttWebSocketConfig;
 import com.hivemq.client.mqtt.MqttWebSocketConfigBuilder;
@@ -11,11 +13,10 @@ import com.hivemq.client.mqtt.mqtt3.message.auth.Mqtt3SimpleAuth;
 import com.hivemq.client.mqtt.mqtt3.message.auth.Mqtt3SimpleAuthBuilder;
 import com.hivemq.client.mqtt.mqtt3.message.connect.Mqtt3ConnectBuilder;
 import com.hivemq.client.mqtt.mqtt3.message.connect.connack.Mqtt3ConnAck;
+
 import net.xmeter.samplers.mqtt.ConnectionParameters;
 import net.xmeter.samplers.mqtt.MQTTClient;
 import net.xmeter.samplers.mqtt.MQTTConnection;
-
-import java.util.logging.Logger;
 
 class HiveMQTTClient implements MQTTClient {
     private static final Logger logger = Logger.getLogger(HiveMQTTClient.class.getCanonicalName());

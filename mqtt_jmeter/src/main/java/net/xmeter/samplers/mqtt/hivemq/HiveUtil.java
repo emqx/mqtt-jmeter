@@ -1,6 +1,7 @@
 package net.xmeter.samplers.mqtt.hivemq;
 
 import com.hivemq.client.mqtt.datatypes.MqttQos;
+
 import net.xmeter.samplers.mqtt.MQTTQoS;
 
 class HiveUtil {

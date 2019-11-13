@@ -1,14 +1,15 @@
 package net.xmeter.samplers;
 
-import net.xmeter.samplers.mqtt.MQTTConnection;
+import java.text.MessageFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
 
-import java.text.MessageFormat;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import net.xmeter.samplers.mqtt.MQTTConnection;
 
 public class DisConnectSampler extends AbstractMQTTSampler {
 	private static final long serialVersionUID = 4360869021667126983L;

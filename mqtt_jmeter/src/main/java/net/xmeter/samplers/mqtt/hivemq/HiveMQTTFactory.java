@@ -1,18 +1,19 @@
 package net.xmeter.samplers.mqtt.hivemq;
 
+import java.io.File;
+import java.util.Collections;
+import java.util.logging.Logger;
+
 import com.hivemq.client.mqtt.MqttClientSslConfig;
 import com.hivemq.client.mqtt.MqttClientSslConfigBuilder;
 import com.hivemq.client.util.KeyStoreUtil;
+
 import net.xmeter.Util;
 import net.xmeter.samplers.AbstractMQTTSampler;
 import net.xmeter.samplers.mqtt.ConnectionParameters;
 import net.xmeter.samplers.mqtt.MQTTClient;
 import net.xmeter.samplers.mqtt.MQTTFactory;
 import net.xmeter.samplers.mqtt.MQTTSsl;
-
-import java.io.File;
-import java.util.Collections;
-import java.util.logging.Logger;
 
 class HiveMQTTFactory implements MQTTFactory {
     private static final Logger logger = Logger.getLogger(HiveMQTTFactory.class.getCanonicalName());

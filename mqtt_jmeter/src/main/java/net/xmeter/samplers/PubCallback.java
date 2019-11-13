@@ -1,11 +1,11 @@
 package net.xmeter.samplers;
 
 
-import org.fusesource.mqtt.client.Callback;
-import org.fusesource.mqtt.client.QoS;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.fusesource.mqtt.client.Callback;
+import org.fusesource.mqtt.client.QoS;
 
 public class PubCallback implements Callback<Void>{
 	private static final Logger logger = Logger.getLogger(PubCallback.class.getCanonicalName());

@@ -1,13 +1,5 @@
 package net.xmeter;
 
-import net.xmeter.samplers.AbstractMQTTSampler;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
-import org.apache.http.ssl.SSLContexts;
-import org.apache.jmeter.services.FileServer;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -16,6 +8,16 @@ import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.UUID;
 import java.util.logging.Logger;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.ssl.SSLContexts;
+import org.apache.jmeter.services.FileServer;
+
+import net.xmeter.samplers.AbstractMQTTSampler;
 
 public class Util implements Constants {
 	

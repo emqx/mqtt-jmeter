@@ -1,11 +1,12 @@
 package net.xmeter.samplers;
 
-import net.xmeter.Constants;
-import org.apache.jmeter.samplers.AbstractSampler;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.jmeter.samplers.AbstractSampler;
+
+import net.xmeter.Constants;
 
 public abstract class AbstractMQTTSampler extends AbstractSampler implements Constants {
 	/**

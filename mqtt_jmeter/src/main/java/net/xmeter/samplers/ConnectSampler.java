@@ -1,20 +1,21 @@
 package net.xmeter.samplers;
 
+import java.text.MessageFormat;
+import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.apache.jmeter.samplers.Entry;
+import org.apache.jmeter.samplers.SampleResult;
+import org.apache.jmeter.threads.JMeterContextService;
+import org.apache.jmeter.threads.JMeterVariables;
+
 import net.xmeter.Util;
 import net.xmeter.samplers.mqtt.ConnectionParameters;
 import net.xmeter.samplers.mqtt.MQTT;
 import net.xmeter.samplers.mqtt.MQTTClient;
 import net.xmeter.samplers.mqtt.MQTTConnection;
 import net.xmeter.samplers.mqtt.MQTTSsl;
-import org.apache.jmeter.samplers.Entry;
-import org.apache.jmeter.samplers.SampleResult;
-import org.apache.jmeter.threads.JMeterContextService;
-import org.apache.jmeter.threads.JMeterVariables;
-
-import java.text.MessageFormat;
-import java.util.HashSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class ConnectSampler extends AbstractMQTTSampler {
 	private static final long serialVersionUID = 1859006013465470528L;

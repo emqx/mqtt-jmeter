@@ -1,7 +1,8 @@
 package net.xmeter.samplers.mqtt.fuse;
 
-import net.xmeter.samplers.mqtt.MQTTQoS;
 import org.fusesource.mqtt.client.QoS;
+
+import net.xmeter.samplers.mqtt.MQTTQoS;
 
 class FuseUtil {
     static QoS map(MQTTQoS qos) {
