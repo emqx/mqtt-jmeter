@@ -17,7 +17,7 @@ import net.xmeter.Constants;
 import net.xmeter.samplers.mqtt.ConnectionParameters;
 import net.xmeter.samplers.mqtt.MQTTClient;
 import net.xmeter.samplers.mqtt.MQTTConnection;
-import net.xmeter.samplers.mqtt.MQTTException;
+import net.xmeter.samplers.mqtt.MQTTClientException;
 
 class FuseMQTTClient implements MQTTClient {
     private static final Logger logger = Logger.getLogger(FuseMQTTClient.class.getCanonicalName());
@@ -90,7 +90,7 @@ class FuseMQTTClient implements MQTTClient {
                 }
             });
             killLock.acquire();
-            throw new MQTTException("Connection timeout " + mqtt, e);
+            throw new MQTTClientException("Connection timeout " + mqtt, e);
         }
     }
 }

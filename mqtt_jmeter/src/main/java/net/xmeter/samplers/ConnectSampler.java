@@ -72,11 +72,11 @@ public class ConnectSampler extends AbstractMQTTSampler {
 			parameters.setCleanSession(getConnCleanSession());
 			parameters.setConnectTimeout(Integer.parseInt(getConnTimeout()));
 			if (parameters.isSecureProtocol()) {
-				MQTTSsl ssl = MQTT.getInstance().createSsl(this);
+				MQTTSsl ssl = MQTT.getInstance(getMqttClientName()).createSsl(this);
 				parameters.setSsl(ssl);
 			}
 
-			client = MQTT.getInstance().createClient(parameters);
+			client = MQTT.getInstance(getMqttClientName()).createClient(parameters);
 
 			result.sampleStart();
 			connection = client.connect();
@@ -98,7 +98,7 @@ public class ConnectSampler extends AbstractMQTTSampler {
 				result.setResponseCode("501");
 			}
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, e.getMessage(), e);
+			logger.log(Level.SEVERE, "Failed to establish Connection " + connection , e);
 			if (result.getEndTime() == 0) result.sampleEnd(); //avoid re-enter sampleEnd()
 			result.setSuccessful(false);
 			result.setResponseMessage(MessageFormat.format("Failed to establish Connection {0}.", connection));

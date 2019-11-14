@@ -5,7 +5,8 @@ public interface Constants {
 	public static final String MQTT_VERSION = "mqtt.version";
 	public static final String PORT = "mqtt.port";
 	public static final String CONN_TIMEOUT = "mqtt.conn_timeout";
-	
+	public static final String MQTT_CLIENT_NAME = "mqtt.client_name";
+
 	public static final String PROTOCOL = "mqtt.protocol";
 	public static final String WS_PATH = "mqtt.ws_path";
 	public static final String DUAL_AUTH = "mqtt.dual_ssl_authentication";
@@ -67,6 +68,9 @@ public interface Constants {
 	public static final String WS_PROTOCOL = "WS";
 	public static final String WSS_PROTOCOL = "WSS";
 	public static final String DEFAULT_PROTOCOL = TCP_PROTOCOL;
+	public static final String FUSESOURCE_MQTT_CLIENT_NAME = "fusesource";
+	public static final String HIVEMQ_MQTT_CLIENT_NAME = "hivemq";
+	public static final String DEFAULT_MQTT_CLIENT_NAME = FUSESOURCE_MQTT_CLIENT_NAME;
 	
 	public static final String JMETER_VARIABLE_PREFIX = "${";
 	

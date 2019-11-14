@@ -148,7 +148,9 @@ public class PubSampler extends AbstractMQTTSampler {
 			}
 			
 			result.sampleStart();
-			logger.fine("pub [topic]: " + topicName + ", [payload]: " + new String(toSend));
+			if (logger.isLoggable(Level.FINE)) {
+				logger.fine("pub [topic]: " + topicName + ", [payload]: " + new String(toSend));
+			}
 
 			MQTTPubResult pubResult = connection.publish(topicName, toSend, qos_enum, retainedMsg);
 			
@@ -172,15 +174,17 @@ public class PubSampler extends AbstractMQTTSampler {
 				pubResult.getError().ifPresent(logger::info);
 			}
 		} catch (Exception ex) {
-			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			logger.log(Level.SEVERE, "Publish failed for connection " + connection, ex);
 			if (result.getEndTime() == 0) result.sampleEnd();
 			result.setLatency(result.getEndTime() - result.getStartTime());
 			result.setSuccessful(false);
 			result.setResponseMessage(MessageFormat.format("Publish failed for connection {0}.", connection));
 			result.setResponseData(MessageFormat.format("Client [{0}] publish failed: {1}", (clientId == null ? "null" : clientId), ex.getMessage()).getBytes());
 			result.setResponseCode("502");
-			logger.info(MessageFormat.format("** [clientId: {0}, topic: {1}, payload: {2}] Publish failed for connection {3}.", (clientId == null ? "null" : clientId),
-					topicName, new String(toSend), connection));
+			if (logger.isLoggable(Level.INFO)) {
+				logger.info(MessageFormat.format("** [clientId: {0}, topic: {1}, payload: {2}] Publish failed for connection {3}.", (clientId == null ? "null" : clientId),
+						topicName, new String(toSend), connection));
+			}
 		}
 		return result;
 	}

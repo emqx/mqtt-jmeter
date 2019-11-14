@@ -2,6 +2,7 @@ package net.xmeter.samplers;
 
 import java.text.MessageFormat;
 import java.util.Vector;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.jmeter.samplers.Entry;
@@ -111,7 +112,7 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 					subResult.setResponseCode("501");
 				}
 			} catch (Exception e) {
-				logger.severe(e.getMessage());
+				logger.log(Level.SEVERE, "Failed to establish Connection", e);
 //				failedConnCount += 1;
 				subResult.setSuccessful(false);
 				subResult.setResponseMessage("Failed to establish Connections.");
@@ -139,7 +140,7 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
         ConnectionParameters parameters = new ConnectionParameters();
         parameters.setClientId(clientId);
 		if (parameters.isSecureProtocol()) {
-			parameters.setSsl(MQTT.getInstance().createSsl(this));
+			parameters.setSsl(MQTT.getInstance(getMqttClientName()).createSsl(this));
 		}
 
 		parameters.setProtocol(getProtocol());
@@ -161,7 +162,7 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 		parameters.setCleanSession(getConnCleanSession());
 		parameters.setConnectTimeout(Integer.parseInt(getConnTimeout()));
 
-		return MQTT.getInstance().createClient(parameters);
+		return MQTT.getInstance(getMqttClientName()).createClient(parameters);
 	}
 	
 	private boolean handleSubscription(MQTTConnection connection) throws InterruptedException {
@@ -197,13 +198,13 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 		}
 		connection.subscribe(paraTopics, MQTTQoS.fromValue(qos), () -> {
             synchronized (lock) {
-                logger.fine("sub successful, topic length is " + paraTopics.length);
+                logger.fine(() -> "sub successful, topic length is " + paraTopics.length);
                 subSucc = true;
                 lock.notify();
             }
         }, error -> {
             synchronized (lock) {
-                logger.info("subscribe failed: " + error.getMessage());
+                logger.info(() -> "subscribe failed: " + error.getMessage());
                 subSucc = false;
                 lock.notify();
             }

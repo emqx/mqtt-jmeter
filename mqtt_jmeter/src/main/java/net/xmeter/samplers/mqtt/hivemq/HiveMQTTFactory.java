@@ -15,8 +15,15 @@ import net.xmeter.samplers.mqtt.MQTTClient;
 import net.xmeter.samplers.mqtt.MQTTFactory;
 import net.xmeter.samplers.mqtt.MQTTSsl;
 
+import static net.xmeter.Constants.HIVEMQ_MQTT_CLIENT_NAME;
+
 class HiveMQTTFactory implements MQTTFactory {
     private static final Logger logger = Logger.getLogger(HiveMQTTFactory.class.getCanonicalName());
+
+    @Override
+    public String getName() {
+        return HIVEMQ_MQTT_CLIENT_NAME;
+    }
 
     @Override
     public MQTTClient createClient(ConnectionParameters parameters) throws Exception {

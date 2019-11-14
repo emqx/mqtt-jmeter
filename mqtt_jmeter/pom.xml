@@ -41,7 +41,7 @@
         <dependency>
             <groupId>com.github.hivemq.hivemq-mqtt-client</groupId>
             <artifactId>hivemq-mqtt-client</artifactId>
-            <version>develop-SNAPSHOT</version>
+            <version>develop-1f79cdbe45-1</version>
         </dependency>
         <!--
         <dependency>

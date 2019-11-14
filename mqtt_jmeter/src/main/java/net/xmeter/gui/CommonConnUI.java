@@ -1,6 +1,6 @@
 package net.xmeter.gui;
 
-import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -28,6 +28,7 @@ import org.apache.jorphan.gui.JLabeledTextField;
 import net.xmeter.Constants;
 import net.xmeter.Util;
 import net.xmeter.samplers.AbstractMQTTSampler;
+import net.xmeter.samplers.mqtt.MQTT;
 
 public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private final JLabeledTextField serverAddr = new JLabeledTextField("Server name or IP:");
@@ -39,6 +40,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private final JLabeledTextField passwordAuth = new JLabeledTextField("Password:");
 
 	private JLabeledChoice protocols;
+	private JLabeledChoice clientNames;
 
 	private JCheckBox dualAuth = new JCheckBox("Dual SSL authentication");
 	private JLabeledTextField wsPath = new JLabeledTextField("WS Path: ", 10);
@@ -65,6 +67,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private final JLabeledTextField connCleanSession = new JLabeledTextField("Clean session:", 3);
 
 	private final List<String> protocolsList = new ArrayList<>(Arrays.asList(TCP_PROTOCOL, SSL_PROTOCOL, WS_PROTOCOL, WSS_PROTOCOL));
+	private final List<String> clientNamesList = MQTT.getAvailableNames();
 
 	public JPanel createConnPanel() {
 		JPanel con = new HorizontalPanel();
@@ -122,24 +125,29 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		JPanel protocolPanel = new VerticalPanel();
 		protocolPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Protocols"));
 		
-		JPanel pPanel = new HorizontalPanel();
+		JPanel pPanel = new JPanel();
+		pPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		//pPanel.setLayout(new GridLayout(1, 2));
 
 		protocols = new JLabeledChoice("Protocols:", protocolsList.toArray(new String[] {}), true, false);
 		//JComboBox<String> component = (JComboBox) protocols.getComponentList().get(1);
 		//component.setSize(new Dimension(40, component.getHeight()));
 		protocols.addChangeListener(this);
-		pPanel.add(protocols, BorderLayout.WEST);
+		pPanel.add(protocols);
+
+		clientNames = new JLabeledChoice("Clients:", clientNamesList.toArray(new String[] {}), true, false);
+		clientNames.addChangeListener(this);
+		pPanel.add(clientNames);
 
 		dualAuth.setSelected(false);
 		dualAuth.setFont(null);
 		dualAuth.setVisible(false);
 		dualAuth.addChangeListener(this);
-		pPanel.add(dualAuth, BorderLayout.CENTER);
+		pPanel.add(dualAuth);
 
 		wsPath.setFont(null);
 		wsPath.setVisible(false);
-		pPanel.add(wsPath, BorderLayout.EAST);
+		pPanel.add(wsPath);
 
 		JPanel panel = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
@@ -249,6 +257,12 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		} else {
 			protocols.setText(sampler.getProtocol());
 		}
+		if (sampler.getProtocol().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1) {
+			int index = clientNamesList.indexOf(sampler.getMqttClientName());
+			clientNames.setSelectedIndex(index);
+		} else{
+			clientNames.setText(sampler.getMqttClientName());
+		}
 		boolean wsProtocol = Util.isWebSocketProtocol(sampler.getProtocol());
 		wsPath.setText(sampler.getWsPath());
 		wsPath.setVisible(wsProtocol);
@@ -288,6 +302,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		sampler.setConnTimeout(timeout.getText());
 		
 		sampler.setProtocol(protocols.getText());
+		sampler.setMqttClientName(clientNames.getText());
 		sampler.setWsPath(wsPath.getText());
 		sampler.setDualSSLAuth(dualAuth.isSelected());
 		sampler.setKeyStoreFilePath(tksFilePath.getText());
@@ -321,7 +336,8 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		mqttVersion.setSelectedIndex(0);
 		timeout.setText(DEFAULT_CONN_TIME_OUT);
 
-		protocols.setSelectedIndex(0);	
+		protocols.setSelectedIndex(0);
+		clientNames.setSelectedIndex(clientNamesList.indexOf(DEFAULT_MQTT_CLIENT_NAME));
 		dualAuth.setSelected(false);
 		wsPath.setText("");
 		tksFilePath.setText("");

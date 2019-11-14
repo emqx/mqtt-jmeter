@@ -2,6 +2,7 @@ package net.xmeter.samplers;
 
 import java.text.MessageFormat;
 import java.util.Vector;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.jmeter.samplers.Entry;
@@ -61,7 +62,7 @@ public class EfficientDisConnectSampler extends AbstractMQTTSampler {
 				subResult.setResponseMessage(MessageFormat.format("Connection {0} disconnected.", connection));
 				subResult.setResponseCodeOK();
 			} catch (Exception e) {
-				logger.severe(e.getMessage());
+				logger.log(Level.SEVERE, "Failed to disconnect Connection " + connection, e);
 				subResult.setSuccessful(false);
 				subResult.setResponseMessage(MessageFormat.format("Failed to disconnect Connection {0}.", connection));
 				subResult.setResponseData(MessageFormat.format("Client [{0}] failed. Couldn't disconnect connection.", (clientId == null ? "null" : clientId)).getBytes());
@@ -69,7 +70,7 @@ public class EfficientDisConnectSampler extends AbstractMQTTSampler {
 			} finally {
 				totalSampleCount += subResult.getSampleCount();
 				subResult.sampleEnd();
-				System.out.println("dis-connect: " + (System.currentTimeMillis() - cur));
+				logger.info(() -> "dis-connect: " + (System.currentTimeMillis() - cur));
 				result.addSubResult(subResult);
 			}
 		}

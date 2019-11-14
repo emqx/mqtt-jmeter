@@ -1,5 +1,8 @@
 package net.xmeter.samplers.mqtt.hivemq;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 import com.hivemq.client.mqtt.MqttClientSslConfig;
@@ -17,6 +20,7 @@ import com.hivemq.client.mqtt.mqtt3.message.connect.connack.Mqtt3ConnAck;
 import net.xmeter.samplers.mqtt.ConnectionParameters;
 import net.xmeter.samplers.mqtt.MQTTClient;
 import net.xmeter.samplers.mqtt.MQTTConnection;
+import net.xmeter.samplers.mqtt.MQTTClientException;
 
 class HiveMQTTClient implements MQTTClient {
     private static final Logger logger = Logger.getLogger(HiveMQTTClient.class.getCanonicalName());
@@ -59,26 +63,35 @@ class HiveMQTTClient implements MQTTClient {
     }
 
     @Override
-    public MQTTConnection connect() {
-        Mqtt3ConnectBuilder.Send<Mqtt3ConnAck> connectBuilder = client.connectWith()
+    public MQTTConnection connect() throws Exception {
+        Mqtt3ConnectBuilder.Send<CompletableFuture<Mqtt3ConnAck>> connectSend = client.toAsync().connectWith()
                 .cleanSession(parameters.isCleanSession())
                 .keepAlive(parameters.getKeepAlive());
-        connectBuilder = applyAuth(connectBuilder);
+        Mqtt3SimpleAuth auth = createAuth();
+        if (auth != null) {
+            connectSend = connectSend.simpleAuth(auth);
+        }
         logger.info(() -> "Connect client: " + parameters.getClientId());
-        Mqtt3ConnAck connAck = connectBuilder.send();
-        logger.info(() -> "Connected client: " + parameters.getClientId());
-        return new HiveMQTTConnection(client, parameters.getClientId(), connAck);
+        CompletableFuture<Mqtt3ConnAck> connectFuture = connectSend.send();
+        try {
+            Mqtt3ConnAck connAck = connectFuture.get(parameters.getConnectTimeout(), TimeUnit.SECONDS);
+            logger.info(() -> "Connected client: " + parameters.getClientId());
+            return new HiveMQTTConnection(client, parameters.getClientId(), connAck);
+        } catch (TimeoutException e) {
+            client.disconnect();
+            throw new MQTTClientException("Connection timeout " + client, e);
+        }
     }
 
-    private Mqtt3ConnectBuilder.Send<Mqtt3ConnAck> applyAuth(Mqtt3ConnectBuilder.Send<Mqtt3ConnAck> builder) {
+    private Mqtt3SimpleAuth createAuth() {
         if (parameters.getUsername() != null) {
             Mqtt3SimpleAuthBuilder.Complete simpleAuth = Mqtt3SimpleAuth.builder()
                     .username(parameters.getUsername());
             if (parameters.getPassword() != null) {
                 simpleAuth.password(parameters.getPassword().getBytes());
             }
-            builder = builder.simpleAuth(simpleAuth.build());
+            return simpleAuth.build();
         }
-        return builder;
+        return null;
     }
 }

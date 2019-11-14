@@ -1,8 +1,8 @@
 package net.xmeter.samplers;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.jmeter.samplers.AbstractSampler;
 
@@ -22,7 +22,7 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 //	protected static int conCapacity = 1;
 	
 	//<connection client id, topics>
-	protected static Map<String, Set<String>> topicSubscribed = new HashMap<>();
+	protected static Map<String, Set<String>> topicSubscribed = new ConcurrentHashMap<>();
 
 	public String getServer() {
 		return getPropertyAsString(SERVER, DEFAULT_SERVER);
@@ -191,6 +191,14 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 			labelPrefix = "xmeter-mqtt-batch-con-mode-";
 		}
 		return labelPrefix;
+	}
+
+	public String getMqttClientName() {
+		return getPropertyAsString(MQTT_CLIENT_NAME, DEFAULT_MQTT_CLIENT_NAME);
+	}
+
+	public void setMqttClientName(String mqttClientName) {
+		setProperty(MQTT_CLIENT_NAME, mqttClientName);
 	}
 
 //	public int getConCapacity() {
