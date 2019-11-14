@@ -147,7 +147,7 @@ public class SubSampler extends AbstractMQTTSampler {
 			try {
 				TimeUnit.MILLISECONDS.sleep(sampleElapsedTime);
 			} catch (InterruptedException e) {
-				logger.info("Received exception when waiting for notification signal: " + e.getMessage());
+				logger.log(Level.INFO, "Received exception when waiting for notification signal", e);
 			}
 			synchronized (dataLock) {
 				result.sampleStart();
@@ -165,7 +165,7 @@ public class SubSampler extends AbstractMQTTSampler {
 					try {
 						dataLock.wait();
 					} catch (InterruptedException e) {
-						logger.info("Received exception when waiting for notification signal: " + e.getMessage());
+						logger.log(Level.INFO, "Received exception when waiting for notification signal", e);
 					}
 				}
 				result.sampleStart();
@@ -189,7 +189,9 @@ public class SubSampler extends AbstractMQTTSampler {
 			}
 		}
 		result = fillOKResult(result, bean.getReceivedMessageSize(), message, content.toString());
-		logger.fine("sub [topic]: " + topicName + ", [payload]: " + content.toString());
+		if (logger.isLoggable(Level.FINE)) {
+			logger.fine("sub [topic]: " + topicName + ", [payload]: " + content.toString());
+		}
 		
 		if(receivedCount == 0) {
 			result.setEndTime(result.getStartTime()); // dummy result, rectify sample time
@@ -222,9 +224,9 @@ public class SubSampler extends AbstractMQTTSampler {
 		}
 
 		connection.subscribe(paraTopics, MQTTQoS.fromValue(qos), () -> {
-			logger.fine("sub successful, topic length is " + paraTopics.length);
+			logger.fine(() -> "sub successful, topic length is " + paraTopics.length);
 		}, error -> {
-			logger.info("subscribe failed: " + error.getMessage());
+			logger.log(Level.INFO, "subscribe failed", error);
 			subFailed = true;
 		});
 	}
@@ -268,7 +270,7 @@ public class SubSampler extends AbstractMQTTSampler {
 			long now = System.currentTimeMillis();
 			int index = msg.indexOf(TIME_STAMP_SEP_FLAG);
 			if (index == -1 && (!printFlag)) {
-				logger.info("Payload does not include timestamp: " + msg);
+				logger.info(() -> "Payload does not include timestamp: " + msg);
 				printFlag = true;
 			} else if (index != -1) {
 				long start = Long.parseLong(msg.substring(0, index));
@@ -305,7 +307,7 @@ public class SubSampler extends AbstractMQTTSampler {
 		try {
 			TimeUnit.MILLISECONDS.sleep(SUB_FAIL_PENALTY);
 		} catch (InterruptedException e) {
-			logger.info("Received exception when waiting for notification signal: " + e.getMessage());
+			logger.log(Level.INFO, "Received exception when waiting for notification signal", e);
 		}
 		return result;
 	}
