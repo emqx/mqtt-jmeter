@@ -41,4 +41,12 @@ public class MQTT {
         }
         return factory;
     }
+
+    public static List<String> getSupportedProtocols(String name) {
+        MQTTFactory factory = getAvailableFactories().get(name);
+        if (factory == null) {
+            throw new IllegalArgumentException("Failed to find MQTTFactory named" + name);
+        }
+        return factory.getSupportedProtocols();
+    }
 }

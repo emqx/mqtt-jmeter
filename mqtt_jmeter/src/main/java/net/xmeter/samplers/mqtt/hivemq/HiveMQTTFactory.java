@@ -2,6 +2,7 @@ package net.xmeter.samplers.mqtt.hivemq;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.List;
 import java.util.logging.Logger;
 
 import com.hivemq.client.mqtt.MqttClientSslConfig;
@@ -23,6 +24,11 @@ class HiveMQTTFactory implements MQTTFactory {
     @Override
     public String getName() {
         return HIVEMQ_MQTT_CLIENT_NAME;
+    }
+
+    @Override
+    public List<String> getSupportedProtocols() {
+        return HiveUtil.ALLOWED_PROTOCOLS;
     }
 
     @Override

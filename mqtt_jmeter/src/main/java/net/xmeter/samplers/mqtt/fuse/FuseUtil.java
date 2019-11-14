@@ -1,10 +1,21 @@
 package net.xmeter.samplers.mqtt.fuse;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.fusesource.mqtt.client.QoS;
 
+import net.xmeter.Constants;
 import net.xmeter.samplers.mqtt.MQTTQoS;
 
 class FuseUtil {
+    static final List<String> ALLOWED_PROTOCOLS;
+    static {
+        ALLOWED_PROTOCOLS = new ArrayList<>();
+        ALLOWED_PROTOCOLS.add(Constants.TCP_PROTOCOL);
+        ALLOWED_PROTOCOLS.add(Constants.SSL_PROTOCOL);
+    }
+
     static QoS map(MQTTQoS qos) {
         switch (qos) {
             case AT_MOST_ONCE: return QoS.AT_MOST_ONCE;

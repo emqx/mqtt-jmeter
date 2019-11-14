@@ -1,12 +1,12 @@
 package net.xmeter.gui;
 
+import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -66,7 +66,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 
 	private final JLabeledTextField connCleanSession = new JLabeledTextField("Clean session:", 3);
 
-	private final List<String> protocolsList = new ArrayList<>(Arrays.asList(TCP_PROTOCOL, SSL_PROTOCOL, WS_PROTOCOL, WSS_PROTOCOL));
 	private final List<String> clientNamesList = MQTT.getAvailableNames();
 
 	public JPanel createConnPanel() {
@@ -126,28 +125,31 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		protocolPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Protocols"));
 		
 		JPanel pPanel = new JPanel();
-		pPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+		pPanel.setLayout(new BorderLayout());
 		//pPanel.setLayout(new GridLayout(1, 2));
 
-		protocols = new JLabeledChoice("Protocols:", protocolsList.toArray(new String[] {}), true, false);
+		JPanel pCenter = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		clientNames = new JLabeledChoice("Clients:", clientNamesList.toArray(new String[] {}), true, false);
+		clientNames.addChangeListener(this);
+		pCenter.add(clientNames);
+
+		protocols = new JLabeledChoice("Protocols:", false);
 		//JComboBox<String> component = (JComboBox) protocols.getComponentList().get(1);
 		//component.setSize(new Dimension(40, component.getHeight()));
 		protocols.addChangeListener(this);
-		pPanel.add(protocols);
+		pCenter.add(protocols);
 
-		clientNames = new JLabeledChoice("Clients:", clientNamesList.toArray(new String[] {}), true, false);
-		clientNames.addChangeListener(this);
-		pPanel.add(clientNames);
+		wsPath.setFont(null);
+		wsPath.setVisible(false);
+		pCenter.add(wsPath);
+
+		pPanel.add(pCenter, BorderLayout.CENTER);
 
 		dualAuth.setSelected(false);
 		dualAuth.setFont(null);
 		dualAuth.setVisible(false);
 		dualAuth.addChangeListener(this);
-		pPanel.add(dualAuth);
-
-		wsPath.setFont(null);
-		wsPath.setVisible(false);
-		pPanel.add(wsPath);
+		pPanel.add(dualAuth, BorderLayout.SOUTH);
 
 		JPanel panel = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
@@ -238,6 +240,15 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 			boolean wsProtocol = Util.isWebSocketProtocol(protocols.getText());
 			wsPath.setVisible(wsProtocol);
 			wsPath.setEnabled(wsProtocol);
+		} else if (e.getSource() == clientNames) {
+			int index = clientNames.getSelectedIndex();
+			if (index > -1) {
+				String clientName = clientNames.getItems()[index];
+				List<String> supportedProtocols = MQTT.getSupportedProtocols(clientName);
+				protocols.setValues(supportedProtocols.toArray(new String[supportedProtocols.size()]));
+			} else {
+				protocols.setValues(new String[0]);
+			}
 		}
 	}
 
@@ -252,7 +263,8 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		timeout.setText(sampler.getConnTimeout());
 
 		if(sampler.getProtocol().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1) {
-			int index = protocolsList.indexOf(sampler.getProtocol());
+			List<String> items = Arrays.asList(protocols.getItems());
+			int index = items.indexOf(sampler.getProtocol());
 			protocols.setSelectedIndex(index);
 		} else {
 			protocols.setText(sampler.getProtocol());
@@ -336,8 +348,10 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		mqttVersion.setSelectedIndex(0);
 		timeout.setText(DEFAULT_CONN_TIME_OUT);
 
-		protocols.setSelectedIndex(0);
 		clientNames.setSelectedIndex(clientNamesList.indexOf(DEFAULT_MQTT_CLIENT_NAME));
+		protocols.setValues(MQTT.getSupportedProtocols(DEFAULT_MQTT_CLIENT_NAME).toArray(new String[] {}));
+		protocols.setSelectedIndex(0);
+
 		dualAuth.setSelected(false);
 		wsPath.setText("");
 		tksFilePath.setText("");

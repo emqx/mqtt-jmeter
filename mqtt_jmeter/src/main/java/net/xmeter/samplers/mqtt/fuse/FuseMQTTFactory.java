@@ -1,5 +1,7 @@
 package net.xmeter.samplers.mqtt.fuse;
 
+import java.util.List;
+
 import net.xmeter.Constants;
 import net.xmeter.Util;
 import net.xmeter.samplers.AbstractMQTTSampler;
@@ -12,6 +14,11 @@ class FuseMQTTFactory implements MQTTFactory {
     @Override
     public String getName() {
         return Constants.FUSESOURCE_MQTT_CLIENT_NAME;
+    }
+
+    @Override
+    public List<String> getSupportedProtocols() {
+        return FuseUtil.ALLOWED_PROTOCOLS;
     }
 
     @Override
