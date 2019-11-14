@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
-import com.hivemq.client.mqtt.MqttGlobalPublishFilter;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3BlockingClient;
@@ -122,10 +121,6 @@ class HiveMQTTConnection implements MQTTConnection {
     @Override
     public void setSubListener(MQTTSubListener listener) {
         this.listener = listener;
-        client.toAsync().publishes(MqttGlobalPublishFilter.SUBSCRIBED, publish -> {
-            String message = new String(publish.getPayloadAsBytes());
-            listener.accept(publish.getTopic().toString(), message, () -> {});
-        });
     }
 
     @Override
