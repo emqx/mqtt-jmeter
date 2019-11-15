@@ -262,6 +262,13 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		}
 		timeout.setText(sampler.getConnTimeout());
 
+		if (sampler.getProtocol().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1) {
+			int index = clientNamesList.indexOf(sampler.getMqttClientName());
+			clientNames.setSelectedIndex(index);
+		} else{
+			clientNames.setText(sampler.getMqttClientName());
+		}
+
 		if(sampler.getProtocol().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1) {
 			List<String> items = Arrays.asList(protocols.getItems());
 			int index = items.indexOf(sampler.getProtocol());
@@ -269,12 +276,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		} else {
 			protocols.setText(sampler.getProtocol());
 		}
-		if (sampler.getProtocol().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1) {
-			int index = clientNamesList.indexOf(sampler.getMqttClientName());
-			clientNames.setSelectedIndex(index);
-		} else{
-			clientNames.setText(sampler.getMqttClientName());
-		}
+
 		boolean wsProtocol = Util.isWebSocketProtocol(sampler.getProtocol());
 		wsPath.setText(sampler.getWsPath());
 		wsPath.setVisible(wsProtocol);
@@ -312,9 +314,9 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		sampler.setPort(serverPort.getText());
 		sampler.setMqttVersion(mqttVersion.getText());
 		sampler.setConnTimeout(timeout.getText());
-		
-		sampler.setProtocol(protocols.getText());
+
 		sampler.setMqttClientName(clientNames.getText());
+		sampler.setProtocol(protocols.getText());
 		sampler.setWsPath(wsPath.getText());
 		sampler.setDualSSLAuth(dualAuth.isSelected());
 		sampler.setKeyStoreFilePath(tksFilePath.getText());
