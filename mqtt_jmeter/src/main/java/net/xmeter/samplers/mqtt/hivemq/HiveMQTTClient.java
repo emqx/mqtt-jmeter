@@ -3,6 +3,7 @@ package net.xmeter.samplers.mqtt.hivemq;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.hivemq.client.mqtt.MqttClientSslConfig;
@@ -19,8 +20,8 @@ import com.hivemq.client.mqtt.mqtt3.message.connect.connack.Mqtt3ConnAck;
 
 import net.xmeter.samplers.mqtt.ConnectionParameters;
 import net.xmeter.samplers.mqtt.MQTTClient;
-import net.xmeter.samplers.mqtt.MQTTConnection;
 import net.xmeter.samplers.mqtt.MQTTClientException;
+import net.xmeter.samplers.mqtt.MQTTConnection;
 
 class HiveMQTTClient implements MQTTClient {
     private static final Logger logger = Logger.getLogger(HiveMQTTClient.class.getCanonicalName());
@@ -77,9 +78,13 @@ class HiveMQTTClient implements MQTTClient {
             Mqtt3ConnAck connAck = connectFuture.get(parameters.getConnectTimeout(), TimeUnit.SECONDS);
             logger.info(() -> "Connected client: " + parameters.getClientId());
             return new HiveMQTTConnection(client, parameters.getClientId(), connAck);
-        } catch (TimeoutException e) {
-            client.disconnect();
-            throw new MQTTClientException("Connection timeout " + client, e);
+        } catch (TimeoutException timeoutException) {
+            try {
+                client.disconnect();
+            } catch (Exception e) {
+                logger.log(Level.FINE, "Disconnect on timeout failed " + client, e);
+            }
+            throw new MQTTClientException("Connection timeout " + client, timeoutException);
         }
     }
 
