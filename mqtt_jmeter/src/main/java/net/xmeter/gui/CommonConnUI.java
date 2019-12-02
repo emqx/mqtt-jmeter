@@ -40,7 +40,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private final JLabeledTextField passwordAuth = new JLabeledTextField("Password:");
 
 	private JLabeledChoice protocols;
-	private JLabeledChoice clientNames;
+//	private JLabeledChoice clientNames;
 
 	private JCheckBox dualAuth = new JCheckBox("Dual SSL authentication");
 	private JLabeledTextField wsPath = new JLabeledTextField("WS Path: ", 10);
@@ -66,7 +66,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 
 	private final JLabeledTextField connCleanSession = new JLabeledTextField("Clean session:", 3);
 
-	private final List<String> clientNamesList = MQTT.getAvailableNames();
+//	private final List<String> clientNamesList = MQTT.getAvailableNames();
 
 	public JPanel createConnPanel() {
 		JPanel con = new HorizontalPanel();
@@ -129,9 +129,9 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		//pPanel.setLayout(new GridLayout(1, 2));
 
 		JPanel pCenter = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		clientNames = new JLabeledChoice("Clients:", clientNamesList.toArray(new String[] {}), true, false);
-		clientNames.addChangeListener(this);
-		pCenter.add(clientNames);
+//		clientNames = new JLabeledChoice("Clients:", clientNamesList.toArray(new String[] {}), true, false);
+//		clientNames.addChangeListener(this);
+//		pCenter.add(clientNames);
 
 		protocols = new JLabeledChoice("Protocols:", false);
 		//JComboBox<String> component = (JComboBox) protocols.getComponentList().get(1);
@@ -241,15 +241,15 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 			boolean wsProtocol = Util.isWebSocketProtocol(protocols.getText());
 			wsPath.setVisible(wsProtocol);
 			wsPath.setEnabled(wsProtocol);
-		} else if (e.getSource() == clientNames) {
-			int index = clientNames.getSelectedIndex();
-			if (index > -1) {
-				String clientName = clientNames.getItems()[index];
-				List<String> supportedProtocols = MQTT.getSupportedProtocols(clientName);
-				protocols.setValues(supportedProtocols.toArray(new String[supportedProtocols.size()]));
-			} else {
-				protocols.setValues(new String[0]);
-			}
+//		} else if (e.getSource() == clientNames) {
+//			int index = clientNames.getSelectedIndex();
+//			if (index > -1) {
+//				String clientName = clientNames.getItems()[index];
+//				List<String> supportedProtocols = MQTT.getSupportedProtocols(clientName);
+//				protocols.setValues(supportedProtocols.toArray(new String[supportedProtocols.size()]));
+//			} else {
+//				protocols.setValues(new String[0]);
+//			}
 		}
 	}
 
@@ -263,12 +263,12 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		}
 		timeout.setText(sampler.getConnTimeout());
 
-		if (sampler.getProtocol().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1) {
-			int index = clientNamesList.indexOf(sampler.getMqttClientName());
-			clientNames.setSelectedIndex(index);
-		} else{
-			clientNames.setText(sampler.getMqttClientName());
-		}
+//		if (sampler.getProtocol().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1) {
+//			int index = clientNamesList.indexOf(sampler.getMqttClientName());
+//			clientNames.setSelectedIndex(index);
+//		} else{
+//			clientNames.setText(sampler.getMqttClientName());
+//		}
 
 		if(sampler.getProtocol().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1) {
 			List<String> items = Arrays.asList(protocols.getItems());
@@ -316,7 +316,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		sampler.setMqttVersion(mqttVersion.getText());
 		sampler.setConnTimeout(timeout.getText());
 
-		sampler.setMqttClientName(clientNames.getText());
+//		sampler.setMqttClientName(clientNames.getText());
 		sampler.setProtocol(protocols.getText());
 		sampler.setWsPath(wsPath.getText());
 		sampler.setDualSSLAuth(dualAuth.isSelected());
@@ -351,7 +351,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		mqttVersion.setSelectedIndex(0);
 		timeout.setText(DEFAULT_CONN_TIME_OUT);
 
-		clientNames.setSelectedIndex(clientNamesList.indexOf(DEFAULT_MQTT_CLIENT_NAME));
+//		clientNames.setSelectedIndex(clientNamesList.indexOf(DEFAULT_MQTT_CLIENT_NAME));
 		protocols.setValues(MQTT.getSupportedProtocols(DEFAULT_MQTT_CLIENT_NAME).toArray(new String[] {}));
 		protocols.setSelectedIndex(0);
 

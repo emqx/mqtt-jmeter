@@ -9,13 +9,6 @@
         <jmeter-version>3.2</jmeter-version>
     </properties>
 
-	<repositories>
-		<repository>
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
-		</repository>
-	</repositories>
-
     <dependencies>
         <dependency>
             <groupId>org.apache.jmeter</groupId>
