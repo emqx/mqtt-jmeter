@@ -45,15 +45,15 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private JCheckBox dualAuth = new JCheckBox("Dual SSL authentication");
 	private JLabeledTextField wsPath = new JLabeledTextField("WS Path: ", 10);
 
-	private final JLabeledTextField tksFilePath = new JLabeledTextField("Trust Key Store(*.jks):       ", 25);
+//	private final JLabeledTextField tksFilePath = new JLabeledTextField("Trust Key Store(*.jks):       ", 25);
 	private final JLabeledTextField ccFilePath = new JLabeledTextField("Client Certification(*.p12):", 25);
 	
-	private final JLabeledTextField tksPassword = new JLabeledTextField("Secret:", 10);
+//	private final JLabeledTextField tksPassword = new JLabeledTextField("Secret:", 10);
 	private final JLabeledTextField ccPassword = new JLabeledTextField("Secret:", 10);
 
-	private JButton tksBrowseButton;
+//	private JButton tksBrowseButton;
 	private JButton ccBrowseButton;
-	private static final String TKS_BROWSE = "tks_browse";
+//	private static final String TKS_BROWSE = "tks_browse";
 	private static final String CC_BROWSE = "cc_browse";
 	
 	public final JLabeledTextField connNamePrefix = new JLabeledTextField("ClientId:", 8);
@@ -155,20 +155,20 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		GridBagConstraints c = new GridBagConstraints();
 		c.anchor = GridBagConstraints.SOUTHWEST;
 		
-		c.gridx = 0; c.gridy = 0; c.gridwidth = 2;
-		tksFilePath.setVisible(false);
-		panel.add(tksFilePath, c);
-
-		c.gridx = 2; c.gridy = 0; c.gridwidth = 1;
-		tksBrowseButton = new JButton(JMeterUtils.getResString("browse"));
-		tksBrowseButton.setActionCommand(TKS_BROWSE);
-		tksBrowseButton.addActionListener(this);
-		tksBrowseButton.setVisible(false);
-		panel.add(tksBrowseButton, c);
-		
-		c.gridx = 3; c.gridy = 0; c.gridwidth = 2;
-		tksPassword.setVisible(false);
-		panel.add(tksPassword, c);
+//		c.gridx = 0; c.gridy = 0; c.gridwidth = 2;
+//		tksFilePath.setVisible(false);
+//		panel.add(tksFilePath, c);
+//
+//		c.gridx = 2; c.gridy = 0; c.gridwidth = 1;
+//		tksBrowseButton = new JButton(JMeterUtils.getResString("browse"));
+//		tksBrowseButton.setActionCommand(TKS_BROWSE);
+//		tksBrowseButton.addActionListener(this);
+//		tksBrowseButton.setVisible(false);
+//		panel.add(tksBrowseButton, c);
+//		
+//		c.gridx = 3; c.gridy = 0; c.gridwidth = 2;
+//		tksPassword.setVisible(false);
+//		panel.add(tksPassword, c);
 
 		//c.weightx = 0.0;
 		c.gridx = 0; c.gridy = 1; c.gridwidth = 2;
@@ -195,10 +195,11 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String action = e.getActionCommand();
-		if(TKS_BROWSE.equals(action)) {
-			String path = browseAndGetFilePath();
-			tksFilePath.setText(path);
-		}else if(CC_BROWSE.equals(action)) {
+//		if(TKS_BROWSE.equals(action)) {
+//			String path = browseAndGetFilePath();
+//			tksFilePath.setText(path);
+//		}else 
+		if(CC_BROWSE.equals(action)) {
 			String path = browseAndGetFilePath();
 			ccFilePath.setText(path);
 		}
@@ -219,16 +220,16 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	public void stateChanged(ChangeEvent e) {
 		if(e.getSource() == dualAuth) {
 			if(dualAuth.isSelected()) {
-				tksFilePath.setVisible(true);
-				tksBrowseButton.setVisible(true);
-				tksPassword.setVisible(true);
+//				tksFilePath.setVisible(true);
+//				tksBrowseButton.setVisible(true);
+//				tksPassword.setVisible(true);
 				ccFilePath.setVisible(true);
 				ccBrowseButton.setVisible(true);
 				ccPassword.setVisible(true);
 			} else {
-				tksFilePath.setVisible(false);
-				tksBrowseButton.setVisible(false);
-				tksPassword.setVisible(false);
+//				tksFilePath.setVisible(false);
+//				tksBrowseButton.setVisible(false);
+//				tksPassword.setVisible(false);
 				ccFilePath.setVisible(false);
 				ccBrowseButton.setVisible(false);
 				ccPassword.setVisible(false);
@@ -286,8 +287,8 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 			dualAuth.setVisible(true);
 			dualAuth.setSelected(sampler.isDualSSLAuth());	
 		}
-		tksFilePath.setText(sampler.getKeyStoreFilePath());
-		tksPassword.setText(sampler.getKeyStorePassword());
+//		tksFilePath.setText(sampler.getKeyStoreFilePath());
+//		tksPassword.setText(sampler.getKeyStorePassword());
 		ccFilePath.setText(sampler.getClientCertFilePath());
 		ccPassword.setText(sampler.getClientCertPassword());
 
@@ -319,8 +320,8 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		sampler.setProtocol(protocols.getText());
 		sampler.setWsPath(wsPath.getText());
 		sampler.setDualSSLAuth(dualAuth.isSelected());
-		sampler.setKeyStoreFilePath(tksFilePath.getText());
-		sampler.setKeyStorePassword(tksPassword.getText());
+//		sampler.setKeyStoreFilePath(tksFilePath.getText());
+//		sampler.setKeyStorePassword(tksPassword.getText());
 		sampler.setClientCertFilePath(ccFilePath.getText());
 		sampler.setClientCertPassword(ccPassword.getText());
 
@@ -356,8 +357,8 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 
 		dualAuth.setSelected(false);
 		wsPath.setText("");
-		tksFilePath.setText("");
-		tksPassword.setText("");
+//		tksFilePath.setText("");
+//		tksPassword.setText("");
 		ccFilePath.setText("");
 		ccPassword.setText("");
 		

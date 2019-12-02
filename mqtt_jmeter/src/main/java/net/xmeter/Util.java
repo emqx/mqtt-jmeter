@@ -5,16 +5,13 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
-import org.apache.http.ssl.SSLContexts;
 import org.apache.jmeter.services.FileServer;
 
 import net.xmeter.samplers.AbstractMQTTSampler;
@@ -40,37 +37,32 @@ public class Util implements Constants {
 
 	public static SSLContext getContext(AbstractMQTTSampler sampler) throws Exception {
 		if (!sampler.isDualSSLAuth()) {
+			logger.info("Configured with non-dual SSL.");
 			SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
-			sslContext.init(null, new TrustManager[] { new X509TrustManager() {
-				public X509Certificate[] getAcceptedIssuers() {
-					return null;
-				}
-
-				public void checkClientTrusted(X509Certificate[] certs, String authType) {
-				}
-
-				public void checkServerTrusted(X509Certificate[] certs, String authType) {
-				}
-			} }, new SecureRandom());
+			sslContext.init(null, new TrustManager[] {new AcceptAllTrustManager()}, new SecureRandom());
 			return sslContext;
 		} else {
-			logger.info("Configured with dual SSL, trying to load key files.");
-			String KEYSTORE_PASS = sampler.getKeyStorePassword();
+			logger.info("Configured with dual SSL, trying to load client certification.");
+//			String KEYSTORE_PASS = sampler.getKeyStorePassword();
 			String CLIENTCERT_PASS = sampler.getClientCertPassword();
 
-			File theFile1 = getKeyStoreFile(sampler);
+//			File theFile1 = getKeyStoreFile(sampler);
 			File theFile2 = getClientCertFile(sampler);
 			
-			try(InputStream is_cacert = new FileInputStream(theFile1); InputStream is_client = new FileInputStream(theFile2)) {
-				KeyStore tks = KeyStore.getInstance(KeyStore.getDefaultType()); // jks
-				tks.load(is_cacert, KEYSTORE_PASS.toCharArray());
+			try(/*InputStream is_cacert = new FileInputStream(theFile1);*/InputStream is_client = new FileInputStream(theFile2)) {
+//				KeyStore tks = KeyStore.getInstance(KeyStore.getDefaultType()); // jks
+//				tks.load(is_cacert, KEYSTORE_PASS.toCharArray());
 
 				KeyStore cks = KeyStore.getInstance("PKCS12");
 				cks.load(is_client, CLIENTCERT_PASS.toCharArray());
 
-				SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(tks, new TrustSelfSignedStrategy()) // use it to customize
-						.loadKeyMaterial(cks, CLIENTCERT_PASS.toCharArray()) // load client certificate
-						.build();
+				SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+				
+				final KeyManagerFactory kmfactory = KeyManagerFactory.getInstance(
+		                KeyManagerFactory.getDefaultAlgorithm());
+		        kmfactory.init(cks, CLIENTCERT_PASS.toCharArray());
+				
+				sslContext.init(kmfactory.getKeyManagers(), new TrustManager[] {new AcceptAllTrustManager()}, new SecureRandom());
 				return sslContext;
 			}
 		}
