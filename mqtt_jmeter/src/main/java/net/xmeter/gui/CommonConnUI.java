@@ -1,11 +1,14 @@
 package net.xmeter.gui;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -23,7 +26,9 @@ import org.apache.jorphan.gui.JLabeledChoice;
 import org.apache.jorphan.gui.JLabeledTextField;
 
 import net.xmeter.Constants;
+import net.xmeter.Util;
 import net.xmeter.samplers.AbstractMQTTSampler;
+import net.xmeter.samplers.mqtt.MQTT;
 
 public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private final JLabeledTextField serverAddr = new JLabeledTextField("Server name or IP:");
@@ -35,8 +40,10 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private final JLabeledTextField passwordAuth = new JLabeledTextField("Password:");
 
 	private JLabeledChoice protocols;
+	private JLabeledChoice clientNames;
 
 	private JCheckBox dualAuth = new JCheckBox("Dual SSL authentication");
+	private JLabeledTextField wsPath = new JLabeledTextField("WS Path: ", 10);
 
 	private final JLabeledTextField tksFilePath = new JLabeledTextField("Trust Key Store(*.jks):       ", 25);
 	private final JLabeledTextField ccFilePath = new JLabeledTextField("Client Certification(*.p12):", 25);
@@ -58,7 +65,9 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private final JLabeledTextField reconnAttmptMax = new JLabeledTextField("Reconnect attampt max:", 3);
 
 	private final JLabeledTextField connCleanSession = new JLabeledTextField("Clean session:", 3);
-	
+
+	private final List<String> clientNamesList = MQTT.getAvailableNames();
+
 	public JPanel createConnPanel() {
 		JPanel con = new HorizontalPanel();
 		
@@ -115,20 +124,32 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		JPanel protocolPanel = new VerticalPanel();
 		protocolPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Protocols"));
 		
-		JPanel pPanel = new HorizontalPanel();
+		JPanel pPanel = new JPanel();
+		pPanel.setLayout(new BorderLayout());
 		//pPanel.setLayout(new GridLayout(1, 2));
 
-		protocols = new JLabeledChoice("Protocols:", new String[] { "TCP", "SSL" }, true, false);
+		JPanel pCenter = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		clientNames = new JLabeledChoice("Clients:", clientNamesList.toArray(new String[] {}), true, false);
+		clientNames.addChangeListener(this);
+		pCenter.add(clientNames);
+
+		protocols = new JLabeledChoice("Protocols:", false);
 		//JComboBox<String> component = (JComboBox) protocols.getComponentList().get(1);
 		//component.setSize(new Dimension(40, component.getHeight()));
 		protocols.addChangeListener(this);
-		pPanel.add(protocols, BorderLayout.WEST);
+		pCenter.add(protocols);
+
+		wsPath.setFont(null);
+		wsPath.setVisible(false);
+		pCenter.add(wsPath);
+
+		pPanel.add(pCenter, BorderLayout.CENTER);
 
 		dualAuth.setSelected(false);
 		dualAuth.setFont(null);
 		dualAuth.setVisible(false);
 		dualAuth.addChangeListener(this);
-		pPanel.add(dualAuth, BorderLayout.CENTER);
+		pPanel.add(dualAuth, BorderLayout.SOUTH);
 
 		JPanel panel = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
@@ -213,16 +234,24 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 				ccPassword.setVisible(false);
 			}
 		} else if(e.getSource() == protocols) {
-			if("TCP".equals(protocols.getText())) {
-				dualAuth.setVisible(false);
-				dualAuth.setSelected(false);
-			} else if("SSL".equals(protocols.getText())) {
-				dualAuth.setVisible(true);
-				dualAuth.setEnabled(true);
+			boolean isSecure = Util.isSecureProtocol(protocols.getText());
+			dualAuth.setVisible(isSecure);
+			dualAuth.setEnabled(isSecure);
+			boolean wsProtocol = Util.isWebSocketProtocol(protocols.getText());
+			wsPath.setVisible(wsProtocol);
+			wsPath.setEnabled(wsProtocol);
+		} else if (e.getSource() == clientNames) {
+			int index = clientNames.getSelectedIndex();
+			if (index > -1) {
+				String clientName = clientNames.getItems()[index];
+				List<String> supportedProtocols = MQTT.getSupportedProtocols(clientName);
+				protocols.setValues(supportedProtocols.toArray(new String[supportedProtocols.size()]));
+			} else {
+				protocols.setValues(new String[0]);
 			}
 		}
 	}
-	
+
 	public void configure(AbstractMQTTSampler sampler) {
 		serverAddr.setText(sampler.getServer());
 		serverPort.setText(sampler.getPort());
@@ -232,17 +261,27 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 			mqttVersion.setSelectedIndex(1);
 		}
 		timeout.setText(sampler.getConnTimeout());
-		
-		
-		if(sampler.getProtocol().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1){
-			if(DEFAULT_PROTOCOL.equals(sampler.getProtocol())) {
-				protocols.setSelectedIndex(0);	
-			} else {
-				protocols.setSelectedIndex(1);
-			}
+
+		if (sampler.getProtocol().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1) {
+			int index = clientNamesList.indexOf(sampler.getMqttClientName());
+			clientNames.setSelectedIndex(index);
+		} else{
+			clientNames.setText(sampler.getMqttClientName());
+		}
+
+		if(sampler.getProtocol().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1) {
+			List<String> items = Arrays.asList(protocols.getItems());
+			int index = items.indexOf(sampler.getProtocol());
+			protocols.setSelectedIndex(index);
 		} else {
 			protocols.setText(sampler.getProtocol());
 		}
+
+		boolean wsProtocol = Util.isWebSocketProtocol(sampler.getProtocol());
+		wsPath.setText(sampler.getWsPath());
+		wsPath.setVisible(wsProtocol);
+		wsPath.setEnabled(wsProtocol);
+
 		if(sampler.isDualSSLAuth()) {
 			dualAuth.setVisible(true);
 			dualAuth.setSelected(sampler.isDualSSLAuth());	
@@ -275,8 +314,10 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		sampler.setPort(serverPort.getText());
 		sampler.setMqttVersion(mqttVersion.getText());
 		sampler.setConnTimeout(timeout.getText());
-		
+
+		sampler.setMqttClientName(clientNames.getText());
 		sampler.setProtocol(protocols.getText());
+		sampler.setWsPath(wsPath.getText());
 		sampler.setDualSSLAuth(dualAuth.isSelected());
 		sampler.setKeyStoreFilePath(tksFilePath.getText());
 		sampler.setKeyStorePassword(tksPassword.getText());
@@ -309,8 +350,12 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		mqttVersion.setSelectedIndex(0);
 		timeout.setText(DEFAULT_CONN_TIME_OUT);
 
-		protocols.setSelectedIndex(0);	
+		clientNames.setSelectedIndex(clientNamesList.indexOf(DEFAULT_MQTT_CLIENT_NAME));
+		protocols.setValues(MQTT.getSupportedProtocols(DEFAULT_MQTT_CLIENT_NAME).toArray(new String[] {}));
+		protocols.setSelectedIndex(0);
+
 		dualAuth.setSelected(false);
+		wsPath.setText("");
 		tksFilePath.setText("");
 		tksPassword.setText("");
 		ccFilePath.setText("");

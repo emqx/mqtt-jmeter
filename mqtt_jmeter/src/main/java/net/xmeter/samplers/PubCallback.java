@@ -1,13 +1,14 @@
 package net.xmeter.samplers;
 
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.fusesource.mqtt.client.Callback;
 import org.fusesource.mqtt.client.QoS;
 
 public class PubCallback implements Callback<Void>{
-	private static final Logger logger = Logger.getLogger(ConnectionCallback.class.getCanonicalName());
+	private static final Logger logger = Logger.getLogger(PubCallback.class.getCanonicalName());
 	private boolean successful = false;
 	private Object pubLock;
 	private String errorMessage = "";
@@ -36,7 +37,7 @@ public class PubCallback implements Callback<Void>{
 		synchronized (pubLock) {
 			this.successful = false;
 			this.errorMessage = "err: " + value.getMessage();
-			logger.severe(value.getMessage());
+			logger.log(Level.SEVERE, value.getMessage(), value);
 			pubLock.notify();
 		}	
 	}

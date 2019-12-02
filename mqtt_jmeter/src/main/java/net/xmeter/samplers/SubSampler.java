@@ -1,36 +1,30 @@
 package net.xmeter.samplers;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
-import org.fusesource.hawtbuf.Buffer;
-import org.fusesource.hawtbuf.UTF8Buffer;
-import org.fusesource.mqtt.client.Callback;
-import org.fusesource.mqtt.client.CallbackConnection;
-import org.fusesource.mqtt.client.Listener;
-import org.fusesource.mqtt.client.QoS;
-import org.fusesource.mqtt.client.Topic;
 
 import net.xmeter.SubBean;
+import net.xmeter.samplers.mqtt.MQTTConnection;
+import net.xmeter.samplers.mqtt.MQTTQoS;
 
 @SuppressWarnings("deprecation")
 public class SubSampler extends AbstractMQTTSampler {
 	private static final long serialVersionUID = 2979978053740194951L;
 	private static final Logger logger = Logger.getLogger(SubSampler.class.getCanonicalName());
 	
-	private transient CallbackConnection connection = null;
-	private transient UTF8Buffer clientId;
+	private transient MQTTConnection connection = null;
+	private transient String clientId;
 	private boolean subFailed = false;
 	
 	private boolean sampleByTime = true; // initial values
@@ -41,8 +35,6 @@ public class SubSampler extends AbstractMQTTSampler {
 	private boolean printFlag = false;
 
 	private transient Object dataLock = new Object();
-	
-	private int qos = QOS_0;
 
 	public String getQOS() {
 		return getPropertyAsString(QOS_LEVEL, String.valueOf(QOS_0));
@@ -106,9 +98,8 @@ public class SubSampler extends AbstractMQTTSampler {
 		result.setSampleLabel(getName());
 	
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
-		connection = (CallbackConnection) vars.getObject("conn");
-		clientId = (UTF8Buffer) vars.getObject("clientId");
-		UTF8Buffer clientId = (UTF8Buffer) vars.getObject("clientId");
+		connection = (MQTTConnection) vars.getObject("conn");
+		clientId = (String) vars.getObject("clientId");
 		if (connection == null) {
 			return fillFailedResult(result, "500", "Subscribe failed because connection is not established.");
 		}
@@ -134,8 +125,8 @@ public class SubSampler extends AbstractMQTTSampler {
 		setListener(sampleByTime, sampleCount);
 		Set<String> topics = topicSubscribed.get(clientId);
 		if (topics == null) {
-			logger.severe("subscribed topics haven't been initiated. [clientId: " + (clientId == null ? "null" : clientId.toString()) + "]");
-			topics = new HashSet<String>();
+			logger.severe("subscribed topics haven't been initiated. [clientId: " + (clientId == null ? "null" : clientId) + "]");
+			topics = new HashSet<>();
 			topics.add(topicsName);
 			topicSubscribed.put(clientId, topics);
 			listenToTopics(topicsName);  // TODO: run once or multiple times ?
@@ -156,7 +147,7 @@ public class SubSampler extends AbstractMQTTSampler {
 			try {
 				TimeUnit.MILLISECONDS.sleep(sampleElapsedTime);
 			} catch (InterruptedException e) {
-				logger.info("Received exception when waiting for notification signal: " + e.getMessage());
+				logger.log(Level.INFO, "Received exception when waiting for notification signal", e);
 			}
 			synchronized (dataLock) {
 				result.sampleStart();
@@ -174,7 +165,7 @@ public class SubSampler extends AbstractMQTTSampler {
 					try {
 						dataLock.wait();
 					} catch (InterruptedException e) {
-						logger.info("Received exception when waiting for notification signal: " + e.getMessage());
+						logger.log(Level.INFO, "Received exception when waiting for notification signal", e);
 					}
 				}
 				result.sampleStart();
@@ -198,7 +189,9 @@ public class SubSampler extends AbstractMQTTSampler {
 			}
 		}
 		result = fillOKResult(result, bean.getReceivedMessageSize(), message, content.toString());
-		logger.fine("sub [topic]: " + topicName + ", [payload]: " + content.toString());
+		if (logger.isLoggable(Level.FINE)) {
+			logger.fine("sub [topic]: " + topicName + ", [payload]: " + content.toString());
+		}
 		
 		if(receivedCount == 0) {
 			result.setEndTime(result.getStartTime()); // dummy result, rectify sample time
@@ -216,83 +209,45 @@ public class SubSampler extends AbstractMQTTSampler {
 	}
 	
 	private void listenToTopics(final String topicsName) {
+		int qos;
 		try {
 			qos = Integer.parseInt(getQOS());
 		} catch(Exception ex) {
-			logger.severe(MessageFormat.format("Specified invalid QoS value {0}, set to default QoS value {1}!", ex.getMessage(), qos));
+			logger.log(Level.SEVERE, ex, () -> MessageFormat.format("Specified invalid QoS value {0}, set to default QoS value {1}!", ex.getMessage(), QOS_0));
 			qos = QOS_0;
 		}
 		
 		final String[] paraTopics = topicsName.split(",");
-		
-		Topic[] topics = new Topic[paraTopics.length];
 		if(qos < 0 || qos > 2) {
 			logger.severe("Specified invalid QoS value, set to default QoS value " + qos);
 			qos = QOS_0;
 		}
-		for(int i = 0; i < topics.length; i++) {
-			if (qos == QOS_0) {
-				topics[i] = new Topic(paraTopics[i], QoS.AT_MOST_ONCE);
-			} else if (qos == QOS_1) {
-				topics[i] = new Topic(paraTopics[i], QoS.AT_LEAST_ONCE);
-			} else {
-				topics[i] = new Topic(paraTopics[i], QoS.EXACTLY_ONCE);
-			}
-		}
 
-		connection.subscribe(topics, new Callback<byte[]>() {
-			@Override
-			public void onSuccess(byte[] value) {
-				logger.fine("sub successful, topic length is " + paraTopics.length);
-			}
-
-			@Override
-			public void onFailure(Throwable value) {
-				logger.info("subscribe failed: " + value.getMessage());
-				subFailed = true;
-			}
+		connection.subscribe(paraTopics, MQTTQoS.fromValue(qos), () -> {
+			logger.fine(() -> "sub successful, topic length is " + paraTopics.length);
+		}, error -> {
+			logger.log(Level.INFO, "subscribe failed", error);
+			subFailed = true;
 		});
 	}
 	
 	private void setListener(final boolean sampleByTime, final int sampleCount) {
-		connection.listener(new Listener() {
-			@Override
-			public void onPublish(UTF8Buffer topic, Buffer body, Runnable ack) {
-				try {
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					body.writeTo(baos);
-					String msg = baos.toString();
-					ack.run();
-					
-					if(sampleByTime) {
-						synchronized (dataLock) {
-							handleSubBean(sampleByTime, msg, sampleCount);
-						}
-					} else {
-						synchronized (dataLock) {
-							SubBean bean = handleSubBean(sampleByTime, msg, sampleCount);
-							if(bean.getReceivedCount() == sampleCount) {
-								dataLock.notify();
-							}
-						}
+		connection.setSubListener(((topic, message, ack) -> {
+			ack.run();
+
+			if(sampleByTime) {
+				synchronized (dataLock) {
+					handleSubBean(sampleByTime, message, sampleCount);
+				}
+			} else {
+				synchronized (dataLock) {
+					SubBean bean = handleSubBean(sampleByTime, message, sampleCount);
+					if(bean.getReceivedCount() == sampleCount) {
+						dataLock.notify();
 					}
-				} catch (IOException e) {
-					logger.severe(e.getMessage());
 				}
 			}
-
-			@Override
-			public void onFailure(Throwable value) {
-			}
-
-			@Override
-			public void onDisconnected() {
-			}
-
-			@Override
-			public void onConnected() {
-			}
-		});
+		}));
 	}
 	
 	private SubBean handleSubBean(boolean sampleByTime, String msg, int sampleCount) {
@@ -315,7 +270,7 @@ public class SubSampler extends AbstractMQTTSampler {
 			long now = System.currentTimeMillis();
 			int index = msg.indexOf(TIME_STAMP_SEP_FLAG);
 			if (index == -1 && (!printFlag)) {
-				logger.info("Payload does not include timestamp: " + msg);
+				logger.info(() -> "Payload does not include timestamp: " + msg);
 				printFlag = true;
 			} else if (index != -1) {
 				long start = Long.parseLong(msg.substring(0, index));
@@ -341,7 +296,7 @@ public class SubSampler extends AbstractMQTTSampler {
 		result.setSuccessful(false);
 		result.setResponseMessage(message);
 		if (clientId != null) {
-			result.setResponseData(MessageFormat.format("Client [{0}]: {1}", clientId.toString(), message).getBytes());
+			result.setResponseData(MessageFormat.format("Client [{0}]: {1}", clientId, message).getBytes());
 		} else {
 			result.setResponseData(message.getBytes());
 		}
@@ -352,7 +307,7 @@ public class SubSampler extends AbstractMQTTSampler {
 		try {
 			TimeUnit.MILLISECONDS.sleep(SUB_FAIL_PENALTY);
 		} catch (InterruptedException e) {
-			logger.info("Received exception when waiting for notification signal: " + e.getMessage());
+			logger.log(Level.INFO, "Received exception when waiting for notification signal", e);
 		}
 		return result;
 	}

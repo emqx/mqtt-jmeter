@@ -1,20 +1,21 @@
 package net.xmeter.samplers;
 
 import java.text.MessageFormat;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
-import org.fusesource.hawtbuf.UTF8Buffer;
-import org.fusesource.mqtt.client.CallbackConnection;
+
+import net.xmeter.samplers.mqtt.MQTTConnection;
 
 public class DisConnectSampler extends AbstractMQTTSampler {
 	private static final long serialVersionUID = 4360869021667126983L;
 	private static final Logger logger = Logger.getLogger(DisConnectSampler.class.getCanonicalName());
 
-	private transient CallbackConnection connection = null;
+	private transient MQTTConnection connection = null;
 
 	@Override
 	public SampleResult sample(Entry entry) {
@@ -22,8 +23,8 @@ public class DisConnectSampler extends AbstractMQTTSampler {
 		result.setSampleLabel(getName());
 		
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
-		connection = (CallbackConnection) vars.getObject("conn");
-		UTF8Buffer clientId = (UTF8Buffer) vars.getObject("clientId");
+		connection = (MQTTConnection) vars.getObject("conn");
+		String clientId = (String) vars.getObject("clientId");
 		if (connection == null) {
 			result.sampleStart();
 			result.setSuccessful(false);
@@ -39,7 +40,7 @@ public class DisConnectSampler extends AbstractMQTTSampler {
 			
 			if (connection != null) {
 				logger.info(MessageFormat.format("Disconnect connection {0}.", connection));
-				connection.disconnect(null);
+				connection.disconnect();
 				vars.remove("conn"); // clean up thread local var as well
 				topicSubscribed.remove(clientId);
 			}
@@ -51,11 +52,11 @@ public class DisConnectSampler extends AbstractMQTTSampler {
 			result.setResponseMessage(MessageFormat.format("Connection {0} disconnected.", connection));
 			result.setResponseCodeOK();
 		} catch (Exception e) {
-			logger.severe(e.getMessage());
+			logger.log(Level.SEVERE, "Failed to disconnect Connection" + connection, e);
 			if (result.getEndTime() == 0) result.sampleEnd(); //avoid re-enter sampleEnd()
 			result.setSuccessful(false);
 			result.setResponseMessage(MessageFormat.format("Failed to disconnect Connection {0}.", connection));
-			result.setResponseData(MessageFormat.format("Client [{0}] failed. Couldn't disconnect connection.", (clientId == null ? "null" : clientId.toString())).getBytes());
+			result.setResponseData(MessageFormat.format("Client [{0}] failed. Couldn't disconnect connection.", (clientId == null ? "null" : clientId)).getBytes());
 			result.setResponseCode("501");
 		}
 		return result;

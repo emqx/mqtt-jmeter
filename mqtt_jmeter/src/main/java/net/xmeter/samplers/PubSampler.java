@@ -1,6 +1,7 @@
 package net.xmeter.samplers;
 
 import java.text.MessageFormat;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.bind.DatatypeConverter;
@@ -9,19 +10,19 @@ import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
-import org.fusesource.hawtbuf.UTF8Buffer;
-import org.fusesource.mqtt.client.CallbackConnection;
-import org.fusesource.mqtt.client.QoS;
 
 import net.xmeter.Util;
+import net.xmeter.samplers.mqtt.MQTTConnection;
+import net.xmeter.samplers.mqtt.MQTTPubResult;
+import net.xmeter.samplers.mqtt.MQTTQoS;
 
 public class PubSampler extends AbstractMQTTSampler {
 	private static final long serialVersionUID = 4312341622759500786L;
 	private static final Logger logger = Logger.getLogger(PubSampler.class.getCanonicalName());
 	
-	private transient CallbackConnection connection = null;
+	private transient MQTTConnection connection = null;
 	private String payload = null;
-	private QoS qos_enum = QoS.AT_MOST_ONCE;
+	private MQTTQoS qos_enum = MQTTQoS.AT_MOST_ONCE;
 	private String topicName = "";
 	private boolean retainedMsg = false;
 
@@ -91,8 +92,8 @@ public class PubSampler extends AbstractMQTTSampler {
 		result.setSampleLabel(getName());
 	
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
-		connection = (CallbackConnection) vars.getObject("conn");
-		UTF8Buffer clientId = (UTF8Buffer) vars.getObject("clientId");
+		connection = (MQTTConnection) vars.getObject("conn");
+		String clientId = (String) vars.getObject("clientId");
 		if (connection == null) {
 			result.sampleStart();
 			result.setSuccessful(false);
@@ -122,13 +123,13 @@ public class PubSampler extends AbstractMQTTSampler {
 			int qos = Integer.parseInt(getQOS());
 			switch (qos) {
 			case 0:
-				qos_enum = QoS.AT_MOST_ONCE;
+				qos_enum = MQTTQoS.AT_MOST_ONCE;
 				break;
 			case 1:
-				qos_enum = QoS.AT_LEAST_ONCE;
+				qos_enum = MQTTQoS.AT_LEAST_ONCE;
 				break;
 			case 2:
-				qos_enum = QoS.EXACTLY_ONCE;
+				qos_enum = MQTTQoS.EXACTLY_ONCE;
 				break;
 			default:
 				break;
@@ -147,50 +148,43 @@ public class PubSampler extends AbstractMQTTSampler {
 			}
 			
 			result.sampleStart();
-			final Object pubLock = new Object();
-			PubCallback pubCallback = new PubCallback(pubLock, qos_enum);
-			logger.fine("pub [topic]: " + topicName + ", [payload]: " + new String(toSend));
-			
-			if(qos_enum == QoS.AT_MOST_ONCE) { 
-				//For QoS == 0, the callback is the same thread with sampler thread, so it cannot use the lock object wait() & notify() in else block;
-				//Otherwise the sampler thread will be blocked.
-				connection.publish(topicName, toSend, qos_enum, retainedMsg, pubCallback);
-			} else {
-				synchronized (pubLock) {
-					connection.publish(topicName, toSend, qos_enum, retainedMsg, pubCallback);
-					pubLock.wait();
-				}
+			if (logger.isLoggable(Level.FINE)) {
+				logger.fine("pub [topic]: " + topicName + ", [payload]: " + new String(toSend));
 			}
+
+			MQTTPubResult pubResult = connection.publish(topicName, toSend, qos_enum, retainedMsg);
 			
 			result.sampleEnd();
 			result.setSamplerData(new String(toSend));
 			result.setSentBytes(toSend.length);
 			result.setLatency(result.getEndTime() - result.getStartTime());
-			result.setSuccessful(pubCallback.isSuccessful());
+			result.setSuccessful(pubResult.isSuccessful());
 			
-			if(pubCallback.isSuccessful()) {
+			if(pubResult.isSuccessful()) {
 				result.setResponseData("Publish successfuly.".getBytes());
 				result.setResponseMessage(MessageFormat.format("publish successfully for Connection {0}.", connection));
 				result.setResponseCodeOK();	
 			} else {
 				result.setSuccessful(false);
 				result.setResponseMessage(MessageFormat.format("Publish failed for connection {0}.", connection));
-				result.setResponseData(MessageFormat.format("Client [{0}] publish failed: {1}", (clientId == null ? "null" : clientId.toString()), pubCallback.getErrorMessage()).getBytes());
+				result.setResponseData(MessageFormat.format("Client [{0}] publish failed: {1}", (clientId == null ? "null" : clientId), pubResult.getError().orElse("")).getBytes());
 				result.setResponseCode("501");
-				logger.info(MessageFormat.format("** [clientId: {0}, topic: {1}, payload: {2}] Publish failed for connection {3}.", (clientId == null ? "null" : clientId.toString()), 
+				logger.info(MessageFormat.format("** [clientId: {0}, topic: {1}, payload: {2}] Publish failed for connection {3}.", (clientId == null ? "null" : clientId),
 						topicName, new String(toSend), connection));
-				logger.info(pubCallback.getErrorMessage());
+				pubResult.getError().ifPresent(logger::info);
 			}
 		} catch (Exception ex) {
-			logger.severe(ex.getMessage());
+			logger.log(Level.SEVERE, "Publish failed for connection " + connection, ex);
 			if (result.getEndTime() == 0) result.sampleEnd();
 			result.setLatency(result.getEndTime() - result.getStartTime());
 			result.setSuccessful(false);
 			result.setResponseMessage(MessageFormat.format("Publish failed for connection {0}.", connection));
-			result.setResponseData(MessageFormat.format("Client [{0}] publish failed: {1}", (clientId == null ? "null" : clientId.toString()), ex.getMessage()).getBytes());
+			result.setResponseData(MessageFormat.format("Client [{0}] publish failed: {1}", (clientId == null ? "null" : clientId), ex.getMessage()).getBytes());
 			result.setResponseCode("502");
-			logger.info(MessageFormat.format("** [clientId: {0}, topic: {1}, payload: {2}] Publish failed for connection {3}.", (clientId == null ? "null" : clientId.toString()), 
-					topicName, new String(toSend), connection));
+			if (logger.isLoggable(Level.INFO)) {
+				logger.info(MessageFormat.format("** [clientId: {0}, topic: {1}, payload: {2}] Publish failed for connection {3}.", (clientId == null ? "null" : clientId),
+						topicName, new String(toSend), connection));
+			}
 		}
 		return result;
 	}
