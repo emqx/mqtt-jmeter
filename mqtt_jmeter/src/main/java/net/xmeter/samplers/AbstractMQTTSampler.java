@@ -169,12 +169,12 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 		setProperty(PASSWORD_AUTH, password);
 	}
 	
-	public void setConnCleanSession(Boolean cleanSession) {
+	public void setConnCleanSession(String cleanSession) {
 		setProperty(CONN_CLEAN_SESSION, cleanSession);
 	}
 	
-	public Boolean getConnCleanSession() {
-		return getPropertyAsBoolean(CONN_CLEAN_SESSION, true);
+	public String getConnCleanSession() {
+		return getPropertyAsString(CONN_CLEAN_SESSION, "true");
 	}
 	
 	public void setTopicSubscribed(String clientId, Set<String> topics) {

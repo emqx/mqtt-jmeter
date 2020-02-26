@@ -335,7 +335,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		sampler.setConnAttamptMax(connAttmptMax.getText());
 		sampler.setConnReconnAttamptMax(reconnAttmptMax.getText());
 		
-		sampler.setConnCleanSession(Boolean.parseBoolean(connCleanSession.getText()));
+		sampler.setConnCleanSession(connCleanSession.getText());
 	}
 	
 	public static int parseInt(String value) {

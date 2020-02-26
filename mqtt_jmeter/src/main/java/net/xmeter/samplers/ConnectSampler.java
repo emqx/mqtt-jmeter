@@ -69,7 +69,7 @@ public class ConnectSampler extends AbstractMQTTSampler {
 			if (!"".equals(getPasswordAuth().trim())) {
 				parameters.setPassword(getPasswordAuth());
 			}
-			parameters.setCleanSession(getConnCleanSession());
+			parameters.setCleanSession(Boolean.parseBoolean(getConnCleanSession()));
 			parameters.setConnectTimeout(Integer.parseInt(getConnTimeout()));
 			if (parameters.isSecureProtocol()) {
 				MQTTSsl ssl = MQTT.getInstance(getMqttClientName()).createSsl(this);

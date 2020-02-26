@@ -159,7 +159,7 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 		if (!"".equals(getPasswordAuth().trim())) {
 			parameters.setPassword(getPasswordAuth());
 		}
-		parameters.setCleanSession(getConnCleanSession());
+		parameters.setCleanSession(Boolean.parseBoolean(getConnCleanSession()));
 		parameters.setConnectTimeout(Integer.parseInt(getConnTimeout()));
 
 		return MQTT.getInstance(getMqttClientName()).createClient(parameters);
