@@ -371,5 +371,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		connAttmptMax.setText(DEFAULT_CONN_ATTAMPT_MAX);
 		connKeepAlive.setText(DEFAULT_CONN_KEEP_ALIVE);
 		reconnAttmptMax.setText(DEFAULT_CONN_RECONN_ATTAMPT_MAX);
+		connCleanSession.setText("true");
 	}
 }
