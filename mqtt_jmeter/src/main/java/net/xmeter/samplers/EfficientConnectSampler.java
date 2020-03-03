@@ -28,10 +28,11 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 	private transient Vector<MQTTConnection> connections;
 	
 	private Boolean subSucc = null;
-	private Object lock = new Object();
+	private Object lock;
 
 	@Override
 	public SampleResult sample(Entry entry) {
+		lock = new Object();
 		SampleResult result = new SampleResult();
 		result.setSampleLabel(getLabelPrefix() + getName());
 		result.setSuccessful(true);
