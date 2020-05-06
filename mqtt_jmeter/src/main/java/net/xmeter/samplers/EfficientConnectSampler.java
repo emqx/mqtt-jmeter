@@ -16,6 +16,7 @@ import net.xmeter.samplers.mqtt.MQTT;
 import net.xmeter.samplers.mqtt.MQTTClient;
 import net.xmeter.samplers.mqtt.MQTTConnection;
 import net.xmeter.samplers.mqtt.MQTTQoS;
+import net.xmeter.samplers.mqtt.MQTTSsl;
 
 public class EfficientConnectSampler extends AbstractMQTTSampler {
 
@@ -162,7 +163,11 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 		}
 		parameters.setCleanSession(Boolean.parseBoolean(getConnCleanSession()));
 		parameters.setConnectTimeout(Integer.parseInt(getConnTimeout()));
-
+		if (parameters.isSecureProtocol()) {
+			MQTTSsl ssl = MQTT.getInstance(getMqttClientName()).createSsl(this);
+			parameters.setSsl(ssl);
+		}
+		
 		return MQTT.getInstance(getMqttClientName()).createClient(parameters);
 	}
 	
