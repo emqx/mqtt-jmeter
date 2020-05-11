@@ -45,15 +45,10 @@ This section includes basic connection settings.
 
 - **Timeout(s)**: The connection timeout seconds while connecting to MQTT server. The default is 10 seconds.
 
-### MQTT Client
-
-The sampler supports 2 client implementations:
-- fusesource
-- hivemq
 
 ### MQTT Protocol
 
-The sampler supports 4 protocols, TCP, WS, SSL, WSS depending on selected client.
+The sampler supports 4 protocols, TCP, SSL, WS, WSS.
 For SSL and WSS protocols, it includes normal SSL and dual SSL authentication. 
 
 If **'Dual SSL authentication'** is checked, please follow 'Certification files for SSL/TLS connections' at end of this doc to set the client SSL configuration properly.
