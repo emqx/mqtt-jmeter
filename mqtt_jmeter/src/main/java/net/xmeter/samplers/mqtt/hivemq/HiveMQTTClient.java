@@ -28,7 +28,7 @@ class HiveMQTTClient implements MQTTClient {
     private final ConnectionParameters parameters;
     private final Mqtt3BlockingClient client;
 
-    HiveMQTTClient(ConnectionParameters parameters) throws Exception {
+    HiveMQTTClient(ConnectionParameters parameters) {
         this.parameters = parameters;
         Mqtt3ClientBuilder mqtt3ClientBuilder = Mqtt3Client.builder()
                 .identifier(parameters.getClientId())
@@ -39,8 +39,7 @@ class HiveMQTTClient implements MQTTClient {
                 .buildBlocking();
     }
 
-    private Mqtt3ClientBuilder applyAdditionalConfig(Mqtt3ClientBuilder builder, ConnectionParameters parameters)
-            throws Exception {
+    private Mqtt3ClientBuilder applyAdditionalConfig(Mqtt3ClientBuilder builder, ConnectionParameters parameters) {
         if (parameters.getReconnectMaxAttempts() > 0) {
             builder = builder.automaticReconnect(MqttClientAutoReconnect.builder().build());
         }
@@ -51,10 +50,13 @@ class HiveMQTTClient implements MQTTClient {
         if (parameters.isWebSocketProtocol()) {
             MqttWebSocketConfigBuilder wsConfigBuilder = MqttWebSocketConfig.builder();
             if (parameters.getPath() != null) {
-                wsConfigBuilder.serverPath(parameters.getPath());
+                wsConfigBuilder = wsConfigBuilder.serverPath(parameters.getPath());
             }
             builder = builder.webSocketConfig(wsConfigBuilder.build());
         }
+        builder = builder.transportConfig()
+                .mqttConnectTimeout(parameters.getConnectTimeout(), TimeUnit.SECONDS)
+                .applyTransportConfig();
         return builder;
     }
 
@@ -93,7 +95,7 @@ class HiveMQTTClient implements MQTTClient {
             Mqtt3SimpleAuthBuilder.Complete simpleAuth = Mqtt3SimpleAuth.builder()
                     .username(parameters.getUsername());
             if (parameters.getPassword() != null) {
-                simpleAuth.password(parameters.getPassword().getBytes());
+                simpleAuth = simpleAuth.password(parameters.getPassword().getBytes());
             }
             return simpleAuth.build();
         }
