@@ -1,5 +1,13 @@
 package net.xmeter.samplers;
 
+import net.xmeter.SubBean;
+import net.xmeter.samplers.mqtt.MQTTConnection;
+import net.xmeter.samplers.mqtt.MQTTQoS;
+import org.apache.jmeter.samplers.Entry;
+import org.apache.jmeter.samplers.SampleResult;
+import org.apache.jmeter.threads.JMeterContextService;
+import org.apache.jmeter.threads.JMeterVariables;
+
 import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.List;
@@ -8,15 +16,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.apache.jmeter.samplers.Entry;
-import org.apache.jmeter.samplers.SampleResult;
-import org.apache.jmeter.threads.JMeterContextService;
-import org.apache.jmeter.threads.JMeterVariables;
-
-import net.xmeter.SubBean;
-import net.xmeter.samplers.mqtt.MQTTConnection;
-import net.xmeter.samplers.mqtt.MQTTQoS;
 
 @SuppressWarnings("deprecation")
 public class SubSampler extends AbstractMQTTSampler {
@@ -98,8 +97,8 @@ public class SubSampler extends AbstractMQTTSampler {
 		result.setSampleLabel(getName());
 	
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
-		connection = (MQTTConnection) vars.getObject("conn");
-		clientId = (String) vars.getObject("clientId");
+		connection = (MQTTConnection) vars.getObject(getConnName());
+		clientId = (String) vars.getObject(getConnName()+"_clientId");
 		if (connection == null) {
 			return fillFailedResult(result, "500", "Subscribe failed because connection is not established.");
 		}
@@ -124,7 +123,7 @@ public class SubSampler extends AbstractMQTTSampler {
 		final String topicsName= getTopics();
 		setListener(sampleByTime, sampleCount);
 		Set<String> topics = topicSubscribed.get(clientId);
-		if (topics == null) {
+		if (topics == null ) {
 			logger.severe("subscribed topics haven't been initiated. [clientId: " + (clientId == null ? "null" : clientId) + "]");
 			topics = new HashSet<>();
 			topics.add(topicsName);

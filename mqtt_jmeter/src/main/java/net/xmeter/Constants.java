@@ -6,6 +6,7 @@ public interface Constants {
 	public static final String PORT = "mqtt.port";
 	public static final String CONN_TIMEOUT = "mqtt.conn_timeout";
 	public static final String MQTT_CLIENT_NAME = "mqtt.client_name";
+	public static final String MQTT_CONN_NAME = "mqtt.connect_name";
 
 	public static final String PROTOCOL = "mqtt.protocol";
 	public static final String WS_PATH = "mqtt.ws_path";
@@ -63,6 +64,7 @@ public interface Constants {
 	public static final String DEFAULT_MQTT_VERSION = "3.1";
 	public static final String DEFAULT_PORT = "1883";
 	public static final String DEFAULT_CONN_TIME_OUT = "10";
+	public static final String DEFAULT_MQTT_CONN_NAME = "mqttconn";
 	public static final String TCP_PROTOCOL = "TCP";
 	public static final String SSL_PROTOCOL = "SSL";
 	public static final String WS_PROTOCOL = "WS";
