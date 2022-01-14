@@ -137,20 +137,20 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 		setProperty(CONN_CLIENT_ID_SUFFIX, clientIdSuffix);
 	}
 
-	public String getConnAttamptMax() {
-		return getPropertyAsString(CONN_ATTAMPT_MAX, DEFAULT_CONN_ATTAMPT_MAX);
+	public String getConnAttemptMax() {
+		return getPropertyAsString(CONN_ATTEMPT_MAX, DEFAULT_CONN_ATTEMPT_MAX);
 	}
 
-	public void setConnAttamptMax(String connAttamptMax) {
-		setProperty(CONN_ATTAMPT_MAX, connAttamptMax);
+	public void setConnAttemptMax(String connAttemptMax) {
+		setProperty(CONN_ATTEMPT_MAX, connAttemptMax);
 	}
 
-	public String getConnReconnAttamptMax() {
-		return getPropertyAsString(CONN_RECONN_ATTAMPT_MAX, DEFAULT_CONN_RECONN_ATTAMPT_MAX);
+	public String getConnReconnAttemptMax() {
+		return getPropertyAsString(CONN_RECONN_ATTEMPT_MAX, DEFAULT_CONN_RECONN_ATTEMPT_MAX);
 	}
 
-	public void setConnReconnAttamptMax(String connReconnAttamptMax) {
-		setProperty(CONN_RECONN_ATTAMPT_MAX, connReconnAttamptMax);
+	public void setConnReconnAttemptMax(String connReconnAttemptMax) {
+		setProperty(CONN_RECONN_ATTEMPT_MAX, connReconnAttemptMax);
 	}
 
 	public String getUserNameAuth() {

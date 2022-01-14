@@ -60,8 +60,8 @@ public class ConnectSampler extends AbstractMQTTSampler {
 			}
 			parameters.setClientId(clientId);
 
-			parameters.setConnectMaxAttempts(Integer.parseInt(getConnAttamptMax()));
-			parameters.setReconnectMaxAttempts(Integer.parseInt(getConnReconnAttamptMax()));
+			parameters.setConnectMaxAttempts(Integer.parseInt(getConnAttemptMax()));
+			parameters.setReconnectMaxAttempts(Integer.parseInt(getConnReconnAttemptMax()));
 
 			if (!"".equals(getUserNameAuth().trim())) {
 				parameters.setUsername(getUserNameAuth());
