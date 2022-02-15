@@ -6,7 +6,7 @@
     <version>2.0.3</version>
 
     <properties>
-        <jmeter-version>5.0</jmeter-version>
+        <jmeter-version>5.4.3</jmeter-version>
     </properties>
 
     <dependencies>
@@ -23,6 +23,7 @@
             <version>${jmeter-version}</version>
             <scope>provided</scope>
         </dependency>
+
 
         <dependency>
             <groupId>org.fusesource.mqtt-client</groupId>

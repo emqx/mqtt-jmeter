@@ -98,6 +98,7 @@
           <boolProp name="mqtt.client_id_suffix">true</boolProp>
           <stringProp name="mqtt.sample_condition">specified elapsed time (ms)</stringProp>
           <stringProp name="mqtt.sample_condition_value">1000</stringProp>
+          <stringProp name="mqtt.sample_condition_enable">false</stringProp>
         </net.xmeter.samplers.SubSampler>
         <hashTree>
           <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="固定定时器" enabled="true">
