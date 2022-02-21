@@ -159,9 +159,11 @@ public class PubSampler extends AbstractMQTTSampler {
 			result.setSuccessful(pubResult.isSuccessful());
 			
 			if(pubResult.isSuccessful()) {
+				logger.log(Level.INFO ,connection + "服务连接成功并开始发布消息");
 				result.setResponseData("Publish successfuly.".getBytes());
 				result.setResponseMessage(MessageFormat.format("publish successfully for Connection {0}.", connection));
-				result.setResponseCodeOK();	
+				result.setResponseCodeOK();
+				logger.log(Level.INFO ,connection + "发布消息成功");
 			} else {
 				result.setSuccessful(false);
 				result.setResponseMessage(MessageFormat.format("Publish failed for connection {0}.", connection));

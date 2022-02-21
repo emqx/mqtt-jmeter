@@ -110,14 +110,16 @@ public class SubSampler extends AbstractMQTTSampler {
 		if (connection == null) {
 			return fillFailedResult(result, "500", "Subscribe failed because connection is not established.");
 		}
-
+		logger.log(Level.INFO, connection + "服务连接成功，并开始接收消息");
 		sampleByTime = SAMPLE_ON_CONDITION_OPTION1.equals(getSampleCondition());
 		sampleEnable = getSampleConditionEnable();
 		try {
 			if (sampleByTime) {
 				sampleElapsedTime = Integer.parseInt(getSampleElapsedTime());
+				logger.log(Level.INFO, "结束接收方式为按持续时间");
 			} else {
 				sampleCount = Integer.parseInt(getSampleCount());
+				logger.log(Level.INFO, "结束接收方式为按消息数量");
 			}
 		} catch (NumberFormatException e) {
 			return fillFailedResult(result, "510", "Unrecognized value for sample elapsed time or message count.");
@@ -365,6 +367,7 @@ public class SubSampler extends AbstractMQTTSampler {
 		result.setBytes(size);
 		result.setResponseData(contents.getBytes());
 		result.sampleEnd();
+		logger.log(Level.INFO, connection + "服务器接收消息成功");
 		return result;
 	}
 

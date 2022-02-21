@@ -50,6 +50,7 @@ public class DisConnectSampler extends AbstractMQTTSampler {
 			result.setResponseData("Successful.".getBytes());
 			result.setResponseMessage(MessageFormat.format("Connection {0} disconnected.", connection));
 			result.setResponseCodeOK();
+			logger.log(Level.INFO ,connection + "服务关闭成功");
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, "Failed to disconnect Connection" + connection, e);
 			if (result.getEndTime() == 0) result.sampleEnd(); //avoid re-enter sampleEnd()

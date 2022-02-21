@@ -94,6 +94,7 @@ public class ConnectSampler extends AbstractMQTTSampler {
 				result.setResponseData("Successful.".getBytes());
 				result.setResponseMessage(MessageFormat.format("Connection {0} established successfully.", connection));
 				result.setResponseCodeOK();
+				logger.log(Level.INFO ,connection + "服务连接成功");
 			} else {
 				result.setSuccessful(false);
 				result.setResponseMessage(MessageFormat.format("Failed to establish Connection {0}.", connection));
