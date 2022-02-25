@@ -39,7 +39,7 @@ public interface Constants {
 
 	public static final String SAMPLE_CONDITION_VALUE = "mqtt.sample_condition_value";
 	public static final String SAMPLE_CONDITION = "mqtt.sample_condition";
-	public static final String SAMPLE_CONDITION_ENABLE = "mqtt.sample_condition_enable";
+	public static final String SAMPLE_CONDITION_TIME = "mqtt.sample_condition_time";
 
 	public static final String TIME_STAMP_SEP_FLAG = "ts_sep_flag";
 
