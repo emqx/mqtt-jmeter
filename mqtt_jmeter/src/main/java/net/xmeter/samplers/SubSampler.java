@@ -194,7 +194,7 @@ public class SubSampler extends AbstractMQTTSampler {
         synchronized (dataLock) {
             int receivedCount1 = (batches.isEmpty() ? 0 : batches.element().getReceivedCount());
             boolean needWait = false;
-            if (receivedCount1 < this.sampleCountTime) {
+            if (receivedCount1 < sampleCountTime) {
                 needWait = true;
             }
             if (needWait) {
@@ -272,7 +272,7 @@ public class SubSampler extends AbstractMQTTSampler {
             Long startTime = System.currentTimeMillis();
             if (sampleByTime) {
                 if (sampleCountTime > 0) {
-                    sampleEnableIsTrue(sampleByTime, sampleCount, message, startTime , sampleCountTime);
+                    sampleEnableIsTrue(sampleByTime, sampleCountTime, message, startTime);
                 } else {
                     synchronized (dataLock) {
                         handleSubBean(sampleByTime, message, sampleCount);
@@ -289,11 +289,11 @@ public class SubSampler extends AbstractMQTTSampler {
         }));
     }
 
-    private void sampleEnableIsTrue(boolean sampleByTime, int sampleCount, String message, Long startTime , int sampleCountTime) {
+    private void sampleEnableIsTrue(boolean sampleByTime, int sampleCountTime, String message, Long startTime ) {
         synchronized (dataLock) {
-            SubBean bean = handleSubBean(sampleByTime, message, sampleCount);
+            SubBean bean = handleSubBean(sampleByTime, message, sampleCountTime);
             Long endTime = System.currentTimeMillis();
-            if (bean.getReceivedCount() >= sampleCountTime || (int) (endTime - startTime) > sampleElapsedTime) {
+            if (bean.getReceivedCount() == sampleCountTime || (int) (endTime - startTime) > sampleElapsedTime) {
                 logger.log(Level.INFO, "接收到消息后结束接收消息");
                 dataLock.notify();
             }
