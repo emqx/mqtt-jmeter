@@ -1,12 +1,12 @@
 # mqtt-jmeter Overview
 MQTT JMeter Plugin extends your JMeter's capability to test against MQTT protocol, just as easy as ordinary HTTP protocal. 
 
-It has been used to benchmark EMQ server performance, and here is the [report link](https://github.com/emqtt/emq-xmeter-cn).
+It has been used to benchmark EMQ server performance, and here is the [report link](https://github.com/emqx/emq-xmeter-cn).
 
 This plugin is developed and maintained by [XMeter](https://www.xmeter.net). XMeter is a professional performance testing service provider.
 
 # Install instruction
-The plugin is a standard JMeter plugin. You can download the latest version of mqtt-jmeter from [here](https://github.com/emqtt/mqtt-jmeter/releases), and then copy the downloaded JAR files into $JMETER_HOME/lib/ext folder. After restarting the JMeter, you can see "MQTT samplers" provided by this plugin.
+The plugin is a standard JMeter plugin. You can download the latest version of mqtt-jmeter from [here](https://github.com/emqx/mqtt-jmeter/releases), and then copy the downloaded JAR files into $JMETER_HOME/lib/ext folder. After restarting the JMeter, you can see "MQTT samplers" provided by this plugin.
 
 To use this plugin, we recommend you to install JMeter 3.2 or above.
 
@@ -41,7 +41,7 @@ This section includes basic connection settings.
 
 - **Port number**: The port opened by MQTT server. Typically 1883 is for TCP protocol, and 8883 for SSL protocol.
 
-- **MQTT version**: The MQTT version, default is 3.1, and another option is 3.1.1. Sometimes we found version 3.1.1 is required to  establish connection to [Azure IoTHub](https://github.com/emqtt/mqtt-jmeter/issues/21).
+- **MQTT version**: The MQTT version, default is 3.1, and another option is 3.1.1. Sometimes we found version 3.1.1 is required to  establish connection to [Azure IoTHub](https://github.com/emqx/mqtt-jmeter/issues/21).
 
 - **Timeout(s)**: The connection timeout seconds while connecting to MQTT server. The default is 10 seconds.
 
