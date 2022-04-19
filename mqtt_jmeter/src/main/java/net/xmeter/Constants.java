@@ -41,6 +41,8 @@ public interface Constants {
 	public static final String SAMPLE_CONDITION = "mqtt.sample_condition";
 	public static final String SAMPLE_CONDITION_TIME = "mqtt.sample_condition_time";
 
+	public static final String SAMPLE_CONDITION_CONTENT = "mqtt.sample_condition_content";
+
 	public static final String TIME_STAMP_SEP_FLAG = "ts_sep_flag";
 
 	public static final String DEBUG_RESPONSE = "mqtt.debug_response";
@@ -58,6 +60,7 @@ public interface Constants {
 
 	public static final String SAMPLE_ON_CONDITION_OPTION1 = "specified elapsed time (ms)";
 	public static final String SAMPLE_ON_CONDITION_OPTION2 = "number of received messages";
+	public static final String SAMPLE_ON_CONDITION_OPTION3 = "content of received messages";
 
 	public static final int MAX_CLIENT_ID_LENGTH = 23;
 

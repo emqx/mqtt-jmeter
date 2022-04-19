@@ -1,14 +1,20 @@
 package net.xmeter.samplers;
 
+import com.alibaba.fastjson.JSONObject;
 import net.xmeter.SubBean;
+import net.xmeter.samplers.assertions.Assertions;
+import net.xmeter.samplers.assertions.ContentCompare;
 import net.xmeter.samplers.mqtt.MQTTConnection;
 import net.xmeter.samplers.mqtt.MQTTQoS;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,6 +22,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("deprecation")
 public class SubSampler extends AbstractMQTTSampler {
@@ -30,11 +37,15 @@ public class SubSampler extends AbstractMQTTSampler {
     private int sampleElapsedTime = 1000;
     private int sampleCount = 1;
     private int sampleCountTime;
+    private boolean sampleByContent = false;
 
     private transient ConcurrentLinkedQueue<SubBean> batches = new ConcurrentLinkedQueue<>();
     private boolean printFlag = false;
+    private int timeOut;
 
     private transient Object dataLock = new Object();
+
+
 
     public String getQOS() {
         return getPropertyAsString(QOS_LEVEL, String.valueOf(QOS_0));
@@ -70,7 +81,7 @@ public class SubSampler extends AbstractMQTTSampler {
     }
 
     public String getSampleCountTime() {
-        return getPropertyAsString(SAMPLE_CONDITION_VALUE, null);
+        return getPropertyAsString(SAMPLE_CONDITION_TIME, String.valueOf(0));
     }
 
     public void setSampleCountTime(String count) {
@@ -101,6 +112,10 @@ public class SubSampler extends AbstractMQTTSampler {
         setProperty(DEBUG_RESPONSE, debugResponse);
     }
 
+    public String getAssertions() {
+        return getPropertyAsString(SAMPLE_CONDITION_CONTENT, null);
+    }
+
     @Override
     public SampleResult sample(Entry arg0) {
         SampleResult result = new SampleResult();
@@ -113,17 +128,26 @@ public class SubSampler extends AbstractMQTTSampler {
             return fillFailedResult(result, "500", "Subscribe failed because connection is not established.");
         }
         logger.log(Level.INFO, connection + "服务连接成功，并开始接收消息");
-        sampleByTime = SAMPLE_ON_CONDITION_OPTION1.equals(getSampleCondition());
-        sampleCountTime = Integer.parseInt(getSampleCountTime());
+        Assertions assertions = null;
         try {
+            sampleByTime = SAMPLE_ON_CONDITION_OPTION1.equals(getSampleCondition());
+            sampleByContent = SAMPLE_ON_CONDITION_OPTION3.equals(getSampleCondition());
             if (sampleByTime) {
                 sampleElapsedTime = Integer.parseInt(getSampleElapsedTime());
                 logger.log(Level.INFO, "结束接收方式为按持续时间");
+            } else if (sampleByContent) {
+                logger.log(Level.INFO, "接收到的匹配内容：" + getAssertions());
+                if (StringUtils.isNotEmpty(getAssertions())) {
+                    assertions = JSONObject.parseObject(getAssertions(), Assertions.class);
+                    timeOut = StringUtils.isNotEmpty(assertions.getTimeOut()) ? Integer.parseInt(assertions.getTimeOut()) : 0;
+                }
             } else {
                 sampleCount = Integer.parseInt(getSampleCount());
+                sampleCountTime = Integer.parseInt(getSampleCountTime());
                 logger.log(Level.INFO, "结束接收方式为按消息数量");
             }
         } catch (NumberFormatException e) {
+            logger.info(e.getMessage());
             return fillFailedResult(result, "510", "Unrecognized value for sample elapsed time or message count.");
         }
 
@@ -131,10 +155,12 @@ public class SubSampler extends AbstractMQTTSampler {
             return fillFailedResult(result, "511", "Sample on elapsed time: must be greater than 0 ms.");
         } else if (sampleCount < 1) {
             return fillFailedResult(result, "512", "Sample on message count: must be greater than 1.");
+        } else if (sampleByContent && assertions == null) {
+            return fillFailedResult(result, "513", "Sample on message content: match content cannot be empty");
         }
 
         final String topicsName = getTopics();
-        setListener(sampleByTime, sampleCount , sampleCountTime);
+        setListener(sampleByTime, sampleCount, sampleByContent, assertions);
         Set<String> topics = topicSubscribed.get(clientId);
         if (topics == null) {
             logger.severe("subscribed topics haven't been initiated. [clientId: " + (clientId == null ? "null" : clientId) + "]");
@@ -155,18 +181,28 @@ public class SubSampler extends AbstractMQTTSampler {
             return fillFailedResult(result, "501", "Failed to subscribe to topic(s):" + topicsName);
         }
         if (sampleByTime) {
-            if (sampleCountTime > 0) {
-                return getSampleResultWhereTrue(result, topicsName , sampleCountTime);
-            } else {
+            try {
+                TimeUnit.MILLISECONDS.sleep(sampleElapsedTime);
+            } catch (InterruptedException e) {
+                logger.log(Level.INFO, "Received exception when waiting for notification signal", e);
+            }
+            synchronized (dataLock) {
+                result.sampleStart();
+                return produceResult(result, topicsName);
+            }
+        } else if (sampleByContent) {
+            synchronized (dataLock) {
                 try {
-                    TimeUnit.MILLISECONDS.sleep(sampleElapsedTime);
+                    if (timeOut > 0) {
+                        dataLock.wait(timeOut);
+                    } else {
+                        dataLock.wait();
+                    }
                 } catch (InterruptedException e) {
                     logger.log(Level.INFO, "Received exception when waiting for notification signal", e);
                 }
-                synchronized (dataLock) {
-                    result.sampleStart();
-                    return produceResult(result, topicsName);
-                }
+                result.sampleStart();
+                return produceResult(result, topicsName);
             }
         } else {
             synchronized (dataLock) {
@@ -178,7 +214,7 @@ public class SubSampler extends AbstractMQTTSampler {
 
                 if (needWait) {
                     try {
-                        dataLock.wait();
+                        dataLock.wait(sampleCountTime);
                     } catch (InterruptedException e) {
                         logger.log(Level.INFO, "Received exception when waiting for notification signal", e);
                     }
@@ -188,25 +224,6 @@ public class SubSampler extends AbstractMQTTSampler {
             }
         }
 
-    }
-
-    private SampleResult getSampleResultWhereTrue(SampleResult result, String topicsName, int sampleCountTime) {
-        synchronized (dataLock) {
-            int receivedCount1 = (batches.isEmpty() ? 0 : batches.element().getReceivedCount());
-            boolean needWait = false;
-            if (receivedCount1 < sampleCountTime) {
-                needWait = true;
-            }
-            if (needWait) {
-                try {
-                    dataLock.wait();
-                } catch (InterruptedException e) {
-                    logger.log(Level.INFO, "Received exception when waiting for notification signal", e);
-                }
-            }
-            result.sampleStart();
-            return produceResult(result, topicsName);
-        }
     }
 
     private SampleResult produceResult(SampleResult result, String topicName) {
@@ -266,21 +283,87 @@ public class SubSampler extends AbstractMQTTSampler {
         });
     }
 
-    private void setListener(final boolean sampleByTime, final int sampleCount , final  int sampleCountTime) {
+    private void setListener(final boolean sampleByTime, final int sampleCount, final boolean sampleByContent, final Assertions assertion) {
         connection.setSubListener(((topic, message, ack) -> {
             ack.run();
-            Long startTime = System.currentTimeMillis();
             if (sampleByTime) {
-                if (sampleCountTime > 0) {
-                    sampleEnableIsTrue(sampleByTime, sampleCountTime, message, startTime);
-                } else {
-                    synchronized (dataLock) {
-                        handleSubBean(sampleByTime, message, sampleCount);
+                synchronized (dataLock) {
+                    handleSubBean(sampleByTime, message, sampleCount , sampleByContent);
+                }
+            } else if (sampleByContent) {
+                synchronized (dataLock) {
+
+                    if (assertion == null) {
+                        return;
+                    }
+                    SubBean bean = handleSubBean(sampleByTime, message, sampleCount , sampleByContent);
+                    List<String> contentsMessage = bean.getContents();
+                    logger.log(Level.INFO, "sub接收到的消息为" + contentsMessage);
+                    if (CollectionUtils.isNotEmpty(contentsMessage)) {
+                        for (String contents : contentsMessage) {
+                            logger.log(Level.INFO, "收到的消息为" + contents);
+                            ContentCompare contentCompare = new ContentCompare();
+                            List<Boolean> flagList = new ArrayList<>();
+                            if (CollectionUtils.isNotEmpty(assertion.getList())) {
+                                assertion.getList().forEach(item -> {
+                                    if (StringUtils.isNotEmpty(item.getType())) {
+                                        switch (item.getType()) {
+                                            case "Text":
+                                                if (item.getEnable() == false) {
+                                                    flagList.add(false);
+                                                } else {
+                                                    flagList.add(contentCompare.textCompare(contents, item));
+                                                }
+                                                break;
+                                            case "JSON":
+                                                try {
+                                                    JSONObject jsonObject = JSONObject.parseObject(contents);
+                                                    if (item.getEnable() == false) {
+                                                        flagList.add(false);
+                                                    } else {
+                                                        flagList.add(contentCompare.jsonPathCompare(contents, item));
+                                                    }
+                                                    break;
+                                                } catch (Exception e) {
+                                                    logger.log(Level.INFO, "收到的消息不是正常的json格式,无法获得匹配内容");
+                                                    break;
+                                                }
+                                            case "XPath2":
+                                                if (item.getEnable() == false) {
+                                                    flagList.add(false);
+                                                } else {
+                                                    flagList.add(contentCompare.xpathCompare(contents, item));
+                                                }
+                                                break;
+                                        }
+                                    }
+                                });
+                            }
+                            logger.log(Level.INFO, "匹配内容结果为" + flagList);
+                            if (CollectionUtils.isNotEmpty(flagList)) {
+                                List<Boolean> compareCollect = flagList.stream().filter(flagStatus -> flagStatus == true).collect(Collectors.toList());
+                                logger.log(Level.INFO, "过滤结果为" + compareCollect);
+                                if (StringUtils.equals(assertion.getFilterType(), "And")) {
+                                    if (compareCollect.size() == flagList.size()) {
+                                        logger.log(Level.INFO, "匹配条件为and  退出等待");
+                                        dataLock.notify();
+                                        break;
+                                    }
+                                } else {
+                                    if (compareCollect.size() > 0) {
+                                        logger.log(Level.INFO, "匹配条件为or  退出等待");
+                                        dataLock.notify();
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             } else {
                 synchronized (dataLock) {
-                    SubBean bean = handleSubBean(sampleByTime, message, sampleCount);
+                    SubBean bean = handleSubBean(sampleByTime, message, sampleCount , sampleByContent);
+                    logger.log(Level.INFO, "sub接收到的消息为" + bean.getContents());
                     if (bean.getReceivedCount() == sampleCount) {
                         dataLock.notify();
                     }
@@ -289,18 +372,7 @@ public class SubSampler extends AbstractMQTTSampler {
         }));
     }
 
-    private void sampleEnableIsTrue(boolean sampleByTime, int sampleCountTime, String message, Long startTime ) {
-        synchronized (dataLock) {
-            SubBean bean = handleSubBean(sampleByTime, message, sampleCountTime);
-            Long endTime = System.currentTimeMillis();
-            if (bean.getReceivedCount() == sampleCountTime || (int) (endTime - startTime) > sampleElapsedTime) {
-                logger.log(Level.INFO, "接收到消息后结束接收消息");
-                dataLock.notify();
-            }
-        }
-    }
-
-    private SubBean handleSubBean(boolean sampleByTime, String msg, int sampleCount) {
+    private SubBean handleSubBean(boolean sampleByTime, String msg, int sampleCount , boolean sampleByContent) {
         SubBean bean = null;
         if (batches.isEmpty()) {
             bean = new SubBean();
@@ -311,7 +383,7 @@ public class SubSampler extends AbstractMQTTSampler {
             bean = beans[beans.length - 1];
         }
 
-        if ((!sampleByTime) && (bean.getReceivedCount() == sampleCount)) { //Create a new batch when latest bean is full.
+        if ((!sampleByTime) && (bean.getReceivedCount() == sampleCount && (!sampleByContent))) { //Create a new batch when latest bean is full.
             logger.info("The tail bean is full, will create a new bean for it.");
             bean = new SubBean();
             batches.add(bean);
