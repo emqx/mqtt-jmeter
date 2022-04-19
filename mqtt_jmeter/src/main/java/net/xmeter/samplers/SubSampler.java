@@ -134,9 +134,10 @@ public class SubSampler extends AbstractMQTTSampler {
             sampleByContent = SAMPLE_ON_CONDITION_OPTION3.equals(getSampleCondition());
             if (sampleByTime) {
                 sampleElapsedTime = Integer.parseInt(getSampleElapsedTime());
-                logger.log(Level.INFO, "结束接收方式为按持续时间");
+                logger.log(Level.INFO, "sub名称为：" + getName() + " 结束接收方式为按持续时间");
             } else if (sampleByContent) {
-                logger.log(Level.INFO, "接收到的匹配内容：" + getAssertions());
+                logger.log(Level.INFO, "sub名称为：" + getName() + " 结束接收方式为内容");
+                logger.log(Level.INFO, "sub名称为：" + getName() +" 接收到的匹配内容：" + getAssertions());
                 if (StringUtils.isNotEmpty(getAssertions())) {
                     assertions = JSONObject.parseObject(getAssertions(), Assertions.class);
                     timeOut = StringUtils.isNotEmpty(assertions.getTimeOut()) ? Integer.parseInt(assertions.getTimeOut()) : 0;
@@ -144,7 +145,7 @@ public class SubSampler extends AbstractMQTTSampler {
             } else {
                 sampleCount = Integer.parseInt(getSampleCount());
                 sampleCountTime = Integer.parseInt(getSampleCountTime());
-                logger.log(Level.INFO, "结束接收方式为按消息数量");
+                logger.log(Level.INFO, "sub名称为：" + getName() +" 结束接收方式为按消息数量");
             }
         } catch (NumberFormatException e) {
             logger.info(e.getMessage());
@@ -298,10 +299,10 @@ public class SubSampler extends AbstractMQTTSampler {
                     }
                     SubBean bean = handleSubBean(sampleByTime, message, sampleCount , sampleByContent);
                     List<String> contentsMessage = bean.getContents();
-                    logger.log(Level.INFO, "sub接收到的消息为" + contentsMessage);
+                    logger.log(Level.INFO, "sub名称为：" + getName() + " sub接收到的消息为" + contentsMessage);
                     if (CollectionUtils.isNotEmpty(contentsMessage)) {
                         for (String contents : contentsMessage) {
-                            logger.log(Level.INFO, "收到的消息为" + contents);
+                            logger.log(Level.INFO, "需要匹配的内容为 " + contents);
                             ContentCompare contentCompare = new ContentCompare();
                             List<Boolean> flagList = new ArrayList<>();
                             if (CollectionUtils.isNotEmpty(assertion.getList())) {
@@ -339,7 +340,7 @@ public class SubSampler extends AbstractMQTTSampler {
                                     }
                                 });
                             }
-                            logger.log(Level.INFO, "匹配内容结果为" + flagList);
+                            logger.log(Level.INFO, "sub名称为：" + getName() + "匹配内容结果为" + flagList);
                             if (CollectionUtils.isNotEmpty(flagList)) {
                                 List<Boolean> compareCollect = flagList.stream().filter(flagStatus -> flagStatus == true).collect(Collectors.toList());
                                 logger.log(Level.INFO, "过滤结果为" + compareCollect);
@@ -363,7 +364,7 @@ public class SubSampler extends AbstractMQTTSampler {
             } else {
                 synchronized (dataLock) {
                     SubBean bean = handleSubBean(sampleByTime, message, sampleCount , sampleByContent);
-                    logger.log(Level.INFO, "sub接收到的消息为" + bean.getContents());
+                    logger.log(Level.INFO,  "sub名称为：" + getName() + "sub接收到的消息为" + bean.getContents());
                     if (bean.getReceivedCount() == sampleCount) {
                         dataLock.notify();
                     }
