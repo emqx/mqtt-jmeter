@@ -3,6 +3,7 @@ package net.xmeter.samplers;
 import com.alibaba.fastjson.JSONObject;
 import net.xmeter.SubBean;
 import net.xmeter.samplers.assertions.Assertions;
+import net.xmeter.samplers.assertions.AssertionsContent;
 import net.xmeter.samplers.assertions.ContentCompare;
 import net.xmeter.samplers.mqtt.MQTTConnection;
 import net.xmeter.samplers.mqtt.MQTTQoS;
@@ -156,7 +157,7 @@ public class SubSampler extends AbstractMQTTSampler {
             return fillFailedResult(result, "511", "Sample on elapsed time: must be greater than 0 ms.");
         } else if (sampleCount < 1) {
             return fillFailedResult(result, "512", "Sample on message count: must be greater than 1.");
-        } else if (sampleByContent && assertions == null) {
+        } else if ((sampleByContent && assertions == null) || (sampleByContent && assertions.getList().stream().filter(assertionList -> assertionList.getEnable() == true).collect(Collectors.toList()).size() == 0)) {
             return fillFailedResult(result, "513", "Sample on message content: match content cannot be empty");
         }
 
@@ -310,18 +311,14 @@ public class SubSampler extends AbstractMQTTSampler {
                                     if (StringUtils.isNotEmpty(item.getType())) {
                                         switch (item.getType()) {
                                             case "Text":
-                                                if (item.getEnable() == false) {
-                                                    flagList.add(false);
-                                                } else {
+                                                if (item.getEnable()) {
                                                     flagList.add(contentCompare.textCompare(contents, item));
                                                 }
                                                 break;
                                             case "JSON":
                                                 try {
                                                     JSONObject jsonObject = JSONObject.parseObject(contents);
-                                                    if (item.getEnable() == false) {
-                                                        flagList.add(false);
-                                                    } else {
+                                                    if (item.getEnable()) {
                                                         flagList.add(contentCompare.jsonPathCompare(contents, item));
                                                     }
                                                     break;
@@ -330,9 +327,7 @@ public class SubSampler extends AbstractMQTTSampler {
                                                     break;
                                                 }
                                             case "XPath2":
-                                                if (item.getEnable() == false) {
-                                                    flagList.add(false);
-                                                } else {
+                                                if (item.getEnable()) {
                                                     flagList.add(contentCompare.xpathCompare(contents, item));
                                                 }
                                                 break;
@@ -343,9 +338,10 @@ public class SubSampler extends AbstractMQTTSampler {
                             logger.log(Level.INFO, "sub名称为：" + getName() + "匹配内容结果为" + flagList);
                             if (CollectionUtils.isNotEmpty(flagList)) {
                                 List<Boolean> compareCollect = flagList.stream().filter(flagStatus -> flagStatus == true).collect(Collectors.toList());
+                                List<AssertionsContent> collect = assertion.getList().stream().filter(assertionList -> assertionList.getEnable() == true).collect(Collectors.toList());
                                 logger.log(Level.INFO, "过滤结果为" + compareCollect);
                                 if (StringUtils.equals(assertion.getFilterType(), "And")) {
-                                    if (compareCollect.size() == flagList.size()) {
+                                    if (compareCollect.size() == collect.size() && collect.size() > 0) {
                                         logger.log(Level.INFO, "匹配条件为and  退出等待");
                                         dataLock.notify();
                                         break;
