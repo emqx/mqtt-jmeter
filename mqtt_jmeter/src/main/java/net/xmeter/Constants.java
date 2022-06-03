@@ -37,6 +37,7 @@ public interface Constants {
 	public static final String RETAINED_MESSAGE = "mqtt.retained_message";
 	
 	public static final String SAMPLE_CONDITION_VALUE = "mqtt.sample_condition_value";
+	public static final String SAMPLE_CONDITION_VALUE_OPT = "mqtt.sample_condition_value_opt";
 	public static final String SAMPLE_CONDITION = "mqtt.sample_condition";
 	
 	public static final String TIME_STAMP_SEP_FLAG = "ts_sep_flag";
@@ -84,6 +85,7 @@ public interface Constants {
 	public static final String DEFAULT_CONN_RECONN_ATTAMPT_MAX = "0";
 	
 	public static final String DEFAULT_SAMPLE_VALUE_COUNT = "1";
+	public static final String DEFAULT_SAMPLE_VALUE_COUNT_TIMEOUT = "5000";
 	public static final String DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_MILLI_SEC = "1000";
 	
 	public static final String DEFAULT_MESSAGE_FIX_LENGTH = "1024";
