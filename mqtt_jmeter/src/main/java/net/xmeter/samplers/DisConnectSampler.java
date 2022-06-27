@@ -40,7 +40,7 @@ public class DisConnectSampler extends AbstractMQTTSampler {
 			if (connection != null) {
 				logger.info(MessageFormat.format("Disconnect connection {0}.", connection));
 				connection.disconnect();
-				vars.remove(getConnName()); // clean up thread local var as well
+				vars.remove(getConnName()+"_clientId"); // clean up thread local var as well
 				topicSubscribed.remove(clientId);
 			}
 			

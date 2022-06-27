@@ -5,6 +5,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Predicate;
 import net.minidev.json.JSONArray;
 import net.xmeter.samplers.SubSampler;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.jmeter.assertions.AssertionResult;
@@ -12,8 +13,12 @@ import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jmeter.util.XPathUtil;
 import org.apache.oro.text.regex.Pattern;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 
 public class ContentCompare {
@@ -36,25 +41,31 @@ public class ContentCompare {
     }
 
     private boolean arrayMatched(JSONArray value , AssertionsContent jsonPath) {
-        if (value.isEmpty() && "[]".equals(jsonPath.getExpect())) {
-            return false;
-        } else {
-            Object[] var2 = value.toArray();
-            int var3 = var2.length;
-
-            for (int var4 = 0; var4 < var3; ++var4) {
-                Object subj = var2[var4];
-                if (subj == null || this.compareMethod(jsonPath , subj.toString())) {
-                    return false;
+        List<Boolean> result = new ArrayList<>();
+        for (Object subj : value.toArray()) {
+            if (!StringUtils.equals(jsonPath.getOption(), "NOT_CONTAINS")) {
+                if (subj == null || compareMethod(jsonPath , subj.toString())) {
+                    return true;
                 }
+            } else {
+                result.add(compareMethod(jsonPath , subj.toString()));
             }
-            return this.compareMethod(jsonPath , value.toString());
         }
+        if (CollectionUtils.isNotEmpty(result) && StringUtils.equals(jsonPath.getOption(), "NOT_CONTAINS")) {
+            if (result.stream().filter(item -> item == true).collect(Collectors.toList()).size() == result.size()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return compareMethod(jsonPath , value.toString());
     }
 
     private boolean isGt(String v1, String v2) {
         try {
-            return v1.compareTo(v2) > 0;
+            BigDecimal value1 = new BigDecimal(v1);
+            BigDecimal value2 = new BigDecimal(v2);
+            return value1.compareTo(value2) > 0;
         } catch (Exception e) {
             return false;
         }
@@ -62,7 +73,9 @@ public class ContentCompare {
 
     private boolean isLt(String v1, String v2) {
         try {
-            return v1.compareTo(v2) < 0;
+            BigDecimal value1 = new BigDecimal(v1);
+            BigDecimal value2 = new BigDecimal(v2);
+            return value1.compareTo(value2) < 0;
         } catch (Exception e) {
             return false;
         }

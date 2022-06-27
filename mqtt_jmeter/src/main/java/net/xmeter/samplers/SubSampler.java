@@ -186,6 +186,7 @@ public class SubSampler extends AbstractMQTTSampler {
             try {
                 TimeUnit.MILLISECONDS.sleep(sampleElapsedTime);
             } catch (InterruptedException e) {
+                cleanConnect(vars);
                 logger.log(Level.INFO, "Received exception when waiting for notification signal", e);
             }
             synchronized (dataLock) {
@@ -201,6 +202,7 @@ public class SubSampler extends AbstractMQTTSampler {
                         dataLock.wait();
                     }
                 } catch (InterruptedException e) {
+                    cleanConnect(vars);
                     logger.log(Level.INFO, "Received exception when waiting for notification signal", e);
                 }
                 result.sampleStart();
@@ -218,6 +220,7 @@ public class SubSampler extends AbstractMQTTSampler {
                     try {
                         dataLock.wait(sampleCountTime);
                     } catch (InterruptedException e) {
+                        cleanConnect(vars);
                         logger.log(Level.INFO, "Received exception when waiting for notification signal", e);
                     }
                 }
@@ -226,6 +229,16 @@ public class SubSampler extends AbstractMQTTSampler {
             }
         }
 
+    }
+
+    private void cleanConnect(JMeterVariables vars) {
+        try {
+            connection.disconnect();
+            vars.remove(getConnName()+"_clientId");
+            topicSubscribed.remove(this.clientId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private SampleResult produceResult(SampleResult result, String topicName) {
