@@ -28,7 +28,7 @@ class HiveMQTTConnection implements MQTTConnection {
     private static final Logger logger = Logger.getLogger(HiveMQTTConnection.class.getCanonicalName());
 
     private static final Charset charset = Charset.forName("UTF-8");
-    private static final CharsetDecoder decoder = charset.newDecoder();
+    private static ThreadLocal<CharsetDecoder> decoder = ThreadLocal.withInitial(() -> charset.newDecoder());
 
     private final Mqtt3BlockingClient client;
     private final String clientId;
@@ -112,7 +112,7 @@ class HiveMQTTConnection implements MQTTConnection {
 
     private String decode(ByteBuffer value) {
         try {
-            return decoder.decode(value).toString();
+            return decoder.get().decode(value).toString();
         } catch (CharacterCodingException e) {
             throw new RuntimeException(new MQTTClientException("Failed to decode", e));
         }
