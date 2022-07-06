@@ -1,21 +1,16 @@
 package net.xmeter.samplers;
 
-import java.text.MessageFormat;
-import java.util.HashSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import net.xmeter.Util;
+import net.xmeter.samplers.mqtt.*;
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
 
-import net.xmeter.Util;
-import net.xmeter.samplers.mqtt.ConnectionParameters;
-import net.xmeter.samplers.mqtt.MQTT;
-import net.xmeter.samplers.mqtt.MQTTClient;
-import net.xmeter.samplers.mqtt.MQTTConnection;
-import net.xmeter.samplers.mqtt.MQTTSsl;
+import java.text.MessageFormat;
+import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ConnectSampler extends AbstractMQTTSampler {
 	private static final long serialVersionUID = 1859006013465470528L;
@@ -30,7 +25,7 @@ public class ConnectSampler extends AbstractMQTTSampler {
 		result.setSampleLabel(getName());
 		
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
-		connection = (MQTTConnection) vars.getObject("conn");
+		connection = (MQTTConnection) vars.getObject(getConnName());
 		if (connection != null) {
 			result.sampleStart();
 			result.setSuccessful(false);
@@ -92,8 +87,8 @@ public class ConnectSampler extends AbstractMQTTSampler {
 			result.sampleEnd();
 
 			if (connection.isConnectionSucc()) {
-				vars.putObject("conn", connection); // save connection object as thread local variable !!
-				vars.putObject("clientId", client.getClientId());	//save client id as thread local variable
+				vars.putObject(getConnName(), connection); // save connection object as thread local variable !!
+				vars.putObject(getConnName()+"_clientId", client.getClientId());	//save client id as thread local variable
 				topicSubscribed.put(client.getClientId(), new HashSet<>());
 				result.setSuccessful(true);
 				result.setResponseData("Successful.".getBytes());

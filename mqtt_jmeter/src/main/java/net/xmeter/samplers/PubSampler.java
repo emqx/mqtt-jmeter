@@ -1,20 +1,18 @@
 package net.xmeter.samplers;
 
-import java.text.MessageFormat;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.xml.bind.DatatypeConverter;
-
+import net.xmeter.Util;
+import net.xmeter.samplers.mqtt.MQTTConnection;
+import net.xmeter.samplers.mqtt.MQTTPubResult;
+import net.xmeter.samplers.mqtt.MQTTQoS;
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
 
-import net.xmeter.Util;
-import net.xmeter.samplers.mqtt.MQTTConnection;
-import net.xmeter.samplers.mqtt.MQTTPubResult;
-import net.xmeter.samplers.mqtt.MQTTQoS;
+import javax.xml.bind.DatatypeConverter;
+import java.text.MessageFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PubSampler extends AbstractMQTTSampler {
 	private static final long serialVersionUID = 4312341622759500786L;
@@ -92,8 +90,8 @@ public class PubSampler extends AbstractMQTTSampler {
 		result.setSampleLabel(getName());
 	
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
-		connection = (MQTTConnection) vars.getObject("conn");
-		String clientId = (String) vars.getObject("clientId");
+		connection = (MQTTConnection) vars.getObject(getConnName());
+		String clientId = (String) vars.getObject(getConnName()+"_clientId");
 		if (connection == null) {
 			result.sampleStart();
 			result.setSuccessful(false);

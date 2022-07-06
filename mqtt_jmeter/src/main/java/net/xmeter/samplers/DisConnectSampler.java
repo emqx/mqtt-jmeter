@@ -1,15 +1,14 @@
 package net.xmeter.samplers;
 
-import java.text.MessageFormat;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import net.xmeter.samplers.mqtt.MQTTConnection;
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
 
-import net.xmeter.samplers.mqtt.MQTTConnection;
+import java.text.MessageFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DisConnectSampler extends AbstractMQTTSampler {
 	private static final long serialVersionUID = 4360869021667126983L;
@@ -23,8 +22,8 @@ public class DisConnectSampler extends AbstractMQTTSampler {
 		result.setSampleLabel(getName());
 		
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
-		connection = (MQTTConnection) vars.getObject("conn");
-		String clientId = (String) vars.getObject("clientId");
+		connection = (MQTTConnection) vars.getObject(getConnName());
+		String clientId = (String) vars.getObject(getConnName()+"_clientId");
 		if (connection == null) {
 			result.sampleStart();
 			result.setSuccessful(false);
@@ -41,7 +40,7 @@ public class DisConnectSampler extends AbstractMQTTSampler {
 			if (connection != null) {
 				logger.info(MessageFormat.format("Disconnect connection {0}.", connection));
 				connection.disconnect();
-				vars.remove("conn"); // clean up thread local var as well
+				vars.remove(getConnName()); // clean up thread local var as well
 				topicSubscribed.remove(clientId);
 			}
 			

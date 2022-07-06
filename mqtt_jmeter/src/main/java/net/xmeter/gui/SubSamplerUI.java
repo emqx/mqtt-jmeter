@@ -1,14 +1,7 @@
 package net.xmeter.gui;
 
-import java.awt.BorderLayout;
-import java.util.logging.Logger;
-
-import javax.swing.BorderFactory;
-import javax.swing.JCheckBox;
-import javax.swing.JPanel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
+import net.xmeter.Constants;
+import net.xmeter.samplers.SubSampler;
 import org.apache.jmeter.gui.util.HorizontalPanel;
 import org.apache.jmeter.gui.util.VerticalPanel;
 import org.apache.jmeter.samplers.gui.AbstractSamplerGui;
@@ -16,13 +9,17 @@ import org.apache.jmeter.testelement.TestElement;
 import org.apache.jorphan.gui.JLabeledChoice;
 import org.apache.jorphan.gui.JLabeledTextField;
 
-import net.xmeter.Constants;
-import net.xmeter.samplers.SubSampler;
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.util.logging.Logger;
 
 public class SubSamplerUI extends AbstractSamplerGui implements Constants, ChangeListener{
 	private static final long serialVersionUID = 1715399546099472610L;
 	private static final Logger logger = Logger.getLogger(SubSamplerUI.class.getCanonicalName());
-	
+
+	private final JLabeledTextField connName = new JLabeledTextField("MQTT Conn Name:");
 	private JLabeledChoice qosChoice;
 	private JLabeledChoice sampleOnCondition;
 	
@@ -43,8 +40,8 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 		add(makeTitlePanel(), BorderLayout.NORTH);
 		JPanel mainPanel = new VerticalPanel();
 		add(mainPanel, BorderLayout.CENTER);
-
 		mainPanel.add(createSubOption());
+		mainPanel.add(createConnOptions());
 	}
 	
 	private JPanel createSubOption() {
@@ -75,6 +72,17 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 
 		return optsPanelCon;
 	}
+
+	public JPanel createConnOptions() {
+		JPanel optsPanelCon = new VerticalPanel();
+		optsPanelCon.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Connection options"));
+
+		JPanel optsPanel0 = new HorizontalPanel();
+		optsPanel0.add(connName);
+		optsPanelCon.add(optsPanel0);
+
+		return optsPanelCon;
+	}
 	
 	@Override
 	public String getStaticLabel() {
@@ -93,6 +101,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 		super.configure(element);
 		SubSampler sampler = (SubSampler) element;
 
+		this.connName.setText(sampler.getConnName());
 		if(sampler.getQOS().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1){
 			this.qosChoice.setSelectedIndex(Integer.parseInt(sampler.getQOS()));	
 		} else {
@@ -124,6 +133,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 
 	private void setupSamplerProperties(SubSampler sampler) {
 		this.configureTestElement(sampler);
+		sampler.setConnName(this.connName.getText());
 		sampler.setTopics(this.topicNames.getText());
 		
 		if(this.qosChoice.getText().indexOf(JMETER_VARIABLE_PREFIX) == -1) {
@@ -157,6 +167,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 	@Override
 	public void clearGui() {
 		super.clearGui();
+		this.connName.setText(DEFAULT_MQTT_CONN_NAME);
 		this.topicNames.setText(DEFAULT_TOPIC_NAME);
 		this.qosChoice.setText(String.valueOf(QOS_0));
 		this.timestamp.setSelected(false);
