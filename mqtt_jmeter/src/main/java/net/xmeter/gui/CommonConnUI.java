@@ -1,23 +1,9 @@
 package net.xmeter.gui;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
-import javax.swing.JPanel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
+import net.xmeter.Constants;
+import net.xmeter.Util;
+import net.xmeter.samplers.AbstractMQTTSampler;
+import net.xmeter.samplers.mqtt.MQTT;
 import org.apache.jmeter.gui.util.FileDialoger;
 import org.apache.jmeter.gui.util.HorizontalPanel;
 import org.apache.jmeter.gui.util.VerticalPanel;
@@ -25,16 +11,22 @@ import org.apache.jmeter.util.JMeterUtils;
 import org.apache.jorphan.gui.JLabeledChoice;
 import org.apache.jorphan.gui.JLabeledTextField;
 
-import net.xmeter.Constants;
-import net.xmeter.Util;
-import net.xmeter.samplers.AbstractMQTTSampler;
-import net.xmeter.samplers.mqtt.MQTT;
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private final JLabeledTextField serverAddr = new JLabeledTextField("Server name or IP:");
 	private final JLabeledTextField serverPort = new JLabeledTextField("Port number:", 5);
 	private JLabeledChoice mqttVersion = new JLabeledChoice("MQTT version:", new String[] { MQTT_VERSION_3_1, MQTT_VERSION_3_1_1 }, false, false);;
 	private final JLabeledTextField timeout = new JLabeledTextField("Timeout(s):", 5);
+	private final JLabeledTextField connName = new JLabeledTextField("MQTT Conn Name:");
 	
 	private final JLabeledTextField userNameAuth = new JLabeledTextField("User name:");
 	private final JLabeledTextField passwordAuth = new JLabeledTextField("Password:");
@@ -91,6 +83,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		optsPanelCon.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Connection options"));
 		
 		JPanel optsPanel0 = new HorizontalPanel();
+		optsPanel0.add(connName);
 		optsPanel0.add(connNamePrefix);
 		optsPanel0.add(connNameSuffix);
 		connNameSuffix.setSelected(true);
@@ -254,6 +247,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	}
 
 	public void configure(AbstractMQTTSampler sampler) {
+		connName.setText(sampler.getConnName());
 		serverAddr.setText(sampler.getServer());
 		serverPort.setText(sampler.getPort());
 		if(sampler.getMqttVersion().equals(MQTT_VERSION_3_1)) {
@@ -315,6 +309,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		sampler.setPort(serverPort.getText());
 		sampler.setMqttVersion(mqttVersion.getText());
 		sampler.setConnTimeout(timeout.getText());
+		sampler.setConnName(connName.getText());
 
 //		sampler.setMqttClientName(clientNames.getText());
 		sampler.setProtocol(protocols.getText());
@@ -365,6 +360,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		userNameAuth.setText("");
 		passwordAuth.setText("");
 
+		connName.setText(DEFAULT_MQTT_CONN_NAME);
 		connNamePrefix.setText(DEFAULT_CONN_PREFIX_FOR_CONN);
 		connNameSuffix.setSelected(true);
 

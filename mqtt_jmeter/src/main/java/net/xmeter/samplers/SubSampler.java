@@ -1,5 +1,13 @@
 package net.xmeter.samplers;
 
+import net.xmeter.SubBean;
+import net.xmeter.samplers.mqtt.MQTTConnection;
+import net.xmeter.samplers.mqtt.MQTTQoS;
+import org.apache.jmeter.samplers.Entry;
+import org.apache.jmeter.samplers.SampleResult;
+import org.apache.jmeter.threads.JMeterContextService;
+import org.apache.jmeter.threads.JMeterVariables;
+
 import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.List;
@@ -9,26 +17,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.jmeter.samplers.Entry;
-import org.apache.jmeter.samplers.SampleResult;
-import org.apache.jmeter.threads.JMeterContextService;
-import org.apache.jmeter.threads.JMeterVariables;
-
-import net.xmeter.SubBean;
-import net.xmeter.samplers.mqtt.MQTTConnection;
-import net.xmeter.samplers.mqtt.MQTTQoS;
-
 @SuppressWarnings("deprecation")
 public class SubSampler extends AbstractMQTTSampler {
 	private static final long serialVersionUID = 2979978053740194951L;
 	private static final Logger logger = Logger.getLogger(SubSampler.class.getCanonicalName());
-	
+
 	private transient MQTTConnection connection = null;
 	private transient String clientId;
 	private boolean subFailed = false;
-	
+
 	private boolean sampleByTime = true; // initial values
-	private int sampleElapsedTime = 1000; 
+	private int sampleElapsedTime = 1000;
+	private boolean sampleEnable = false;
 	private int sampleCount = 1;
 
 	private transient ConcurrentLinkedQueue<SubBean> batches = new ConcurrentLinkedQueue<>();
@@ -51,27 +51,34 @@ public class SubSampler extends AbstractMQTTSampler {
 	public void setTopics(String topicsName) {
 		setProperty(TOPIC_NAME, topicsName);
 	}
-	
+
 	public String getSampleCondition() {
 		return getPropertyAsString(SAMPLE_CONDITION, SAMPLE_ON_CONDITION_OPTION1);
 	}
-	
+
+	public Boolean getSampleConditionEnable() {
+		return getPropertyAsBoolean(SAMPLE_CONDITION_ENABLE, false);
+	}
+	public void setSampleConditionEnable(boolean sampleEnable) {
+		setProperty(SAMPLE_CONDITION_ENABLE, sampleEnable);
+	}
+
 	public void setSampleCondition(String option) {
 		setProperty(SAMPLE_CONDITION, option);
 	}
-	
+
 	public String getSampleCount() {
 		return getPropertyAsString(SAMPLE_CONDITION_VALUE, DEFAULT_SAMPLE_VALUE_COUNT);
 	}
-	
+
 	public void setSampleCount(String count) {
 		setProperty(SAMPLE_CONDITION_VALUE, count);
 	}
-	
+
 	public String getSampleElapsedTime() {
 		return getPropertyAsString(SAMPLE_CONDITION_VALUE, DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_MILLI_SEC);
 	}
-	
+
 	public void setSampleElapsedTime(String elapsedTime) {
 		setProperty(SAMPLE_CONDITION_VALUE, elapsedTime);
 	}
@@ -96,15 +103,16 @@ public class SubSampler extends AbstractMQTTSampler {
 	public SampleResult sample(Entry arg0) {
 		SampleResult result = new SampleResult();
 		result.setSampleLabel(getName());
-	
+
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
-		connection = (MQTTConnection) vars.getObject("conn");
-		clientId = (String) vars.getObject("clientId");
+		connection = (MQTTConnection) vars.getObject(getConnName());
+		clientId = (String) vars.getObject(getConnName() + "_clientId");
 		if (connection == null) {
 			return fillFailedResult(result, "500", "Subscribe failed because connection is not established.");
 		}
-		
+
 		sampleByTime = SAMPLE_ON_CONDITION_OPTION1.equals(getSampleCondition());
+		sampleEnable = getSampleConditionEnable();
 		try {
 			if (sampleByTime) {
 				sampleElapsedTime = Integer.parseInt(getSampleElapsedTime());
@@ -114,14 +122,14 @@ public class SubSampler extends AbstractMQTTSampler {
 		} catch (NumberFormatException e) {
 			return fillFailedResult(result, "510", "Unrecognized value for sample elapsed time or message count.");
 		}
-		
-		if (sampleByTime && sampleElapsedTime <=0 ) {
+
+		if (sampleByTime && sampleElapsedTime <= 0) {
 			return fillFailedResult(result, "511", "Sample on elapsed time: must be greater than 0 ms.");
 		} else if (sampleCount < 1) {
 			return fillFailedResult(result, "512", "Sample on message count: must be greater than 1.");
 		}
-		
-		final String topicsName= getTopics();
+
+		final String topicsName = getTopics();
 		setListener(sampleByTime, sampleCount);
 		Set<String> topics = topicSubscribed.get(clientId);
 		if (topics == null) {
@@ -138,30 +146,34 @@ public class SubSampler extends AbstractMQTTSampler {
 				listenToTopics(topicsName);  // TODO: run once or multiple times ?
 			}
 		}
-		
+
 		if (subFailed) {
 			return fillFailedResult(result, "501", "Failed to subscribe to topic(s):" + topicsName);
 		}
-		
-		if(sampleByTime) {
-			try {
-				TimeUnit.MILLISECONDS.sleep(sampleElapsedTime);
-			} catch (InterruptedException e) {
-				logger.log(Level.INFO, "Received exception when waiting for notification signal", e);
-			}
-			synchronized (dataLock) {
-				result.sampleStart();
-				return produceResult(result, topicsName);
+		if (sampleByTime) {
+			if (this.sampleEnable) {
+				return getSampleResultWhereTrue(result, topicsName);
+			} else {
+				try {
+					TimeUnit.MILLISECONDS.sleep(sampleElapsedTime);
+				} catch (InterruptedException e) {
+					logger.log(Level.INFO, "Received exception when waiting for notification signal", e);
+				}
+				synchronized (dataLock) {
+					result.sampleStart();
+					return produceResult(result, topicsName);
+				}
 			}
 		} else {
 			synchronized (dataLock) {
-				int receivedCount1 = (batches.isEmpty() ? 0 : batches.element().getReceivedCount());;
+				int receivedCount1 = (batches.isEmpty() ? 0 : batches.element().getReceivedCount());
+				;
 				boolean needWait = false;
-				if(receivedCount1 < sampleCount) {
+				if (receivedCount1 < sampleCount) {
 					needWait = true;
 				}
-				
-				if(needWait) {
+
+				if (needWait) {
 					try {
 						dataLock.wait();
 					} catch (InterruptedException e) {
@@ -172,11 +184,26 @@ public class SubSampler extends AbstractMQTTSampler {
 				return produceResult(result, topicsName);
 			}
 		}
+
 	}
-	
+
+	private SampleResult getSampleResultWhereTrue(SampleResult result, String topicsName) {
+		try {
+			synchronized (dataLock) {
+				logger.log(Level.INFO , "在延时时间内勾选拿到消息就结束接收消息");
+				dataLock.wait();
+				logger.log(Level.INFO ,"超时时间未到，但接收到消息，唤醒线程");
+			}
+		} catch (InterruptedException e) {
+			logger.log(Level.INFO, "Received exception when waiting for notification signal", e);
+		}
+		result.sampleStart();
+		return produceResult(result, topicsName);
+	}
+
 	private SampleResult produceResult(SampleResult result, String topicName) {
 		SubBean bean = batches.poll();
-		if(bean == null) { // In "elapsed time" mode, return "dummy" when time is reached
+		if (bean == null) { // In "elapsed time" mode, return "dummy" when time is reached
 			bean = new SubBean();
 		}
 		int receivedCount = bean.getReceivedCount();
@@ -192,8 +219,8 @@ public class SubSampler extends AbstractMQTTSampler {
 		if (logger.isLoggable(Level.FINE)) {
 			logger.fine("sub [topic]: " + topicName + ", [payload]: " + content.toString());
 		}
-		
-		if(receivedCount == 0) {
+
+		if (receivedCount == 0) {
 			result.setEndTime(result.getStartTime()); // dummy result, rectify sample time
 		} else {
 			if (isAddTimestamp()) {
@@ -207,18 +234,18 @@ public class SubSampler extends AbstractMQTTSampler {
 
 		return result;
 	}
-	
+
 	private void listenToTopics(final String topicsName) {
 		int qos;
 		try {
 			qos = Integer.parseInt(getQOS());
-		} catch(Exception ex) {
+		} catch (Exception ex) {
 			logger.log(Level.SEVERE, ex, () -> MessageFormat.format("Specified invalid QoS value {0}, set to default QoS value {1}!", ex.getMessage(), QOS_0));
 			qos = QOS_0;
 		}
-		
+
 		final String[] paraTopics = topicsName.split(",");
-		if(qos < 0 || qos > 2) {
+		if (qos < 0 || qos > 2) {
 			logger.severe("Specified invalid QoS value, set to default QoS value " + qos);
 			qos = QOS_0;
 		}
@@ -230,29 +257,47 @@ public class SubSampler extends AbstractMQTTSampler {
 			subFailed = true;
 		});
 	}
-	
+
 	private void setListener(final boolean sampleByTime, final int sampleCount) {
 		connection.setSubListener(((topic, message, ack) -> {
 			ack.run();
-
-			if(sampleByTime) {
-				synchronized (dataLock) {
-					handleSubBean(sampleByTime, message, sampleCount);
+			Long startTime = System.currentTimeMillis();
+			if (sampleByTime) {
+				if (sampleEnable) {
+					sampleEnableIsTrue(sampleByTime, sampleCount, message, startTime);
+				} else {
+					synchronized (dataLock) {
+						handleSubBean(sampleByTime, message, sampleCount);
+					}
 				}
 			} else {
 				synchronized (dataLock) {
 					SubBean bean = handleSubBean(sampleByTime, message, sampleCount);
-					if(bean.getReceivedCount() == sampleCount) {
+					if (bean.getReceivedCount() == sampleCount) {
 						dataLock.notify();
 					}
 				}
 			}
 		}));
 	}
-	
+
+	private void sampleEnableIsTrue(boolean sampleByTime, int sampleCount, String message, Long startTime) {
+		synchronized (dataLock) {
+			SubBean bean = handleSubBean(sampleByTime, message, sampleCount);
+			while (true) {
+				Long endTime = System.currentTimeMillis();
+				if (bean.getReceivedCount() == sampleCount || (int) (endTime - startTime) > sampleElapsedTime) {
+					logger.log(Level.INFO , "接收到消息后结束接收消息");
+					dataLock.notify();
+					break;
+				}
+			}
+		}
+	}
+
 	private SubBean handleSubBean(boolean sampleByTime, String msg, int sampleCount) {
 		SubBean bean = null;
-		if(batches.isEmpty()) {
+		if (batches.isEmpty()) {
 			bean = new SubBean();
 			batches.add(bean);
 		} else {
@@ -260,8 +305,8 @@ public class SubSampler extends AbstractMQTTSampler {
 			batches.toArray(beans);
 			bean = beans[beans.length - 1];
 		}
-		
-		if((!sampleByTime) && (bean.getReceivedCount() == sampleCount)) { //Create a new batch when latest bean is full.
+
+		if ((!sampleByTime) && (bean.getReceivedCount() == sampleCount)) { //Create a new batch when latest bean is full.
 			logger.info("The tail bean is full, will create a new bean for it.");
 			bean = new SubBean();
 			batches.add(bean);
@@ -275,7 +320,7 @@ public class SubSampler extends AbstractMQTTSampler {
 			} else if (index != -1) {
 				long start = Long.parseLong(msg.substring(0, index));
 				long elapsed = now - start;
-				
+
 				double avgElapsedTime = bean.getAvgElapsedTime();
 				int receivedCount = bean.getReceivedCount();
 				avgElapsedTime = (avgElapsedTime * receivedCount + elapsed) / (receivedCount + 1);
@@ -301,7 +346,7 @@ public class SubSampler extends AbstractMQTTSampler {
 			result.setResponseData(message.getBytes());
 		}
 		result.sampleEnd();
-		
+
 		// avoid massive repeated "early stage" failures in a short period of time
 		// which probably overloads JMeter CPU and distorts test metrics such as TPS, avg response time
 		try {
