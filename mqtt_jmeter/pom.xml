@@ -44,7 +44,7 @@
     </dependencies>
 
     <build>
-        <finalName>mqtt-xmeter-${project.version}</finalName>
+        <finalName>plugin-xmeter-${project.version}</finalName>
         <defaultGoal>install</defaultGoal>
         <plugins>
             <plugin>

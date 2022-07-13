@@ -75,29 +75,29 @@
       </ThreadGroup>
       <hashTree>
         <SubSampler guiclass="SubSamplerUI" testclass="SubSampler" testname="MQTT Sub Sampler" enabled="true">
-          <stringProp name="mqtt.keystore_file_path"></stringProp>
-          <stringProp name="mqtt.clientcert_file_path"></stringProp>
-          <stringProp name="mqtt.conn_keep_alive">${keep_alive}</stringProp>
-          <stringProp name="mqtt.conn_attampt_max">0</stringProp>
-          <stringProp name="mqtt.keep_time">1800</stringProp>
-          <stringProp name="mqtt.client_id_prefix">sub_</stringProp>
-          <stringProp name="mqtt.reconn_attampt_max">0</stringProp>
-          <stringProp name="mqtt.conn_timeout">10</stringProp>
-          <boolProp name="mqtt.dual_ssl_authentication">false</boolProp>
-          <stringProp name="mqtt.keystore_password"></stringProp>
-          <stringProp name="mqtt.clientcert_password"></stringProp>
-          <stringProp name="mqtt.port">${port}</stringProp>
-          <stringProp name="mqtt.protocol">${protocol}</stringProp>
-          <stringProp name="mqtt.server">${server}</stringProp>
-          <stringProp name="mqtt.user_name"></stringProp>
-          <stringProp name="mqtt.password"></stringProp>
-          <stringProp name="mqtt.topic_name">${topic_name}</stringProp>
-          <stringProp name="mqtt.qos_level">${QoS}</stringProp>
-          <boolProp name="mqtt.add_timestamp">true</boolProp>
-          <boolProp name="mqtt.debug_response">false</boolProp>
-          <boolProp name="mqtt.client_id_suffix">true</boolProp>
-          <stringProp name="mqtt.sample_condition">specified elapsed time (ms)</stringProp>
-          <stringProp name="mqtt.sample_condition_value">1000</stringProp>
+          <stringProp name="plugin.keystore_file_path"></stringProp>
+          <stringProp name="plugin.clientcert_file_path"></stringProp>
+          <stringProp name="plugin.conn_keep_alive">${keep_alive}</stringProp>
+          <stringProp name="plugin.conn_attampt_max">0</stringProp>
+          <stringProp name="plugin.keep_time">1800</stringProp>
+          <stringProp name="plugin.client_id_prefix">sub_</stringProp>
+          <stringProp name="plugin.reconn_attampt_max">0</stringProp>
+          <stringProp name="plugin.conn_timeout">10</stringProp>
+          <boolProp name="plugin.dual_ssl_authentication">false</boolProp>
+          <stringProp name="plugin.keystore_password"></stringProp>
+          <stringProp name="plugin.clientcert_password"></stringProp>
+          <stringProp name="plugin.port">${port}</stringProp>
+          <stringProp name="plugin.protocol">${protocol}</stringProp>
+          <stringProp name="plugin.server">${server}</stringProp>
+          <stringProp name="plugin.user_name"></stringProp>
+          <stringProp name="plugin.password"></stringProp>
+          <stringProp name="plugin.topic_name">${topic_name}</stringProp>
+          <stringProp name="plugin.qos_level">${QoS}</stringProp>
+          <boolProp name="plugin.add_timestamp">true</boolProp>
+          <boolProp name="plugin.debug_response">false</boolProp>
+          <boolProp name="plugin.client_id_suffix">true</boolProp>
+          <stringProp name="plugin.sample_condition">specified elapsed time (ms)</stringProp>
+          <stringProp name="plugin.sample_condition_value">1000</stringProp>
         </SubSampler>
         <hashTree>
           <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="固定定时器" enabled="true">

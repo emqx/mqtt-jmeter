@@ -81,29 +81,29 @@
       </ThreadGroup>
       <hashTree>
         <PubSampler guiclass="PubSamplerUI" testclass="PubSampler" testname="MQTT Pub Sampler" enabled="true">
-          <stringProp name="mqtt.keystore_file_path"></stringProp>
-          <stringProp name="mqtt.clientcert_file_path"></stringProp>
-          <stringProp name="mqtt.conn_keep_alive">${keep_alive}</stringProp>
-          <stringProp name="mqtt.conn_attampt_max">0</stringProp>
-          <stringProp name="mqtt.keep_time">1800</stringProp>
-          <stringProp name="mqtt.client_id_prefix">pub_</stringProp>
-          <stringProp name="mqtt.reconn_attampt_max">0</stringProp>
-          <stringProp name="mqtt.conn_timeout">10</stringProp>
-          <boolProp name="mqtt.dual_ssl_authentication">false</boolProp>
-          <stringProp name="mqtt.keystore_password"></stringProp>
-          <stringProp name="mqtt.clientcert_password"></stringProp>
-          <stringProp name="mqtt.port">${port}</stringProp>
-          <stringProp name="mqtt.protocol">${protocol}</stringProp>
-          <stringProp name="mqtt.server">${server}</stringProp>
-          <stringProp name="mqtt.user_name"></stringProp>
-          <stringProp name="mqtt.password"></stringProp>
-          <stringProp name="mqtt.topic_name">${topic_name}</stringProp>
-          <stringProp name="mqtt.qos_level">${QoS}</stringProp>
-          <boolProp name="mqtt.add_timestamp">true</boolProp>
-          <stringProp name="mqtt.message_type">Random string with fixed length</stringProp>
-          <stringProp name="mqtt.message_type_fixed_length">${msg_length}</stringProp>
-          <stringProp name="mqtt.message_to_sent"></stringProp>
-          <boolProp name="mqtt.client_id_suffix">true</boolProp>
+          <stringProp name="plugin.keystore_file_path"></stringProp>
+          <stringProp name="plugin.clientcert_file_path"></stringProp>
+          <stringProp name="plugin.conn_keep_alive">${keep_alive}</stringProp>
+          <stringProp name="plugin.conn_attampt_max">0</stringProp>
+          <stringProp name="plugin.keep_time">1800</stringProp>
+          <stringProp name="plugin.client_id_prefix">pub_</stringProp>
+          <stringProp name="plugin.reconn_attampt_max">0</stringProp>
+          <stringProp name="plugin.conn_timeout">10</stringProp>
+          <boolProp name="plugin.dual_ssl_authentication">false</boolProp>
+          <stringProp name="plugin.keystore_password"></stringProp>
+          <stringProp name="plugin.clientcert_password"></stringProp>
+          <stringProp name="plugin.port">${port}</stringProp>
+          <stringProp name="plugin.protocol">${protocol}</stringProp>
+          <stringProp name="plugin.server">${server}</stringProp>
+          <stringProp name="plugin.user_name"></stringProp>
+          <stringProp name="plugin.password"></stringProp>
+          <stringProp name="plugin.topic_name">${topic_name}</stringProp>
+          <stringProp name="plugin.qos_level">${QoS}</stringProp>
+          <boolProp name="plugin.add_timestamp">true</boolProp>
+          <stringProp name="plugin.message_type">Random string with fixed length</stringProp>
+          <stringProp name="plugin.message_type_fixed_length">${msg_length}</stringProp>
+          <stringProp name="plugin.message_to_sent"></stringProp>
+          <boolProp name="plugin.client_id_suffix">true</boolProp>
         </PubSampler>
         <hashTree>
           <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="固定定时器" enabled="true">
