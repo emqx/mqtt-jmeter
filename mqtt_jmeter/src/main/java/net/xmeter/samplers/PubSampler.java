@@ -103,6 +103,15 @@ public class PubSampler extends AbstractMQTTSampler {
 			result.sampleEnd(); // avoid endtime=0 exposed in trace log
 			return result;
 		}
+		if (!connection.isConnectionSucc()) {
+			result.sampleStart();
+			result.setSuccessful(false);
+			result.setResponseMessage("Publish: Connection is broken.");
+			result.setResponseData("Publish failed because connection is broken and cannot be used.".getBytes());
+			result.setResponseCode("500");
+			result.sampleEnd();
+			return result;
+		}
 		
 		byte[] toSend = new byte[]{};
 		try {

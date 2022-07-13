@@ -22,8 +22,8 @@ public interface Constants {
 	public static final String CONN_CLIENT_ID_SUFFIX = "mqtt.client_id_suffix";
 	
 	public static final String CONN_KEEP_ALIVE = "mqtt.conn_keep_alive";
-	public static final String CONN_ATTAMPT_MAX = "mqtt.conn_attampt_max";
-	public static final String CONN_RECONN_ATTAMPT_MAX = "mqtt.reconn_attampt_max";
+	public static final String CONN_ATTEMPT_MAX = "mqtt.conn_attempt_max";
+	public static final String CONN_RECONN_ATTEMPT_MAX = "mqtt.reconn_attempt_max";
 	
 	public static final String CONN_CLEAN_SESSION = "mqtt.conn_clean_session";
 	
@@ -37,6 +37,7 @@ public interface Constants {
 	public static final String RETAINED_MESSAGE = "mqtt.retained_message";
 	
 	public static final String SAMPLE_CONDITION_VALUE = "mqtt.sample_condition_value";
+	public static final String SAMPLE_CONDITION_VALUE_OPT = "mqtt.sample_condition_value_opt";
 	public static final String SAMPLE_CONDITION = "mqtt.sample_condition";
 	
 	public static final String TIME_STAMP_SEP_FLAG = "ts_sep_flag";
@@ -80,10 +81,11 @@ public interface Constants {
 	public static final String DEFAULT_CONN_PREFIX_FOR_CONN = "conn_";
 	
 	public static final String DEFAULT_CONN_KEEP_ALIVE = "300";
-	public static final String DEFAULT_CONN_ATTAMPT_MAX = "0";
-	public static final String DEFAULT_CONN_RECONN_ATTAMPT_MAX = "0";
+	public static final String DEFAULT_CONN_ATTEMPT_MAX = "0";
+	public static final String DEFAULT_CONN_RECONN_ATTEMPT_MAX = "0";
 	
 	public static final String DEFAULT_SAMPLE_VALUE_COUNT = "1";
+	public static final String DEFAULT_SAMPLE_VALUE_COUNT_TIMEOUT = "5000";
 	public static final String DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_MILLI_SEC = "1000";
 	
 	public static final String DEFAULT_MESSAGE_FIX_LENGTH = "1024";

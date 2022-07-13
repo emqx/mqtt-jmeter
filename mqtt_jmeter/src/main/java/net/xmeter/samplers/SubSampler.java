@@ -30,6 +30,7 @@ public class SubSampler extends AbstractMQTTSampler {
 	private boolean sampleByTime = true; // initial values
 	private int sampleElapsedTime = 1000; 
 	private int sampleCount = 1;
+	private int sampleCountTimeout = 5000;
 
 	private transient ConcurrentLinkedQueue<SubBean> batches = new ConcurrentLinkedQueue<>();
 	private boolean printFlag = false;
@@ -67,7 +68,15 @@ public class SubSampler extends AbstractMQTTSampler {
 	public void setSampleCount(String count) {
 		setProperty(SAMPLE_CONDITION_VALUE, count);
 	}
-	
+
+	public String getSampleCountTimeout() {
+		return getPropertyAsString(SAMPLE_CONDITION_VALUE_OPT, DEFAULT_SAMPLE_VALUE_COUNT_TIMEOUT);
+	}
+
+	public void setSampleCountTimeout(String timeout) {
+		setProperty(SAMPLE_CONDITION_VALUE_OPT, timeout);
+	}
+
 	public String getSampleElapsedTime() {
 		return getPropertyAsString(SAMPLE_CONDITION_VALUE, DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_MILLI_SEC);
 	}
@@ -110,6 +119,7 @@ public class SubSampler extends AbstractMQTTSampler {
 				sampleElapsedTime = Integer.parseInt(getSampleElapsedTime());
 			} else {
 				sampleCount = Integer.parseInt(getSampleCount());
+				sampleCountTimeout = Integer.parseInt(getSampleCountTimeout());
 			}
 		} catch (NumberFormatException e) {
 			return fillFailedResult(result, "510", "Unrecognized value for sample elapsed time or message count.");
@@ -118,7 +128,7 @@ public class SubSampler extends AbstractMQTTSampler {
 		if (sampleByTime && sampleElapsedTime <=0 ) {
 			return fillFailedResult(result, "511", "Sample on elapsed time: must be greater than 0 ms.");
 		} else if (sampleCount < 1) {
-			return fillFailedResult(result, "512", "Sample on message count: must be greater than 1.");
+			return fillFailedResult(result, "512", "Sample on message count: must be equal or greater than 1.");
 		}
 		
 		final String topicsName= getTopics();
@@ -155,22 +165,46 @@ public class SubSampler extends AbstractMQTTSampler {
 			}
 		} else {
 			synchronized (dataLock) {
-				int receivedCount1 = (batches.isEmpty() ? 0 : batches.element().getReceivedCount());;
-				boolean needWait = false;
-				if(receivedCount1 < sampleCount) {
-					needWait = true;
-				}
-				
-				if(needWait) {
+				int receivedCount1 = (batches.isEmpty() ? 0 : batches.element().getReceivedCount());
+				if (receivedCount1 < sampleCount) {
 					try {
-						dataLock.wait();
+						if (sampleCountTimeout != 0) {
+							dataLock.wait(sampleCountTimeout);
+						} else {
+							dataLock.wait();
+						}
 					} catch (InterruptedException e) {
 						logger.log(Level.INFO, "Received exception when waiting for notification signal", e);
 					}
 				}
+				receivedCount1 = (batches.isEmpty() ? 0 : batches.element().getReceivedCount());
+//				if (receivedCount1 < sampleCount) {
+//					return fillFailedResult(result, "502", "Failed: No message received on topic: " + topicsName + " (Timeout after " + sampleCountTimeout + "ms)");
+//				}
 				result.sampleStart();
 				return produceResult(result, topicsName);
 			}
+//			int currentTime = 0;
+//			int receivedCount1 = (batches.isEmpty() ? 0 : batches.element().getReceivedCount());
+//			while (receivedCount1 < sampleCount && currentTime < sampleCountTimeout) {
+//				try {
+//					TimeUnit.MILLISECONDS.sleep(10);
+//					currentTime += 10;
+//				} catch (InterruptedException e) {
+//					logger.log(Level.INFO, "Received exception when waiting for notification signal", e);
+//				}
+//				receivedCount1 = (batches.isEmpty() ? 0 : batches.element().getReceivedCount());
+//				if (receivedCount1 >= sampleCount) {
+//					break;
+//				}
+//			}
+//			if (receivedCount1 < sampleCount) {
+//				return fillFailedResult(result, "502", "Failed: No message received on topic: " + topicsName + " (Timeout after " + sampleCountTimeout + "ms)");
+//			}
+//			synchronized (dataLock) {
+//				result.sampleStart();
+//				return produceResult(result, topicsName);
+//			}
 		}
 	}
 	
@@ -251,7 +285,7 @@ public class SubSampler extends AbstractMQTTSampler {
 	}
 	
 	private SubBean handleSubBean(boolean sampleByTime, String msg, int sampleCount) {
-		SubBean bean = null;
+		SubBean bean;
 		if(batches.isEmpty()) {
 			bean = new SubBean();
 			batches.add(bean);

@@ -83,7 +83,7 @@ public class EfficientConnectSamplerUI extends AbstractSamplerGui implements Con
 		connUI.configure(sampler);
 		//
 		shouldSub.setSelected(sampler.isSubWhenConnected());
-		if(sampler.getQOS().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1){
+		if(!sampler.getQOS().trim().contains(JMETER_VARIABLE_PREFIX)){
 			this.qosChoice.setSelectedIndex(Integer.parseInt(sampler.getQOS()));	
 		} else {
 			this.qosChoice.setText(sampler.getQOS());
@@ -104,7 +104,7 @@ public class EfficientConnectSamplerUI extends AbstractSamplerGui implements Con
 	
 	private void setupSamplerProperties(EfficientConnectSampler sampler) {
 		sampler.setSubWhenConnected(shouldSub.isSelected());
-		if(this.qosChoice.getText().indexOf(JMETER_VARIABLE_PREFIX) == -1) {
+		if(!this.qosChoice.getText().contains(JMETER_VARIABLE_PREFIX)) {
 			int qos = QOS_0;
 			try {
 				qos = Integer.parseInt(this.qosChoice.getText());

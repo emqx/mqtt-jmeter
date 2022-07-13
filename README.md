@@ -108,7 +108,7 @@ Sub sampler reuses previously established connection (by Connect sampler) to sub
 
 -  **Topic name(s)**: A list of topic names (comma-separated) that will be subscribed to.
 
--  **Payload includes timestamp**: If the checkbox is enabled, then it means the payload includes timestamp. It can be used to calcuate the message latency time.
+-  **Payload includes timestamp**: If the checkbox is enabled, then it means the payload includes timestamp. It can be used to calculate the message latency time.
 
 ```
 message_latency = timestamp_in_sub_when_receive_msg - timestamp_in_payload (timestamp in pub machine when sending out message)
@@ -116,7 +116,7 @@ message_latency = timestamp_in_sub_when_receive_msg - timestamp_in_payload (time
 Please notice, if the machine publish message is not the same as subscriber, then the calculated message latency time is not accurate. 
 It's because the time is almost not the same in different machines. So the latency time calculated by sub sampler could be only be a reference.
 ```
-- **Sample on**: It controls how to sample. The default value is '**elapsed with specified time(ms)**', which means a sub sampler will  occur every specified milli-seconds (default is 1000ms). During the 1000 ms, multiple messages could be received, and result in report is the summarized data during 1000 ms. If the value is set to 2000, then means summarized report during 2000 ms. Another option is '**number of received messages**', which means a sub sampler will occur after receiving these specified number of messages (default is 1). 
+- **Sample on**: It controls how to sample. The default value is '**elapsed with specified time(ms)**', which means a sub sampler will occur every specified milli-seconds (default is 1000ms). During the 1000 ms, multiple messages could be received, and result in report is the summarized data during 1000 ms. If the value is set to 2000, then means summarized report during 2000 ms. Another option is '**number of received messages**', which means a sub sampler will occur after receiving these specified number of messages (default is 1). 
 
 - **Debug response**: If checked, the received message will be print in response. It's recommended to enable this option when you debug your script.
 

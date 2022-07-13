@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
+import javax.swing.JLabel;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
@@ -25,6 +26,8 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 	private static final long serialVersionUID = 2479085966683186422L;
 	private static final Logger logger = Logger.getLogger(PubSamplerUI.class.getCanonicalName());
 
+
+	private final JLabel qosLabel = new JLabel("QoS Level:");
 	private JLabeledChoice qosChoice;
 	private final JLabeledTextField retainedMsg = new JLabeledTextField("Retained messages:", 1);
 	private final JLabeledTextField topicName = new JLabeledTextField("Topic name:");
@@ -59,6 +62,7 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 		qosChoice.addChangeListener(this);
 
 		JPanel optsPanel = new HorizontalPanel();
+		optsPanel.add(qosLabel);
 		optsPanel.add(qosChoice);
 		optsPanel.add(retainedMsg);
 		optsPanel.add(topicName);
@@ -129,7 +133,7 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 		super.configure(element);
 		PubSampler sampler = (PubSampler) element;
 		
-		if(sampler.getQOS().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1){
+		if(!sampler.getQOS().trim().contains(JMETER_VARIABLE_PREFIX)){
 			this.qosChoice.setSelectedIndex(Integer.parseInt(sampler.getQOS()));	
 		} else {
 			this.qosChoice.setText(sampler.getQOS());
@@ -161,7 +165,7 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 		this.configureTestElement(sampler);
 		sampler.setTopic(this.topicName.getText());
 		
-		if(this.qosChoice.getText().indexOf(JMETER_VARIABLE_PREFIX) == -1) {
+		if(!this.qosChoice.getText().contains(JMETER_VARIABLE_PREFIX)) {
 			int qos = QOS_0;
 			try {
 				qos = Integer.parseInt(this.qosChoice.getText());
@@ -193,7 +197,7 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 		this.timestamp.setSelected(false);
 		
 		this.messageTypes.setSelectedIndex(0);
-		this.stringLength.setText(String.valueOf(DEFAULT_MESSAGE_FIX_LENGTH));
+		this.stringLength.setText(DEFAULT_MESSAGE_FIX_LENGTH);
 		this.sendMessage.setText("");
 	}
 }

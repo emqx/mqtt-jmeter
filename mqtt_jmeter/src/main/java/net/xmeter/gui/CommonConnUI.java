@@ -61,8 +61,8 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	
 	private final JLabeledTextField connKeepAlive = new JLabeledTextField("Keep alive(s):", 3);
 	
-	private final JLabeledTextField connAttmptMax = new JLabeledTextField("Connect attampt max:", 3);
-	private final JLabeledTextField reconnAttmptMax = new JLabeledTextField("Reconnect attampt max:", 3);
+	private final JLabeledTextField connAttemptMax = new JLabeledTextField("Connect attempt max:", 3);
+	private final JLabeledTextField reconnAttemptMax = new JLabeledTextField("Reconnect attempt max:", 3);
 
 	private final JLabeledTextField connCleanSession = new JLabeledTextField("Clean session:", 3);
 
@@ -100,8 +100,8 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		optsPanel1.add(connKeepAlive);
 		optsPanelCon.add(optsPanel1);
 		
-		optsPanel1.add(connAttmptMax);
-		optsPanel1.add(reconnAttmptMax);
+		optsPanel1.add(connAttemptMax);
+		optsPanel1.add(reconnAttemptMax);
 		optsPanel1.add(connCleanSession);
 		optsPanelCon.add(optsPanel1);
 		
@@ -270,7 +270,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 //			clientNames.setText(sampler.getMqttClientName());
 //		}
 
-		if(sampler.getProtocol().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1) {
+		if(!sampler.getProtocol().trim().contains(JMETER_VARIABLE_PREFIX)) {
 			List<String> items = Arrays.asList(protocols.getItems());
 			int index = items.indexOf(sampler.getProtocol());
 			protocols.setSelectedIndex(index);
@@ -303,8 +303,8 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		}
 		
 		connKeepAlive.setText(sampler.getConnKeepAlive());
-		connAttmptMax.setText(sampler.getConnAttamptMax());
-		reconnAttmptMax.setText(sampler.getConnReconnAttamptMax());
+		connAttemptMax.setText(sampler.getConnAttemptMax());
+		reconnAttemptMax.setText(sampler.getConnReconnAttemptMax());
 		
 		connCleanSession.setText(sampler.getConnCleanSession().toString());
 	}
@@ -332,8 +332,8 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		sampler.setClientIdSuffix(connNameSuffix.isSelected());
 		
 		sampler.setConnKeepAlive(connKeepAlive.getText());
-		sampler.setConnAttamptMax(connAttmptMax.getText());
-		sampler.setConnReconnAttamptMax(reconnAttmptMax.getText());
+		sampler.setConnAttemptMax(connAttemptMax.getText());
+		sampler.setConnReconnAttemptMax(reconnAttemptMax.getText());
 		
 		sampler.setConnCleanSession(connCleanSession.getText());
 	}
@@ -368,9 +368,9 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		connNamePrefix.setText(DEFAULT_CONN_PREFIX_FOR_CONN);
 		connNameSuffix.setSelected(true);
 
-		connAttmptMax.setText(DEFAULT_CONN_ATTAMPT_MAX);
+		connAttemptMax.setText(DEFAULT_CONN_ATTEMPT_MAX);
 		connKeepAlive.setText(DEFAULT_CONN_KEEP_ALIVE);
-		reconnAttmptMax.setText(DEFAULT_CONN_RECONN_ATTAMPT_MAX);
+		reconnAttemptMax.setText(DEFAULT_CONN_RECONN_ATTEMPT_MAX);
 		connCleanSession.setText("true");
 	}
 }
