@@ -80,7 +80,7 @@
         <boolProp name="ThreadGroup.delayedStart">true</boolProp>
       </ThreadGroup>
       <hashTree>
-        <net.xmeter.samplers.PubSampler guiclass="net.xmeter.gui.PubSamplerUI" testclass="net.xmeter.samplers.PubSampler" testname="MQTT Pub Sampler" enabled="true">
+        <PubSampler guiclass="PubSamplerUI" testclass="PubSampler" testname="MQTT Pub Sampler" enabled="true">
           <stringProp name="mqtt.keystore_file_path"></stringProp>
           <stringProp name="mqtt.clientcert_file_path"></stringProp>
           <stringProp name="mqtt.conn_keep_alive">${keep_alive}</stringProp>
@@ -104,7 +104,7 @@
           <stringProp name="mqtt.message_type_fixed_length">${msg_length}</stringProp>
           <stringProp name="mqtt.message_to_sent"></stringProp>
           <boolProp name="mqtt.client_id_suffix">true</boolProp>
-        </net.xmeter.samplers.PubSampler>
+        </PubSampler>
         <hashTree>
           <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="固定定时器" enabled="true">
             <stringProp name="ConstantTimer.delay">${send_interval}</stringProp>

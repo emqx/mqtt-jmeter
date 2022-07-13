@@ -74,7 +74,7 @@
         <boolProp name="ThreadGroup.delayedStart">true</boolProp>
       </ThreadGroup>
       <hashTree>
-        <net.xmeter.samplers.SubSampler guiclass="net.xmeter.gui.SubSamplerUI" testclass="net.xmeter.samplers.SubSampler" testname="MQTT Sub Sampler" enabled="true">
+        <SubSampler guiclass="SubSamplerUI" testclass="SubSampler" testname="MQTT Sub Sampler" enabled="true">
           <stringProp name="mqtt.keystore_file_path"></stringProp>
           <stringProp name="mqtt.clientcert_file_path"></stringProp>
           <stringProp name="mqtt.conn_keep_alive">${keep_alive}</stringProp>
@@ -98,7 +98,7 @@
           <boolProp name="mqtt.client_id_suffix">true</boolProp>
           <stringProp name="mqtt.sample_condition">specified elapsed time (ms)</stringProp>
           <stringProp name="mqtt.sample_condition_value">1000</stringProp>
-        </net.xmeter.samplers.SubSampler>
+        </SubSampler>
         <hashTree>
           <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="固定定时器" enabled="true">
             <stringProp name="ConstantTimer.delay">${recv_interval}</stringProp>
