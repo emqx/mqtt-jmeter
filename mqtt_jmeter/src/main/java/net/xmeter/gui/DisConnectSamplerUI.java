@@ -1,7 +1,7 @@
 package net.xmeter.gui;
 
 import java.awt.BorderLayout;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 import net.xmeter.Constants;
 import net.xmeter.samplers.DisConnectSampler;
@@ -26,8 +26,8 @@ public class DisConnectSamplerUI extends AbstractSamplerGui implements Constants
 		add(makeTitlePanel(), BorderLayout.NORTH);
 		JPanel mainPanel = new VerticalPanel();
 		JPanel optsPanel = new HorizontalPanel();
-		optsPanel.add(connName);
 		mainPanel.add(optsPanel);
+		mainPanel.add(createConnOptions());
 		add(mainPanel, BorderLayout.CENTER);
 	}
 
@@ -48,6 +48,17 @@ public class DisConnectSamplerUI extends AbstractSamplerGui implements Constants
 	@Override
 	public String getLabelResource() {
 		throw new RuntimeException();
+	}
+
+	public JPanel createConnOptions() {
+		JPanel optsPanelCon = new VerticalPanel();
+		optsPanelCon.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Connection options"));
+
+		JPanel optsPanel0 = new HorizontalPanel();
+		optsPanel0.add(connName);
+		optsPanelCon.add(optsPanel0);
+
+		return optsPanelCon;
 	}
 
 	@Override
