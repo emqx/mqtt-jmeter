@@ -10,6 +10,9 @@ import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import net.xmeter.Constants;
+import net.xmeter.samplers.PubSampler;
+
 import org.apache.jmeter.gui.util.HorizontalPanel;
 import org.apache.jmeter.gui.util.JSyntaxTextArea;
 import org.apache.jmeter.gui.util.JTextScrollPane;
@@ -19,15 +22,12 @@ import org.apache.jmeter.testelement.TestElement;
 import org.apache.jorphan.gui.JLabeledChoice;
 import org.apache.jorphan.gui.JLabeledTextField;
 
-import net.xmeter.Constants;
-import net.xmeter.samplers.PubSampler;
-
 public class PubSamplerUI extends AbstractSamplerGui implements Constants, ChangeListener {
 	private static final long serialVersionUID = 2479085966683186422L;
 	private static final Logger logger = Logger.getLogger(PubSamplerUI.class.getCanonicalName());
 
-
-	private final JLabel qosLabel = new JLabel("QoS Level:");
+	private static final JLabel qosLabel = new JLabel("QOS Level:");
+	private final JLabeledTextField connName = new JLabeledTextField("MQTT Conn Name:");
 	private JLabeledChoice qosChoice;
 	private final JLabeledTextField retainedMsg = new JLabeledTextField("Retained messages:", 1);
 	private final JLabeledTextField topicName = new JLabeledTextField("Topic name:");
@@ -49,9 +49,9 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 		add(makeTitlePanel(), BorderLayout.NORTH);
 		JPanel mainPanel = new VerticalPanel();
 		add(mainPanel, BorderLayout.CENTER);
-
 		mainPanel.add(createPubOption());
 		mainPanel.add(createPayload());
+		mainPanel.add(createConnOptions());
 	}
 
 	private JPanel createPubOption() {
@@ -95,6 +95,17 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 		return optsPanelCon;
 	}
 
+	public JPanel createConnOptions() {
+		JPanel optsPanelCon = new VerticalPanel();
+		optsPanelCon.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Connection options"));
+
+		JPanel optsPanel0 = new HorizontalPanel();
+		optsPanel0.add(connName);
+		optsPanelCon.add(optsPanel0);
+
+		return optsPanelCon;
+	}
+
 	@Override
 	public String getStaticLabel() {
 		return "MQTT Pub Sampler";
@@ -132,8 +143,9 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 	public void configure(TestElement element) {
 		super.configure(element);
 		PubSampler sampler = (PubSampler) element;
-		
-		if(!sampler.getQOS().trim().contains(JMETER_VARIABLE_PREFIX)){
+
+		this.connName.setText(sampler.getConnName());
+		if (sampler.getQOS().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1){
 			this.qosChoice.setSelectedIndex(Integer.parseInt(sampler.getQOS()));	
 		} else {
 			this.qosChoice.setText(sampler.getQOS());
@@ -163,9 +175,10 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 
 	private void setupSamplerProperties(PubSampler sampler) {
 		this.configureTestElement(sampler);
+		sampler.setConnName(this.connName.getText());
 		sampler.setTopic(this.topicName.getText());
 		
-		if(!this.qosChoice.getText().contains(JMETER_VARIABLE_PREFIX)) {
+		if(this.qosChoice.getText().indexOf(JMETER_VARIABLE_PREFIX) == -1) {
 			int qos = QOS_0;
 			try {
 				qos = Integer.parseInt(this.qosChoice.getText());
@@ -175,7 +188,6 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 				}
 			} catch (Exception ex) {
 				logger.info("Invalid QoS value, set to default QoS value 0.");
-				qos = QOS_0;
 			}
 			sampler.setQOS(String.valueOf(qos));
 		} else {
@@ -192,6 +204,7 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 	@Override
 	public void clearGui() {
 		super.clearGui();
+		this.connName.setText(DEFAULT_MQTT_CONN_NAME);
 		this.topicName.setText(DEFAULT_TOPIC_NAME);
 		this.qosChoice.setText(String.valueOf(QOS_0));
 		this.timestamp.setSelected(false);

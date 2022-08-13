@@ -24,6 +24,14 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 	//<connection client id, topics>
 	protected static Map<String, Set<String>> topicSubscribed = new ConcurrentHashMap<>();
 
+	public String getConnName() {
+		return getPropertyAsString(MQTT_CONN_NAME, DEFAULT_MQTT_CONN_NAME);
+	}
+
+	public void setConnName(String connName) {
+		setProperty(MQTT_CONN_NAME, connName);
+	}
+
 	public String getServer() {
 		return getPropertyAsString(SERVER, DEFAULT_SERVER);
 	}

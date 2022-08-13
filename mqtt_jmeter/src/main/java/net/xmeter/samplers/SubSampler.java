@@ -103,8 +103,8 @@ public class SubSampler extends AbstractMQTTSampler {
 		result.setSampleLabel(getName());
 	
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
-		connection = (MQTTConnection) vars.getObject("conn");
-		clientId = (String) vars.getObject("clientId");
+		connection = (MQTTConnection) vars.getObject(getConnName());
+		clientId = (String) vars.getObject(getConnName()+"_clientId");
 		if (connection == null) {
 			return fillFailedResult(result, "500", "Subscribe failed because connection is not established.");
 		}
@@ -124,7 +124,7 @@ public class SubSampler extends AbstractMQTTSampler {
 		if (sampleByTime && sampleElapsedTime <=0 ) {
 			return fillFailedResult(result, "511", "Sample on elapsed time: must be greater than 0 ms.");
 		} else if (sampleCount < 1) {
-			return fillFailedResult(result, "512", "Sample on message count: must be equal or greater then 1.");
+			return fillFailedResult(result, "512", "Sample on message count: must be greater than 0.");
 		}
 		
 		final String topicsName= getTopics();
