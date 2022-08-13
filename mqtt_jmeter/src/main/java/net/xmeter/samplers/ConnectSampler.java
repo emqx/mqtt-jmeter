@@ -28,17 +28,22 @@ public class ConnectSampler extends AbstractMQTTSampler {
 	public SampleResult sample(Entry entry) {
 		SampleResult result = new SampleResult();
 		result.setSampleLabel(getName());
-		
+
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
 		connection = (MQTTConnection) vars.getObject(getConnName());
+		String clientId = (String) vars.getObject(getConnName()+"_clientId");
 		if (connection != null) {
-			result.sampleStart();
-			result.setSuccessful(false);
-			result.setResponseMessage(MessageFormat.format("Connection {0} is already established.", connection));
-			result.setResponseData("Failed. Connection is already established.".getBytes());
-			result.setResponseCode("500");
-			result.sampleEnd(); // avoid endtime=0 exposed in trace log
-			return result;
+			try {
+				if (connection != null) {
+					logger.info(MessageFormat.format("Disconnect connection {0}.", connection));
+					connection.disconnect();
+				}
+			} catch (Exception e) {
+				logger.log(Level.SEVERE, "Failed to disconnect Connection" + connection, e);
+			} finally {
+				vars.remove(getConnName()); // clean up thread local var as well
+				topicSubscribed.remove(clientId);
+			}
 		}
 
 		ConnectionParameters parameters = new ConnectionParameters();
@@ -52,7 +57,6 @@ public class ConnectSampler extends AbstractMQTTSampler {
 				parameters.setPath(getWsPath());
 			}
 
-			String clientId;
 			if(isClientIdSuffix()) {
 				clientId = Util.generateClientId(getConnPrefix());
 			} else {
