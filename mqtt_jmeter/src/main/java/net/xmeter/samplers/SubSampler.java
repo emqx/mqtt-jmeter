@@ -106,8 +106,8 @@ public class SubSampler extends AbstractMQTTSampler {
 		result.setSampleLabel(getName());
 	
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
-		connection = (MQTTConnection) vars.getObject("conn");
-		clientId = (String) vars.getObject("clientId");
+		connection = (MQTTConnection) vars.getObject(getConnName());
+		clientId = (String) vars.getObject(getConnName()+"_clientId");
 		if (connection == null) {
 			return fillFailedResult(result, "500", "Subscribe failed because connection is not established.");
 		}
@@ -284,7 +284,7 @@ public class SubSampler extends AbstractMQTTSampler {
 	}
 	
 	private SubBean handleSubBean(boolean sampleByTime, String msg, int sampleCount) {
-		SubBean bean;
+		SubBean bean = null;
 		if(batches.isEmpty()) {
 			bean = new SubBean();
 			batches.add(bean);

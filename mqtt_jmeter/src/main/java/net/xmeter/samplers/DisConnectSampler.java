@@ -22,8 +22,8 @@ public class DisConnectSampler extends AbstractMQTTSampler {
 		result.setSampleLabel(getName());
 		
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
-		connection = (MQTTConnection) vars.getObject("conn");
-		String clientId = (String) vars.getObject("clientId");
+		connection = (MQTTConnection) vars.getObject(getConnName());
+		String clientId = (String) vars.getObject(getConnName()+"_clientId");
 		if (connection == null) {
 			result.sampleStart();
 			result.setSuccessful(false);
@@ -42,7 +42,7 @@ public class DisConnectSampler extends AbstractMQTTSampler {
 				try {
 					connection.disconnect();
 				} finally {
-					vars.remove("conn"); // clean up thread local var as well
+					vars.remove(getConnName()); // clean up thread local var as well
 					topicSubscribed.remove(clientId);
 				}
 			}
