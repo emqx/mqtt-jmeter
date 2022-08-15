@@ -1,8 +1,8 @@
 package net.xmeter;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.util.UUID;
@@ -18,8 +18,8 @@ import net.xmeter.samplers.AbstractMQTTSampler;
 
 public class Util implements Constants {
 	
-	private static SecureRandom random = new SecureRandom();
-    private static char[] seeds = "abcdefghijklmnopqrstuvwxmy0123456789".toCharArray();
+	private static final SecureRandom random = new SecureRandom();
+    private static final char[] seeds = "abcdefghijklmnopqrstuvwxmy0123456789".toCharArray();
     private static final Logger logger = Logger.getLogger(Util.class.getCanonicalName());
 
 	public static String generateClientId(String prefix) {
@@ -49,7 +49,7 @@ public class Util implements Constants {
 //			File theFile1 = getKeyStoreFile(sampler);
 			File theFile2 = getClientCertFile(sampler);
 			
-			try(/*InputStream is_cacert = new FileInputStream(theFile1);*/InputStream is_client = new FileInputStream(theFile2)) {
+			try(/*InputStream is_cacert = Files.newInputStream(theFile1.toPath());*/InputStream is_client = Files.newInputStream(theFile2.toPath())) {
 //				KeyStore tks = KeyStore.getInstance(KeyStore.getDefaultType()); // jks
 //				tks.load(is_cacert, KEYSTORE_PASS.toCharArray());
 
@@ -68,9 +68,9 @@ public class Util implements Constants {
 		}
 	}
 
-	public static File getKeyStoreFile(AbstractMQTTSampler sampler) {
-		return getFilePath(sampler.getKeyStoreFilePath());
-	}
+//	public static File getKeyStoreFile(AbstractMQTTSampler sampler) {
+//		return getFilePath(sampler.getKeyStoreFilePath());
+//	}
 
 	public static File getClientCertFile(AbstractMQTTSampler sampler) {
 		return getFilePath(sampler.getClientCertFilePath());
@@ -94,7 +94,7 @@ public class Util implements Constants {
 	}
 
 	public static String generatePayload(int size) {
-		StringBuffer res = new StringBuffer();
+		StringBuilder res = new StringBuilder();
 		for(int i = 0; i < size; i++) {
 			res.append(seeds[random.nextInt(seeds.length - 1)]);
 		}

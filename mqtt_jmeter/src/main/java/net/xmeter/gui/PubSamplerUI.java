@@ -22,9 +22,6 @@ import org.apache.jmeter.testelement.TestElement;
 import org.apache.jorphan.gui.JLabeledChoice;
 import org.apache.jorphan.gui.JLabeledTextField;
 
-import net.xmeter.Constants;
-import net.xmeter.samplers.PubSampler;
-
 public class PubSamplerUI extends AbstractSamplerGui implements Constants, ChangeListener {
 	private static final long serialVersionUID = 2479085966683186422L;
 	private static final Logger logger = Logger.getLogger(PubSamplerUI.class.getCanonicalName());
@@ -34,12 +31,12 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 	private JLabeledChoice qosChoice;
 	private final JLabeledTextField retainedMsg = new JLabeledTextField("Retained messages:", 1);
 	private final JLabeledTextField topicName = new JLabeledTextField("Topic name:");
-	private JCheckBox timestamp = new JCheckBox("Add timestamp in payload");
+	private final JCheckBox timestamp = new JCheckBox("Add timestamp in payload");
 
 	private JLabeledChoice messageTypes;
 	private final JSyntaxTextArea sendMessage = JSyntaxTextArea.getInstance(10, 50);
 	private final JTextScrollPane messagePanel = JTextScrollPane.getInstance(sendMessage);
-	private JLabeledTextField stringLength = new JLabeledTextField("Length:");
+	private final JLabeledTextField stringLength = new JLabeledTextField("Length:");
 
 	public PubSamplerUI() {
 		init();
@@ -191,7 +188,6 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 				}
 			} catch (Exception ex) {
 				logger.info("Invalid QoS value, set to default QoS value 0.");
-				qos = QOS_0;
 			}
 			sampler.setQOS(String.valueOf(qos));
 		} else {
@@ -214,7 +210,7 @@ public class PubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 		this.timestamp.setSelected(false);
 		
 		this.messageTypes.setSelectedIndex(0);
-		this.stringLength.setText(String.valueOf(DEFAULT_MESSAGE_FIX_LENGTH));
+		this.stringLength.setText(DEFAULT_MESSAGE_FIX_LENGTH);
 		this.sendMessage.setText("");
 	}
 }

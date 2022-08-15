@@ -16,12 +16,12 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 //	protected static final String LABEL_PREFIX = "xmeter-mqtt-batch-con-mode-";
 	
 //	protected boolean useEfficientCon = Boolean.parseBoolean(System.getProperty("batchCon"));
-	protected boolean useEfficientCon = true;
+//	protected boolean useEfficientCon = true;
 	
 //	protected static int conCapacity = 1;
 	
 	//<connection client id, topics>
-	protected static Map<String, Set<String>> topicSubscribed = new ConcurrentHashMap<>();
+	protected static Map<String, Set<String>> topicsSubscribed = new ConcurrentHashMap<>();
 
 	public String getConnName() {
 		return getPropertyAsString(MQTT_CONN_NAME, DEFAULT_MQTT_CONN_NAME);
@@ -184,11 +184,11 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 	}
 	
 	public void setTopicSubscribed(String clientId, Set<String> topics) {
-		topicSubscribed.put(clientId, topics);
+		topicsSubscribed.put(clientId, topics);
 	}
 	
 	public void removeTopicSubscribed(String clientId) {
-		topicSubscribed.remove(clientId);
+		topicsSubscribed.remove(clientId);
 	}
 	
 	public String getLabelPrefix() {
@@ -203,9 +203,9 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 		return getPropertyAsString(MQTT_CLIENT_NAME, DEFAULT_MQTT_CLIENT_NAME);
 	}
 
-	public void setMqttClientName(String mqttClientName) {
-		setProperty(MQTT_CLIENT_NAME, mqttClientName);
-	}
+//	public void setMqttClientName(String mqttClientName) {
+//		setProperty(MQTT_CLIENT_NAME, mqttClientName);
+//	}
 
 //	public int getConCapacity() {
 //		return conCapacity;

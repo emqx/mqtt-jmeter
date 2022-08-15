@@ -18,12 +18,10 @@ import org.apache.jmeter.threads.JMeterVariables;
 public class PubSampler extends AbstractMQTTSampler {
 	private static final long serialVersionUID = 4312341622759500786L;
 	private static final Logger logger = Logger.getLogger(PubSampler.class.getCanonicalName());
-	
-	private transient MQTTConnection connection = null;
+
 	private String payload = null;
 	private MQTTQoS qos_enum = MQTTQoS.AT_MOST_ONCE;
 	private String topicName = "";
-	private boolean retainedMsg = false;
 
 	public String getQOS() {
 		return getPropertyAsString(QOS_LEVEL, String.valueOf(QOS_0));
@@ -91,7 +89,7 @@ public class PubSampler extends AbstractMQTTSampler {
 		result.setSampleLabel(getName());
 	
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
-		connection = (MQTTConnection) vars.getObject(getConnName());
+		MQTTConnection connection = (MQTTConnection) vars.getObject(getConnName());
 		String clientId = (String) vars.getObject(getConnName()+"_clientId");
 		if (connection == null) {
 			result.sampleStart();
@@ -144,7 +142,7 @@ public class PubSampler extends AbstractMQTTSampler {
 			}
 			
 			topicName = getTopic();
-			retainedMsg = getRetainedMessage();
+			boolean retainedMsg = getRetainedMessage();
 			if (isAddTimestamp()) {
 				byte[] timePrefix = (System.currentTimeMillis() + TIME_STAMP_SEP_FLAG).getBytes();
 				toSend = new byte[timePrefix.length + tmp.length];

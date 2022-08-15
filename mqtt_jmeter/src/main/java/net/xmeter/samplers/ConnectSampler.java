@@ -22,7 +22,6 @@ public class ConnectSampler extends AbstractMQTTSampler {
 	private static final Logger logger = Logger.getLogger(ConnectSampler.class.getCanonicalName());
 
 	private transient MQTTClient client;
-	private transient MQTTConnection connection;
 
 	@Override
 	public SampleResult sample(Entry entry) {
@@ -30,19 +29,17 @@ public class ConnectSampler extends AbstractMQTTSampler {
 		result.setSampleLabel(getName());
 
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
-		connection = (MQTTConnection) vars.getObject(getConnName());
+		MQTTConnection connection = (MQTTConnection) vars.getObject(getConnName());
 		String clientId = (String) vars.getObject(getConnName()+"_clientId");
 		if (connection != null) {
 			try {
-				if (connection != null) {
-					logger.info(MessageFormat.format("Disconnect connection {0}.", connection));
-					connection.disconnect();
-				}
+				logger.info(MessageFormat.format("Disconnect connection {0} ({1}).", connection, getConnName()));
+				connection.disconnect();
 			} catch (Exception e) {
-				logger.log(Level.SEVERE, "Failed to disconnect Connection" + connection, e);
+				logger.log(Level.SEVERE, MessageFormat.format("Failed to disconnect connection {0} ({1}).", connection, getConnName()), e);
 			} finally {
 				vars.remove(getConnName()); // clean up thread local var as well
-				topicSubscribed.remove(clientId);
+				removeTopicSubscribed(clientId);
 			}
 		}
 
@@ -80,7 +77,7 @@ public class ConnectSampler extends AbstractMQTTSampler {
 				parameters.setSsl(ssl);
 			}
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, "Failed to establish Connection " + connection , e);
+			logger.log(Level.SEVERE, "Failed to establish Connection " + connection, e);
 			result.setSuccessful(false);
 			result.setResponseMessage(MessageFormat.format("Failed to establish Connection {0}. Please check SSL authentication info.", connection));
 			result.setResponseData("Failed to establish Connection. Please check SSL authentication info.".getBytes());
@@ -98,7 +95,7 @@ public class ConnectSampler extends AbstractMQTTSampler {
 			if (connection.isConnectionSucc()) {
 				vars.putObject(getConnName(), connection); // save connection object as thread local variable !!
 				vars.putObject(getConnName()+"_clientId", client.getClientId());	//save client id as thread local variable
-				topicSubscribed.put(client.getClientId(), new HashSet<>());
+				setTopicSubscribed(client.getClientId(), new HashSet<>());
 				result.setSuccessful(true);
 				result.setResponseData("Successful.".getBytes());
 				result.setResponseMessage(MessageFormat.format("Connection {0} established successfully.", connection));
@@ -111,7 +108,7 @@ public class ConnectSampler extends AbstractMQTTSampler {
 				result.setResponseCode("501");
 			}
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, "Failed to establish Connection " + connection , e);
+			logger.log(Level.SEVERE, "Failed to establish Connection " + connection, e);
 			if (result.getEndTime() == 0) result.sampleEnd(); //avoid re-enter sampleEnd()
 			result.setSuccessful(false);
 			result.setResponseMessage(MessageFormat.format("Failed to establish Connection {0}.", connection));

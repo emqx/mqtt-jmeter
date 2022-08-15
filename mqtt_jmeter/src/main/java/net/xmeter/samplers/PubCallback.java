@@ -10,14 +10,12 @@ import org.fusesource.mqtt.client.QoS;
 public class PubCallback implements Callback<Void>{
 	private static final Logger logger = Logger.getLogger(PubCallback.class.getCanonicalName());
 	private boolean successful = false;
-	private Object pubLock;
+	private final Object pubLock;
 	private String errorMessage = "";
-	private QoS qos;
-	
+
 	public PubCallback(Object pubLock, QoS qos) {
 		this.pubLock = pubLock;
-		this.qos = qos;
-		if(this.qos == QoS.AT_MOST_ONCE) {
+		if(qos == QoS.AT_MOST_ONCE) {
 			this.successful = true;
 		}
 	}

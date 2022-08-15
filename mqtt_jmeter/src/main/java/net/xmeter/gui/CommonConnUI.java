@@ -33,7 +33,8 @@ import net.xmeter.samplers.mqtt.MQTT;
 public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private final JLabeledTextField serverAddr = new JLabeledTextField("Server name or IP:");
 	private final JLabeledTextField serverPort = new JLabeledTextField("Port number:", 5);
-	private JLabeledChoice mqttVersion = new JLabeledChoice("MQTT version:", new String[] { MQTT_VERSION_3_1, MQTT_VERSION_3_1_1 }, false, false);;
+	private final JLabeledChoice mqttVersion = new JLabeledChoice("MQTT version:",
+			new String[] { MQTT_VERSION_3_1, MQTT_VERSION_3_1_1 }, false, false);
 	private final JLabeledTextField timeout = new JLabeledTextField("Timeout(s):", 5);
 	private final JLabeledTextField connName = new JLabeledTextField("MQTT Conn Name:");
 
@@ -43,8 +44,8 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private JLabeledChoice protocols;
 //	private JLabeledChoice clientNames;
 
-	private JCheckBox dualAuth = new JCheckBox("Dual SSL authentication");
-	private JLabeledTextField wsPath = new JLabeledTextField("WS Path: ", 10);
+	private final JCheckBox dualAuth = new JCheckBox("Dual SSL authentication");
+	private final JLabeledTextField wsPath = new JLabeledTextField("WS Path: ", 10);
 
 //	private final JLabeledTextField tksFilePath = new JLabeledTextField("Trust Key Store(*.jks):       ", 25);
 	private final JLabeledTextField ccFilePath = new JLabeledTextField("Client Certification(*.p12):", 25);
@@ -58,7 +59,7 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private static final String CC_BROWSE = "cc_browse";
 	
 	public final JLabeledTextField connNamePrefix = new JLabeledTextField("ClientId:", 8);
-	private JCheckBox connNameSuffix = new JCheckBox("Add random suffix for ClientId");
+	private final JCheckBox connNameSuffix = new JCheckBox("Add random suffix for ClientId");
 	
 	private final JLabeledTextField connKeepAlive = new JLabeledTextField("Keep alive(s):", 3);
 	
@@ -89,7 +90,8 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	
 	public JPanel createConnOptions() {
 		JPanel optsPanelCon = new VerticalPanel();
-		optsPanelCon.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Connection options"));
+		optsPanelCon.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
+				"Connection options"));
 		
 		JPanel optsPanel0 = new HorizontalPanel();
 		optsPanel0.add(connName);
@@ -299,17 +301,13 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		passwordAuth.setText(sampler.getPasswordAuth());
 		
 		connNamePrefix.setText(sampler.getConnPrefix());
-		if(sampler.isClientIdSuffix()) {
-			connNameSuffix.setSelected(true);
-		} else {
-			connNameSuffix.setSelected(false);
-		}
+		connNameSuffix.setSelected(sampler.isClientIdSuffix());
 		
 		connKeepAlive.setText(sampler.getConnKeepAlive());
 		connAttemptMax.setText(sampler.getConnAttemptMax());
 		reconnAttemptMax.setText(sampler.getConnReconnAttemptMax());
 		
-		connCleanSession.setText(sampler.getConnCleanSession().toString());
+		connCleanSession.setText(sampler.getConnCleanSession());
 	}
 	
 	
@@ -340,13 +338,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		sampler.setConnReconnAttemptMax(reconnAttemptMax.getText());
 		
 		sampler.setConnCleanSession(connCleanSession.getText());
-	}
-	
-	public static int parseInt(String value) {
-		if(value == null || "".equals(value.trim())) {
-			return 0;
-		}
-		return Integer.parseInt(value);
 	}
 	
 	public void clearUI() {

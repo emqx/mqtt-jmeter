@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -24,15 +25,15 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 	private static final JLabel qosLabel = new JLabel("QoS Level:");
 	private final JLabeledTextField connName = new JLabeledTextField("MQTT Conn Name:");
 	private JLabeledChoice qosChoice;
-	private static final JLabel sampleOnLabel = new JLabel("Sample:");
+	private static final JLabel sampleOnLabel = new JLabel("Sample on:");
 	private JLabeledChoice sampleOnCondition;
 	
 	private final JLabeledTextField sampleConditionValue = new JLabeledTextField("");
 	private final JLabeledTextField sampleConditionValue2 = new JLabeledTextField("Timeout (ms):");
 	private final JLabeledTextField topicNames = new JLabeledTextField("Topic name(s):");
 	
-	private JCheckBox debugResponse = new JCheckBox("Debug response");
-	private JCheckBox timestamp = new JCheckBox("Payload includes timestamp");
+	private final JCheckBox debugResponse = new JCheckBox("Debug response");
+	private final JCheckBox timestamp = new JCheckBox("Payload includes timestamp");
 	
 	public SubSamplerUI() {
 		this.init();
@@ -117,7 +118,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 			this.qosChoice.setText(sampler.getQOS());
 		}
 		
-		this.topicNames.setText(sampler.getTopics());
+		this.topicNames.setText(sampler.getTopic());
 		this.timestamp.setSelected(sampler.isAddTimestamp());
 		this.debugResponse.setSelected(sampler.isDebugResponse());
 		this.sampleOnCondition.setText(sampler.getSampleCondition());
@@ -146,7 +147,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 	private void setupSamplerProperties(SubSampler sampler) {
 		this.configureTestElement(sampler);
 		sampler.setConnName(this.connName.getText());
-		sampler.setTopics(this.topicNames.getText());
+		sampler.setTopic(this.topicNames.getText());
 		
 		if(!this.qosChoice.getText().contains(JMETER_VARIABLE_PREFIX)) {
 			int qos = QOS_0;
@@ -158,7 +159,6 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 				}
 			} catch (Exception ex) {
 				logger.info("Invalid QoS value, set to default QoS value 0.");
-				qos = QOS_0;
 			}
 			sampler.setQOS(String.valueOf(qos));
 		} else {
