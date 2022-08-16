@@ -34,6 +34,7 @@ public class SubSampler extends AbstractMQTTSampler {
 	private boolean printFlag = false;
 
 	private final transient Object dataLock = new Object();
+	private boolean lockReleased = false;
 
 	public String getQOS() {
 		return getPropertyAsString(QOS_LEVEL, String.valueOf(QOS_0));
@@ -166,9 +167,20 @@ public class SubSampler extends AbstractMQTTSampler {
 				if (receivedCount < sampleCount) {
 					try {
 						if (sampleCountTimeout > 0) {
-							dataLock.wait(sampleCountTimeout);
+							// handle spurious wakeups (https://docs.oracle.com/en/java/javase/18/docs/api/java.base/java/lang/Object.html#wait(long,int))
+							lockReleased = false;
+							long endtime = System.currentTimeMillis() + sampleCountTimeout;
+							long currenttime = 0;
+							while (!lockReleased || currenttime < endtime) {
+								dataLock.wait(sampleCountTimeout);
+								currenttime = System.currentTimeMillis();
+							}
 						} else {
-							dataLock.wait();
+							// handle spurious wakeups (https://docs.oracle.com/en/java/javase/18/docs/api/java.base/java/lang/Object.html#wait(long,int))
+							lockReleased = false;
+							while (lockReleased == false) {
+								dataLock.wait();
+							}
 						}
 					} catch (InterruptedException e) {
 						logger.log(Level.INFO, "Received exception when waiting for notification signal", e);
@@ -254,6 +266,7 @@ public class SubSampler extends AbstractMQTTSampler {
 				synchronized (dataLock) {
 					SubBean bean = handleSubBean(sampleByTime, message, sampleCount);
 					if(bean.getReceivedCount() == sampleCount) {
+						lockReleased = true;
 						dataLock.notify();
 					}
 				}
