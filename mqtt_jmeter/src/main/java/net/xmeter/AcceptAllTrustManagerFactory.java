@@ -14,7 +14,7 @@ import javax.net.ssl.X509TrustManager;
 
 public class AcceptAllTrustManagerFactory extends TrustManagerFactory {
 	
-	private static final Provider PROVIDER = new Provider("", 0.0, "") {
+	private static final Provider PROVIDER = new Provider("", "0.0", "") {
 		private static final long serialVersionUID = -2226165055935321223L;
 	};
 	
@@ -22,13 +22,13 @@ public class AcceptAllTrustManagerFactory extends TrustManagerFactory {
 		super(AcceptAllTrustManagerFactorySpi.getInstance(), PROVIDER, "");
 	}
 	
-	public static final TrustManagerFactory getInstance() {
+	public static TrustManagerFactory getInstance() {
 		return new AcceptAllTrustManagerFactory();
 	}
 	
 	static final class AcceptAllTrustManagerFactorySpi extends TrustManagerFactorySpi {
 		
-		public static final AcceptAllTrustManagerFactorySpi getInstance() {
+		public static AcceptAllTrustManagerFactorySpi getInstance() {
 			return new AcceptAllTrustManagerFactorySpi();
 		}
 		

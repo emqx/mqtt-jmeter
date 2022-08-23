@@ -4,9 +4,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.jmeter.samplers.AbstractSampler;
-
 import net.xmeter.Constants;
+import org.apache.jmeter.samplers.AbstractSampler;
 
 public abstract class AbstractMQTTSampler extends AbstractSampler implements Constants {
 	/**
@@ -17,12 +16,20 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 //	protected static final String LABEL_PREFIX = "xmeter-mqtt-batch-con-mode-";
 	
 //	protected boolean useEfficientCon = Boolean.parseBoolean(System.getProperty("batchCon"));
-	protected boolean useEfficientCon = true;
+//	protected boolean useEfficientCon = true;
 	
 //	protected static int conCapacity = 1;
 	
 	//<connection client id, topics>
-	protected static Map<String, Set<String>> topicSubscribed = new ConcurrentHashMap<>();
+	protected static Map<String, Set<String>> topicsSubscribed = new ConcurrentHashMap<>();
+
+	public String getConnName() {
+		return getPropertyAsString(MQTT_CONN_NAME, DEFAULT_MQTT_CONN_NAME);
+	}
+
+	public void setConnName(String connName) {
+		setProperty(MQTT_CONN_NAME, connName);
+	}
 
 	public String getServer() {
 		return getPropertyAsString(SERVER, DEFAULT_SERVER);
@@ -112,7 +119,6 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 		this.setProperty(KEY_FILE_PWD2, clientCertPassword);
 	}
 
-
 	public String getConnPrefix() {
 		return getPropertyAsString(CONN_CLIENT_ID_PREFIX, DEFAULT_CONN_PREFIX_FOR_CONN);
 	}
@@ -137,20 +143,20 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 		setProperty(CONN_CLIENT_ID_SUFFIX, clientIdSuffix);
 	}
 
-	public String getConnAttamptMax() {
-		return getPropertyAsString(CONN_ATTAMPT_MAX, DEFAULT_CONN_ATTAMPT_MAX);
+	public String getConnAttemptMax() {
+		return getPropertyAsString(CONN_ATTEMPT_MAX, DEFAULT_CONN_ATTEMPT_MAX);
 	}
 
-	public void setConnAttamptMax(String connAttamptMax) {
-		setProperty(CONN_ATTAMPT_MAX, connAttamptMax);
+	public void setConnAttemptMax(String connAttemptMax) {
+		setProperty(CONN_ATTEMPT_MAX, connAttemptMax);
 	}
 
-	public String getConnReconnAttamptMax() {
-		return getPropertyAsString(CONN_RECONN_ATTAMPT_MAX, DEFAULT_CONN_RECONN_ATTAMPT_MAX);
+	public String getConnReconnAttemptMax() {
+		return getPropertyAsString(CONN_RECONN_ATTEMPT_MAX, DEFAULT_CONN_RECONN_ATTEMPT_MAX);
 	}
 
-	public void setConnReconnAttamptMax(String connReconnAttamptMax) {
-		setProperty(CONN_RECONN_ATTAMPT_MAX, connReconnAttamptMax);
+	public void setConnReconnAttemptMax(String connReconnAttemptMax) {
+		setProperty(CONN_RECONN_ATTEMPT_MAX, connReconnAttemptMax);
 	}
 
 	public String getUserNameAuth() {
@@ -178,11 +184,11 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 	}
 	
 	public void setTopicSubscribed(String clientId, Set<String> topics) {
-		topicSubscribed.put(clientId, topics);
+		topicsSubscribed.put(clientId, topics);
 	}
 	
 	public void removeTopicSubscribed(String clientId) {
-		topicSubscribed.remove(clientId);
+		topicsSubscribed.remove(clientId);
 	}
 	
 	public String getLabelPrefix() {
@@ -197,9 +203,9 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 		return getPropertyAsString(MQTT_CLIENT_NAME, DEFAULT_MQTT_CLIENT_NAME);
 	}
 
-	public void setMqttClientName(String mqttClientName) {
-		setProperty(MQTT_CLIENT_NAME, mqttClientName);
-	}
+//	public void setMqttClientName(String mqttClientName) {
+//		setProperty(MQTT_CLIENT_NAME, mqttClientName);
+//	}
 
 //	public int getConCapacity() {
 //		return conCapacity;

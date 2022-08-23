@@ -3,10 +3,9 @@ package net.xmeter.samplers.mqtt.fuse;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.fusesource.mqtt.client.QoS;
-
 import net.xmeter.Constants;
 import net.xmeter.samplers.mqtt.MQTTQoS;
+import org.fusesource.mqtt.client.QoS;
 
 class FuseUtil {
     static final List<String> ALLOWED_PROTOCOLS;

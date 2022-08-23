@@ -1,7 +1,5 @@
 package net.xmeter.samplers.mqtt.hivemq;
 
-import static net.xmeter.Constants.HIVEMQ_MQTT_CLIENT_NAME;
-
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
@@ -14,6 +12,7 @@ import com.hivemq.client.mqtt.MqttClientSslConfigBuilder;
 import com.hivemq.client.util.KeyStoreUtil;
 
 import net.xmeter.AcceptAllTrustManagerFactory;
+import net.xmeter.Constants;
 import net.xmeter.Util;
 import net.xmeter.samplers.AbstractMQTTSampler;
 import net.xmeter.samplers.mqtt.ConnectionParameters;
@@ -26,7 +25,7 @@ class HiveMQTTFactory implements MQTTFactory {
 
     @Override
     public String getName() {
-        return HIVEMQ_MQTT_CLIENT_NAME;
+        return Constants.HIVEMQ_MQTT_CLIENT_NAME;
     }
 
     @Override

@@ -5,12 +5,12 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.xmeter.Util;
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
 
-import net.xmeter.Util;
 import net.xmeter.samplers.mqtt.ConnectionParameters;
 import net.xmeter.samplers.mqtt.MQTT;
 import net.xmeter.samplers.mqtt.MQTTClient;
@@ -151,8 +151,8 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
         parameters.setVersion(getMqttVersion());
         parameters.setKeepAlive((short) Integer.parseInt(getConnKeepAlive()));
 
-        parameters.setConnectMaxAttempts(Integer.parseInt(getConnAttamptMax()));
-        parameters.setReconnectMaxAttempts(Integer.parseInt(getConnReconnAttamptMax()));
+        parameters.setConnectMaxAttempts(Integer.parseInt(getConnAttemptMax()));
+        parameters.setReconnectMaxAttempts(Integer.parseInt(getConnReconnAttemptMax()));
 //		System.out.println("!!max reconnect:" + mqtt.getReconnectAttemptsMax());
 
 		if (!"".equals(getUserNameAuth().trim())) {

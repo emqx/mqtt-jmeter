@@ -21,9 +21,9 @@ public class EfficientConnectSamplerUI extends AbstractSamplerGui implements Con
 	private static final long serialVersionUID = 1666890646673145131L;
 	private static final Logger logger = Logger.getLogger(SubSamplerUI.class.getCanonicalName());
 
-	private CommonConnUI connUI = new CommonConnUI();
-	private JCheckBox shouldSub = new JCheckBox("Subscribe when connected");
-	private JLabeledTextField connCapacity  = new JLabeledTextField("Connection capacity:");;
+	private final CommonConnUI connUI = new CommonConnUI();
+	private final JCheckBox shouldSub = new JCheckBox("Subscribe when connected");
+	private final JLabeledTextField connCapacity  = new JLabeledTextField("Connection capacity:");
 	private JLabeledChoice qosChoice;
 	private final JLabeledTextField topicNames = new JLabeledTextField("Topic name(s):");
 	
@@ -83,7 +83,7 @@ public class EfficientConnectSamplerUI extends AbstractSamplerGui implements Con
 		connUI.configure(sampler);
 		//
 		shouldSub.setSelected(sampler.isSubWhenConnected());
-		if(sampler.getQOS().trim().indexOf(JMETER_VARIABLE_PREFIX) == -1){
+		if(!sampler.getQOS().trim().contains(JMETER_VARIABLE_PREFIX)){
 			this.qosChoice.setSelectedIndex(Integer.parseInt(sampler.getQOS()));	
 		} else {
 			this.qosChoice.setText(sampler.getQOS());
@@ -104,7 +104,7 @@ public class EfficientConnectSamplerUI extends AbstractSamplerGui implements Con
 	
 	private void setupSamplerProperties(EfficientConnectSampler sampler) {
 		sampler.setSubWhenConnected(shouldSub.isSelected());
-		if(this.qosChoice.getText().indexOf(JMETER_VARIABLE_PREFIX) == -1) {
+		if(!this.qosChoice.getText().contains(JMETER_VARIABLE_PREFIX)) {
 			int qos = QOS_0;
 			try {
 				qos = Integer.parseInt(this.qosChoice.getText());
@@ -114,7 +114,6 @@ public class EfficientConnectSamplerUI extends AbstractSamplerGui implements Con
 				}
 			} catch (Exception ex) {
 				logger.info("Invalid QoS value, set to default QoS value 0.");
-				qos = QOS_0;
 			}
 			sampler.setQOS(String.valueOf(qos));
 		} else {

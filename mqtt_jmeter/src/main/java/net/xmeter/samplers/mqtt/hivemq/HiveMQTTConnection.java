@@ -1,9 +1,9 @@
 package net.xmeter.samplers.mqtt.hivemq;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
@@ -18,7 +18,6 @@ import com.hivemq.client.mqtt.mqtt3.message.subscribe.Mqtt3SubscribeBuilder;
 import com.hivemq.client.mqtt.mqtt3.message.subscribe.Mqtt3Subscription;
 import com.hivemq.client.mqtt.mqtt3.message.subscribe.suback.Mqtt3SubAckReturnCode;
 
-import net.xmeter.samplers.mqtt.MQTTClientException;
 import net.xmeter.samplers.mqtt.MQTTConnection;
 import net.xmeter.samplers.mqtt.MQTTPubResult;
 import net.xmeter.samplers.mqtt.MQTTQoS;
@@ -27,8 +26,8 @@ import net.xmeter.samplers.mqtt.MQTTSubListener;
 class HiveMQTTConnection implements MQTTConnection {
     private static final Logger logger = Logger.getLogger(HiveMQTTConnection.class.getCanonicalName());
 
-    private static final Charset charset = Charset.forName("UTF-8");
-    private static ThreadLocal<CharsetDecoder> decoder = ThreadLocal.withInitial(() -> charset.newDecoder());
+    private static final Charset charset = StandardCharsets.UTF_8;
+    private static final ThreadLocal<CharsetDecoder> decoder = ThreadLocal.withInitial(charset::newDecoder);
 
     private final Mqtt3BlockingClient client;
     private final String clientId;
@@ -105,17 +104,19 @@ class HiveMQTTConnection implements MQTTConnection {
     }
 
     private void handlePublishReceived(Mqtt3Publish received) {
+        System.out.println("Topic name (before decoding): " + received.getTopic());
         String topic = decode(received.getTopic().toByteBuffer());
         String payload = received.getPayload().map(this::decode).orElse("");
         this.listener.accept(topic, payload, () -> {});
     }
 
     private String decode(ByteBuffer value) {
-        try {
-            return decoder.get().decode(value).toString();
-        } catch (CharacterCodingException e) {
-            throw new RuntimeException(new MQTTClientException("Failed to decode", e));
-        }
+//      try {
+//          return decoder.get().decode(value).toString();
+//      } catch (CharacterCodingException e) {
+//          throw new RuntimeException(new MQTTClientException("Failed to decode", e));
+//      }
+        return StandardCharsets.UTF_8.decode(value).toString();
     }
 
     @Override
@@ -125,8 +126,6 @@ class HiveMQTTConnection implements MQTTConnection {
 
     @Override
     public String toString() {
-        return "HiveMQTTConnection{" +
-                "clientId='" + clientId + '\'' +
-                '}';
+        return "HiveMQTTConnection{clientId='" + clientId + "'}";
     }
 }

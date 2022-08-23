@@ -12,7 +12,7 @@ import net.xmeter.Constants;
 import net.xmeter.samplers.ConnectSampler;
 
 public class ConnectSamplerUI extends AbstractSamplerGui implements Constants {
-	private CommonConnUI connUI = new CommonConnUI();
+	private final CommonConnUI connUI = new CommonConnUI();
 	private static final long serialVersionUID = 1666890646673145131L;
 
 	public ConnectSamplerUI() {

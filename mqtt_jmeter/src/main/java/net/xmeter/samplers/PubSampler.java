@@ -6,25 +6,22 @@ import java.util.logging.Logger;
 
 import javax.xml.bind.DatatypeConverter;
 
+import net.xmeter.Util;
+import net.xmeter.samplers.mqtt.MQTTConnection;
+import net.xmeter.samplers.mqtt.MQTTPubResult;
+import net.xmeter.samplers.mqtt.MQTTQoS;
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
 import org.apache.jmeter.threads.JMeterVariables;
 
-import net.xmeter.Util;
-import net.xmeter.samplers.mqtt.MQTTConnection;
-import net.xmeter.samplers.mqtt.MQTTPubResult;
-import net.xmeter.samplers.mqtt.MQTTQoS;
-
 public class PubSampler extends AbstractMQTTSampler {
 	private static final long serialVersionUID = 4312341622759500786L;
 	private static final Logger logger = Logger.getLogger(PubSampler.class.getCanonicalName());
-	
-	private transient MQTTConnection connection = null;
+
 	private String payload = null;
 	private MQTTQoS qos_enum = MQTTQoS.AT_MOST_ONCE;
 	private String topicName = "";
-	private boolean retainedMsg = false;
 
 	public String getQOS() {
 		return getPropertyAsString(QOS_LEVEL, String.valueOf(QOS_0));
@@ -92,8 +89,8 @@ public class PubSampler extends AbstractMQTTSampler {
 		result.setSampleLabel(getName());
 	
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
-		connection = (MQTTConnection) vars.getObject("conn");
-		String clientId = (String) vars.getObject("clientId");
+		MQTTConnection connection = (MQTTConnection) vars.getObject(getConnName());
+		String clientId = (String) vars.getObject(getConnName()+"_clientId");
 		if (connection == null) {
 			result.sampleStart();
 			result.setSuccessful(false);
@@ -101,6 +98,15 @@ public class PubSampler extends AbstractMQTTSampler {
 			result.setResponseData("Publish failed because connection is not established.".getBytes());
 			result.setResponseCode("500");
 			result.sampleEnd(); // avoid endtime=0 exposed in trace log
+			return result;
+		}
+		if (!connection.isConnectionSucc()) {
+			result.sampleStart();
+			result.setSuccessful(false);
+			result.setResponseMessage("Publish: Connection is broken.");
+			result.setResponseData("Publish failed because connection is broken and cannot be used.".getBytes());
+			result.setResponseCode("500");
+			result.sampleEnd();
 			return result;
 		}
 		
@@ -136,7 +142,7 @@ public class PubSampler extends AbstractMQTTSampler {
 			}
 			
 			topicName = getTopic();
-			retainedMsg = getRetainedMessage();
+			boolean retainedMsg = getRetainedMessage();
 			if (isAddTimestamp()) {
 				byte[] timePrefix = (System.currentTimeMillis() + TIME_STAMP_SEP_FLAG).getBytes();
 				toSend = new byte[timePrefix.length + tmp.length];

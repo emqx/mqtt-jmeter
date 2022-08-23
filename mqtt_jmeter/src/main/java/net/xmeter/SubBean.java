@@ -8,7 +8,7 @@ public class SubBean {
 	private int receivedCount = 0;
 	private double avgElapsedTime = 0f;
 
-	private List<String> contents = new ArrayList<String>();
+	private final List<String> contents = new ArrayList<>();
 
 	public int getReceivedMessageSize() {
 		return receivedMessageSize;
@@ -36,9 +36,5 @@ public class SubBean {
 
 	public List<String> getContents() {
 		return contents;
-	}
-
-	public void setContents(List<String> contents) {
-		this.contents = contents;
 	}
 }

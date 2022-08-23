@@ -22,23 +22,25 @@ public class ConnectSampler extends AbstractMQTTSampler {
 	private static final Logger logger = Logger.getLogger(ConnectSampler.class.getCanonicalName());
 
 	private transient MQTTClient client;
-	private transient MQTTConnection connection;
 
 	@Override
 	public SampleResult sample(Entry entry) {
 		SampleResult result = new SampleResult();
 		result.setSampleLabel(getName());
-		
+
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
-		connection = (MQTTConnection) vars.getObject("conn");
+		MQTTConnection connection = (MQTTConnection) vars.getObject(getConnName());
+		String clientId = (String) vars.getObject(getConnName()+"_clientId");
 		if (connection != null) {
-			result.sampleStart();
-			result.setSuccessful(false);
-			result.setResponseMessage(MessageFormat.format("Connection {0} is already established.", connection));
-			result.setResponseData("Failed. Connection is already established.".getBytes());
-			result.setResponseCode("500");
-			result.sampleEnd(); // avoid endtime=0 exposed in trace log
-			return result;
+			try {
+				logger.info(MessageFormat.format("Disconnect connection {0} ({1}).", connection, getConnName()));
+				connection.disconnect();
+			} catch (Exception e) {
+				logger.log(Level.SEVERE, MessageFormat.format("Failed to disconnect connection {0} ({1}).", connection, getConnName()), e);
+			} finally {
+				vars.remove(getConnName()); // clean up thread local var as well
+				removeTopicSubscribed(clientId);
+			}
 		}
 
 		ConnectionParameters parameters = new ConnectionParameters();
@@ -52,7 +54,6 @@ public class ConnectSampler extends AbstractMQTTSampler {
 				parameters.setPath(getWsPath());
 			}
 
-			String clientId;
 			if(isClientIdSuffix()) {
 				clientId = Util.generateClientId(getConnPrefix());
 			} else {
@@ -60,8 +61,8 @@ public class ConnectSampler extends AbstractMQTTSampler {
 			}
 			parameters.setClientId(clientId);
 
-			parameters.setConnectMaxAttempts(Integer.parseInt(getConnAttamptMax()));
-			parameters.setReconnectMaxAttempts(Integer.parseInt(getConnReconnAttamptMax()));
+			parameters.setConnectMaxAttempts(Integer.parseInt(getConnAttemptMax()));
+			parameters.setReconnectMaxAttempts(Integer.parseInt(getConnReconnAttemptMax()));
 
 			if (!"".equals(getUserNameAuth().trim())) {
 				parameters.setUsername(getUserNameAuth());
@@ -76,7 +77,7 @@ public class ConnectSampler extends AbstractMQTTSampler {
 				parameters.setSsl(ssl);
 			}
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, "Failed to establish Connection " + connection , e);
+			logger.log(Level.SEVERE, "Failed to establish Connection " + connection, e);
 			result.setSuccessful(false);
 			result.setResponseMessage(MessageFormat.format("Failed to establish Connection {0}. Please check SSL authentication info.", connection));
 			result.setResponseData("Failed to establish Connection. Please check SSL authentication info.".getBytes());
@@ -92,9 +93,9 @@ public class ConnectSampler extends AbstractMQTTSampler {
 			result.sampleEnd();
 
 			if (connection.isConnectionSucc()) {
-				vars.putObject("conn", connection); // save connection object as thread local variable !!
-				vars.putObject("clientId", client.getClientId());	//save client id as thread local variable
-				topicSubscribed.put(client.getClientId(), new HashSet<>());
+				vars.putObject(getConnName(), connection); // save connection object as thread local variable !!
+				vars.putObject(getConnName()+"_clientId", client.getClientId());	//save client id as thread local variable
+				setTopicSubscribed(client.getClientId(), new HashSet<>());
 				result.setSuccessful(true);
 				result.setResponseData("Successful.".getBytes());
 				result.setResponseMessage(MessageFormat.format("Connection {0} established successfully.", connection));
@@ -103,11 +104,11 @@ public class ConnectSampler extends AbstractMQTTSampler {
 				result.setSuccessful(false);
 				result.setResponseMessage(MessageFormat.format("Failed to establish Connection {0}.", connection));
 				result.setResponseData(MessageFormat.format("Client [{0}] failed. Couldn't establish connection.",
-						client.getClientId()).getBytes());
+				client.getClientId()).getBytes());
 				result.setResponseCode("501");
 			}
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, "Failed to establish Connection " + connection , e);
+			logger.log(Level.SEVERE, "Failed to establish Connection " + connection, e);
 			if (result.getEndTime() == 0) result.sampleEnd(); //avoid re-enter sampleEnd()
 			result.setSuccessful(false);
 			result.setResponseMessage(MessageFormat.format("Failed to establish Connection {0}.", connection));
