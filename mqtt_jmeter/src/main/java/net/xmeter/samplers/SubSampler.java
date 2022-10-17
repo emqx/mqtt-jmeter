@@ -1,6 +1,6 @@
 package net.xmeter.samplers;
 
-import com.alibaba.fastjson.JSONObject;
+import net.xmeter.JsonUtil;
 import net.xmeter.SubBean;
 import net.xmeter.samplers.assertions.Assertions;
 import net.xmeter.samplers.assertions.AssertionsContent;
@@ -140,7 +140,7 @@ public class SubSampler extends AbstractMQTTSampler {
                 logger.log(Level.INFO, "sub名称为：" + getName() + " 结束接收方式为内容");
                 logger.log(Level.INFO, "sub名称为：" + getName() +" 接收到的匹配内容：" + getAssertions());
                 if (StringUtils.isNotEmpty(getAssertions())) {
-                    assertions = JSONObject.parseObject(getAssertions(), Assertions.class);
+                    assertions = JsonUtil.parseObject(getAssertions(), Assertions.class);
                     timeOut = StringUtils.isNotEmpty(assertions.getTimeOut()) ? Integer.parseInt(assertions.getTimeOut()) : 0;
                 }
             } else {
@@ -330,7 +330,7 @@ public class SubSampler extends AbstractMQTTSampler {
                                                 break;
                                             case "JSON":
                                                 try {
-                                                    JSONObject jsonObject = JSONObject.parseObject(contents);
+                                                    Object jsonObject = JsonUtil.parseObject(contents);
                                                     if (item.getEnable()) {
                                                         flagList.add(contentCompare.jsonPathCompare(contents, item));
                                                     }
