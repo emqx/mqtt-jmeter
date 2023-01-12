@@ -2,8 +2,8 @@ package net.xmeter.samplers.mqtt.hivemq;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
-import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
@@ -27,8 +27,7 @@ import net.xmeter.samplers.mqtt.MQTTSubListener;
 class HiveMQTTConnection implements MQTTConnection {
     private static final Logger logger = Logger.getLogger(HiveMQTTConnection.class.getCanonicalName());
 
-    private static final Charset charset = Charset.forName("UTF-8");
-    private static ThreadLocal<CharsetDecoder> decoder = ThreadLocal.withInitial(() -> charset.newDecoder());
+    private static final ThreadLocal<CharsetDecoder> decoder = ThreadLocal.withInitial(StandardCharsets.UTF_8::newDecoder);
 
     private final Mqtt3BlockingClient client;
     private final String clientId;
