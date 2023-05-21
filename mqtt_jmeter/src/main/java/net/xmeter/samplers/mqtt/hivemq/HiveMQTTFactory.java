@@ -14,6 +14,7 @@ import com.hivemq.client.mqtt.MqttClientSslConfigBuilder;
 import com.hivemq.client.util.KeyStoreUtil;
 
 import net.xmeter.AcceptAllTrustManagerFactory;
+import net.xmeter.Constants;
 import net.xmeter.Util;
 import net.xmeter.samplers.AbstractMQTTSampler;
 import net.xmeter.samplers.mqtt.ConnectionParameters;
@@ -36,7 +37,11 @@ class HiveMQTTFactory implements MQTTFactory {
 
     @Override
     public MQTTClient createClient(ConnectionParameters parameters) throws Exception {
-        return new HiveMQTTClient(parameters);
+    	if(parameters.getVersion().equals(Constants.MQTT_VERSION_5)) {
+    		return new HiveMQTT5Client(parameters);
+    	}
+    	
+        return new HiveMQTT3Client(parameters);
     }
 
     @Override
@@ -56,6 +61,7 @@ class HiveMQTTFactory implements MQTTFactory {
 //        		String keyStorePass = sampler.getKeyStorePassword();
         		File clientCertFile = Util.getClientCertFile(sampler);
         		String clientPass = sampler.getClientCertPassword();
+
         		sslBuilder = sslBuilder.keyManagerFactory(KeyStoreUtil.keyManagerFromKeystore(clientCertFile, clientPass, clientPass))
         				.trustManagerFactory(AcceptAllTrustManagerFactory.getInstance());
         }

@@ -35,7 +35,7 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 	public SampleResult sample(Entry entry) {
 		lock = new Object();
 		SampleResult result = new SampleResult();
-		result.setSampleLabel(getLabelPrefix() + getName());
+		result.setSampleLabel(getName());
 		result.setSuccessful(true);
 		
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();
@@ -75,7 +75,7 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
             } else {
 				clientId = getConnPrefix();
 				if (clientId != null && !clientId.isEmpty()) {
-					clientId += "-xmeter-suffix-" + i;
+					clientId += "-xmeter-suffix-" + i + JMeterContextService.getContext().getThreadNum();
 				}
             }
 
@@ -96,6 +96,8 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 						suc = handleSubscription(connection);
 					}
 					if (suc) {
+						vars.putObject("conn", connection); // save connection object as thread local variable !!
+						vars.putObject("clientId", client.getClientId());	//save client id as thread local variable
 						subResult.setSuccessful(true);
 						subResult.setResponseData("Successful.".getBytes());
 						subResult.setResponseMessage(MessageFormat.format("Connection {0} established successfully.", connection));
@@ -129,6 +131,7 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
 		}
 		if (!connections.isEmpty()) {
 			vars.putObject("conns", connections);
+			logger.info(MessageFormat.format("Connections created. Count={0}", connections.size()));
 		}
 		result.setSampleCount(totalSampleCount);
 		if (result.getEndTime() == 0) {

@@ -131,7 +131,7 @@ public class EfficientConnectSamplerUI extends AbstractSamplerGui implements Con
 
 	@Override
 	public String getStaticLabel() {
-		return "Efficient MQTT Connect";
+		return "MQTT Connect";
 	}
 
 	@Override

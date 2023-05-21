@@ -45,7 +45,7 @@ public class EfficientDisConnectSamplerUI extends AbstractSamplerGui implements 
 
 	@Override
 	public String getStaticLabel() {
-		return "Efficient MQTT DisConnect";
+		return "MQTT DisConnect";
 	}
 
 	@Override
