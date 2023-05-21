@@ -21,7 +21,7 @@ public class EfficientDisConnectSampler extends AbstractMQTTSampler {
 	@Override
 	public SampleResult sample(Entry entry) {
 		SampleResult result = new SampleResult();
-		result.setSampleLabel(getLabelPrefix() + getName());
+		result.setSampleLabel(getName());
 		result.setSuccessful(true);
 		
 		JMeterVariables vars = JMeterContextService.getContext().getVariables();

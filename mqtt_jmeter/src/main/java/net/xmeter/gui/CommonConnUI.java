@@ -33,7 +33,7 @@ import net.xmeter.samplers.mqtt.MQTT;
 public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	private final JLabeledTextField serverAddr = new JLabeledTextField("Server name or IP:");
 	private final JLabeledTextField serverPort = new JLabeledTextField("Port number:", 5);
-	private JLabeledChoice mqttVersion = new JLabeledChoice("MQTT version:", new String[] { MQTT_VERSION_3_1, MQTT_VERSION_3_1_1 }, false, false);;
+	private JLabeledChoice mqttVersion = new JLabeledChoice("MQTT version:", new String[] { MQTT_VERSION_5, MQTT_VERSION_3_1, MQTT_VERSION_3_1_1 }, false, false);;
 	private final JLabeledTextField timeout = new JLabeledTextField("Timeout(s):", 5);
 	
 	private final JLabeledTextField userNameAuth = new JLabeledTextField("User name:");
@@ -257,9 +257,11 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		serverAddr.setText(sampler.getServer());
 		serverPort.setText(sampler.getPort());
 		if(sampler.getMqttVersion().equals(MQTT_VERSION_3_1)) {
-			mqttVersion.setSelectedIndex(0);
-		} else if(sampler.getMqttVersion().equals(MQTT_VERSION_3_1_1)) {
 			mqttVersion.setSelectedIndex(1);
+		} else if(sampler.getMqttVersion().equals(MQTT_VERSION_3_1_1)) {
+			mqttVersion.setSelectedIndex(2);
+		} else if (sampler.getMqttVersion().equals(MQTT_VERSION_5)) {
+			mqttVersion.setSelectedIndex(0);
 		}
 		timeout.setText(sampler.getConnTimeout());
 
