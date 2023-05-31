@@ -198,9 +198,13 @@ public class SubSampler extends AbstractMQTTSampler {
 		}
 	}
 
-	protected SampleResult produceAsyncResult(SampleResult result) {
+	protected SampleResult produceAsyncResult(SampleResult result, boolean clearResponses) {
 		synchronized (dataLock) {
-			return doSample(result);
+			SampleResult result1 = doSample(result);
+			if (result1.isSuccessful() && clearResponses) {
+				batches.clear();
+			}
+			return result1;
 		}
 	}
 

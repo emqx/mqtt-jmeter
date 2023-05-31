@@ -28,7 +28,8 @@ public class AsyncResponseSampler extends AbstractMQTTSampler {
 			return result;
 		}
 
-		vars.remove("sub"); // clean up thread local var as well
-		return subSampler.produceAsyncResult(result);
+		// Could make clear responses configurable but cannot think of a good reason to not clear them which allows
+		// the sub sampler to be reused
+		return subSampler.produceAsyncResult(result, true);
 	}
 }
