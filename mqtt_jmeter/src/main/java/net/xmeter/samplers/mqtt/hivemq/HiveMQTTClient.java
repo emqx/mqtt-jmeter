@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 import com.hivemq.client.mqtt.MqttClientSslConfig;
 import com.hivemq.client.mqtt.MqttWebSocketConfig;
 import com.hivemq.client.mqtt.MqttWebSocketConfigBuilder;
-import com.hivemq.client.mqtt.lifecycle.MqttClientAutoReconnect;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3BlockingClient;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3ClientBuilder;
@@ -34,14 +33,18 @@ class HiveMQTTClient implements MQTTClient {
                 .identifier(parameters.getClientId())
                 .serverHost(parameters.getHost())
                 .serverPort(parameters.getPort());
+        Mqtt3SimpleAuth auth = createAuth();
+        if (auth != null) {
+            mqtt3ClientBuilder.simpleAuth(auth);
+        }
         mqtt3ClientBuilder = applyAdditionalConfig(mqtt3ClientBuilder, parameters);
         client = mqtt3ClientBuilder
                 .buildBlocking();
     }
 
     private Mqtt3ClientBuilder applyAdditionalConfig(Mqtt3ClientBuilder builder, ConnectionParameters parameters) {
-        if (parameters.getReconnectMaxAttempts() > 0) {
-            builder = builder.automaticReconnect(MqttClientAutoReconnect.builder().build());
+        if (parameters.getReconnectMaxAttempts() == -1 || parameters.getReconnectMaxAttempts() > 0) {
+            builder = builder.automaticReconnectWithDefaultConfig();
         }
         if (parameters.isSecureProtocol()) {
             MqttClientSslConfig sslConfig = ((HiveMQTTSsl) parameters.getSsl()).getSslConfig();
@@ -70,10 +73,7 @@ class HiveMQTTClient implements MQTTClient {
         Mqtt3ConnectBuilder.Send<CompletableFuture<Mqtt3ConnAck>> connectSend = client.toAsync().connectWith()
                 .cleanSession(parameters.isCleanSession())
                 .keepAlive(parameters.getKeepAlive());
-        Mqtt3SimpleAuth auth = createAuth();
-        if (auth != null) {
-            connectSend = connectSend.simpleAuth(auth);
-        }
+
         logger.info(() -> "Connect client: " + parameters.getClientId());
         CompletableFuture<Mqtt3ConnAck> connectFuture = connectSend.send();
         try {

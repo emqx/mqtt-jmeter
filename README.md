@@ -1,12 +1,12 @@
 # mqtt-jmeter Overview
 MQTT JMeter Plugin extends your JMeter's capability to test against MQTT protocol, just as easy as ordinary HTTP protocal. 
 
-It has been used to benchmark EMQ server performance, and here is the [report link](https://github.com/emqtt/emq-xmeter-cn).
+It has been used to benchmark EMQ server performance, and here is the [report link](https://github.com/emqx/emq-xmeter-cn).
 
 This plugin is developed and maintained by [XMeter](https://www.xmeter.net). XMeter is a professional performance testing service provider.
 
 # Install instruction
-The plugin is a standard JMeter plugin. You can download the latest version of mqtt-jmeter from [here](https://github.com/emqtt/mqtt-jmeter/releases), and then copy the downloaded JAR files into $JMETER_HOME/lib/ext folder. After restarting the JMeter, you can see "MQTT samplers" provided by this plugin.
+The plugin is a standard JMeter plugin. You can download the latest version of mqtt-jmeter from [here](https://github.com/emqx/mqtt-jmeter/releases), and then copy the downloaded JAR files into $JMETER_HOME/lib/ext folder. After restarting the JMeter, you can see "MQTT samplers" provided by this plugin.
 
 To use this plugin, we recommend you to install JMeter 3.2 or above.
 
@@ -41,7 +41,7 @@ This section includes basic connection settings.
 
 - **Port number**: The port opened by MQTT server. Typically 1883 is for TCP protocol, and 8883 for SSL protocol.
 
-- **MQTT version**: The MQTT version, default is 3.1, and another option is 3.1.1. Sometimes we found version 3.1.1 is required to  establish connection to [Azure IoTHub](https://github.com/emqtt/mqtt-jmeter/issues/21).
+- **MQTT version**: The MQTT version, default is 3.1, and another option is 3.1.1. Sometimes we found version 3.1.1 is required to  establish connection to [Azure IoTHub](https://github.com/emqx/mqtt-jmeter/issues/21).
 
 - **Timeout(s)**: The connection timeout seconds while connecting to MQTT server. The default is 10 seconds.
 
@@ -67,8 +67,8 @@ User can configure MQTT server with user name & password authentication, refer t
 
 - **ClientId**: Identification of the client, i.e. virtual user or JMeter thread. Default value is 'conn_'. If 'Add random client id suffix' is selected, JMeter plugin will append generated uuid as suffix to represent the client, otherwise, the text of 'ClientId' will be passed as 'clientId' of current connection.
 - **Keep alive(s)**: Ping packet send interval in seconds. Default value is 300, which means each connection sends a ping packet to MQTT server every 5 minutes.
-- **Connect attampt max**: The maximum number of reconnect attempts before an error is reported back to the client on the first attempt by the client to connect to a server. Set to -1 to use unlimited attempts. Defaults to 0.
-- **Reconnect attampt max**:  The maximum number of reconnect attempts before an error is reported back to the client after a server connection had previously been established. Set to -1 to use unlimited attempts. Defaults to 0.
+- **Connect attempt max**: The maximum number of reconnect attempts before an error is reported back to the client on the first attempt by the client to connect to a server. Set to -1 to use unlimited attempts. Defaults to 0.
+- **Reconnect attempt max**:  The maximum number of reconnect attempts before an error is reported back to the client after a server connection had previously been established. Set to -1 to use unlimited attempts. Defaults to 0.
 - **Clean session**: If you want to maintain state information between sessions, set it to false; otherwise, set it to true.
 
 

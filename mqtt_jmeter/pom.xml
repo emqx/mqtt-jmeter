@@ -6,7 +6,8 @@
     <version>2.0.2</version>
 
     <properties>
-        <jmeter-version>5.0</jmeter-version>
+        <jmeter-version>5.5</jmeter-version>
+        <encoding>UTF-8</encoding>
     </properties>
 
     <dependencies>
@@ -33,7 +34,7 @@
         <dependency>
             <groupId>com.hivemq</groupId>
             <artifactId>hivemq-mqtt-client</artifactId>
-            <version>1.2.2</version>
+            <version>1.3.0</version>
         </dependency>
 
     </dependencies>
