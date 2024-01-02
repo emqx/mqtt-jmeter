@@ -151,8 +151,8 @@ public class EfficientConnectSampler extends AbstractMQTTSampler {
         parameters.setVersion(getMqttVersion());
         parameters.setKeepAlive((short) Integer.parseInt(getConnKeepAlive()));
 
-        parameters.setConnectMaxAttempts(Integer.parseInt(getConnAttamptMax()));
-        parameters.setReconnectMaxAttempts(Integer.parseInt(getConnReconnAttamptMax()));
+        parameters.setConnectMaxAttempts(Integer.parseInt(getConnAttemptMax()));
+        parameters.setReconnectMaxAttempts(Integer.parseInt(getConnReconnAttemptMax()));
 //		System.out.println("!!max reconnect:" + mqtt.getReconnectAttemptsMax());
 
 		if (!"".equals(getUserNameAuth().trim())) {

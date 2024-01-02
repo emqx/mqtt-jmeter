@@ -61,8 +61,8 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	
 	private final JLabeledTextField connKeepAlive = new JLabeledTextField("Keep alive(s):", 3);
 	
-	private final JLabeledTextField connAttmptMax = new JLabeledTextField("Connect attampt max:", 3);
-	private final JLabeledTextField reconnAttmptMax = new JLabeledTextField("Reconnect attampt max:", 3);
+	private final JLabeledTextField connAttmptMax = new JLabeledTextField("Connect attempt max:", 3);
+	private final JLabeledTextField reconnAttmptMax = new JLabeledTextField("Reconnect attempt max:", 3);
 
 	private final JLabeledTextField connCleanSession = new JLabeledTextField("Clean session:", 3);
 
@@ -303,8 +303,8 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		}
 		
 		connKeepAlive.setText(sampler.getConnKeepAlive());
-		connAttmptMax.setText(sampler.getConnAttamptMax());
-		reconnAttmptMax.setText(sampler.getConnReconnAttamptMax());
+		connAttmptMax.setText(sampler.getConnAttemptMax());
+		reconnAttmptMax.setText(sampler.getConnReconnAttemptMax());
 		
 		connCleanSession.setText(sampler.getConnCleanSession().toString());
 	}
@@ -332,8 +332,8 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		sampler.setClientIdSuffix(connNameSuffix.isSelected());
 		
 		sampler.setConnKeepAlive(connKeepAlive.getText());
-		sampler.setConnAttamptMax(connAttmptMax.getText());
-		sampler.setConnReconnAttamptMax(reconnAttmptMax.getText());
+		sampler.setConnAttemptMax(connAttmptMax.getText());
+		sampler.setConnReconnAttemptMax(reconnAttmptMax.getText());
 		
 		sampler.setConnCleanSession(connCleanSession.getText());
 	}
@@ -368,9 +368,9 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		connNamePrefix.setText(DEFAULT_CONN_PREFIX_FOR_CONN);
 		connNameSuffix.setSelected(true);
 
-		connAttmptMax.setText(DEFAULT_CONN_ATTAMPT_MAX);
+		connAttmptMax.setText(DEFAULT_CONN_ATTEMPT_MAX);
 		connKeepAlive.setText(DEFAULT_CONN_KEEP_ALIVE);
-		reconnAttmptMax.setText(DEFAULT_CONN_RECONN_ATTAMPT_MAX);
+		reconnAttmptMax.setText(DEFAULT_CONN_RECONN_ATTEMPT_MAX);
 		connCleanSession.setText("true");
 	}
 }

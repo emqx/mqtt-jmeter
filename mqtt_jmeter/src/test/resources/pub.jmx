@@ -84,10 +84,10 @@
           <stringProp name="mqtt.keystore_file_path"></stringProp>
           <stringProp name="mqtt.clientcert_file_path"></stringProp>
           <stringProp name="mqtt.conn_keep_alive">${keep_alive}</stringProp>
-          <stringProp name="mqtt.conn_attampt_max">0</stringProp>
+          <stringProp name="mqtt.conn_attempt_max">0</stringProp>
           <stringProp name="mqtt.keep_time">1800</stringProp>
           <stringProp name="mqtt.client_id_prefix">pub_</stringProp>
-          <stringProp name="mqtt.reconn_attampt_max">0</stringProp>
+          <stringProp name="mqtt.reconn_attempt_max">0</stringProp>
           <stringProp name="mqtt.conn_timeout">10</stringProp>
           <boolProp name="mqtt.dual_ssl_authentication">false</boolProp>
           <stringProp name="mqtt.keystore_password"></stringProp>
