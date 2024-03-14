@@ -31,6 +31,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 	
 	private JCheckBox debugResponse = new JCheckBox("Debug response");
 	private JCheckBox timestamp = new JCheckBox("Payload includes timestamp");
+	private JCheckBox async = new JCheckBox("Async");
 	
 	public SubSamplerUI() {
 		this.init();
@@ -71,6 +72,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 		
 		JPanel optsPanel2 = new HorizontalPanel();
 		optsPanel2.add(debugResponse);
+		optsPanel2.add(async);
 		optsPanelCon.add(optsPanel2);
 
 		return optsPanelCon;
@@ -102,6 +104,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 		this.topicNames.setText(sampler.getTopics());
 		this.timestamp.setSelected(sampler.isAddTimestamp());
 		this.debugResponse.setSelected(sampler.isDebugResponse());
+		this.async.setSelected(sampler.isAsync());
 		this.sampleOnCondition.setText(sampler.getSampleCondition());
 
 		if(SAMPLE_ON_CONDITION_OPTION1.equalsIgnoreCase(sampleOnCondition.getText())) {
@@ -145,6 +148,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 		
 		sampler.setAddTimestamp(this.timestamp.isSelected());
 		sampler.setDebugResponse(this.debugResponse.isSelected());
+		sampler.setAsync(this.async.isSelected());
 		sampler.setSampleCondition(this.sampleOnCondition.getText());
 		
 		if(SAMPLE_ON_CONDITION_OPTION1.equalsIgnoreCase(sampleOnCondition.getText())) {
@@ -161,6 +165,7 @@ public class SubSamplerUI extends AbstractSamplerGui implements Constants, Chang
 		this.qosChoice.setText(String.valueOf(QOS_0));
 		this.timestamp.setSelected(false);
 		this.debugResponse.setSelected(false);
+		this.async.setSelected(false);
 		this.sampleOnCondition.setText(SAMPLE_ON_CONDITION_OPTION1);
 		this.sampleConditionValue.setText(DEFAULT_SAMPLE_VALUE_ELAPSED_TIME_MILLI_SEC);
 	}
