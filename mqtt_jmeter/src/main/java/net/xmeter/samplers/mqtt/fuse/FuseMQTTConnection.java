@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.xmeter.samplers.mqtt.*;
 import org.fusesource.hawtbuf.Buffer;
 import org.fusesource.hawtbuf.UTF8Buffer;
 import org.fusesource.mqtt.client.Callback;
@@ -16,10 +17,6 @@ import org.fusesource.mqtt.client.Listener;
 import org.fusesource.mqtt.client.QoS;
 
 import net.xmeter.samplers.PubCallback;
-import net.xmeter.samplers.mqtt.MQTTConnection;
-import net.xmeter.samplers.mqtt.MQTTPubResult;
-import net.xmeter.samplers.mqtt.MQTTQoS;
-import net.xmeter.samplers.mqtt.MQTTSubListener;
 
 class FuseMQTTConnection implements MQTTConnection {
     private static final Logger logger = Logger.getLogger(FuseMQTTConnection.class.getCanonicalName());
@@ -63,7 +60,7 @@ class FuseMQTTConnection implements MQTTConnection {
     }
 
     @Override
-    public MQTTPubResult publish(String topicName, byte[] message, MQTTQoS qos, boolean retained) {
+    public MQTTPubResult publish(String topicName, byte[] message, MQTTQoS qos, boolean retained, MQTT5PublishReq req) {
         final Object pubLock = new Object();
         QoS fuseQos = FuseUtil.map(qos);
         PubCallback pubCallback = new PubCallback(pubLock, fuseQos);

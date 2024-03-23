@@ -18,11 +18,7 @@ import com.hivemq.client.mqtt.mqtt3.message.subscribe.Mqtt3SubscribeBuilder;
 import com.hivemq.client.mqtt.mqtt3.message.subscribe.Mqtt3Subscription;
 import com.hivemq.client.mqtt.mqtt3.message.subscribe.suback.Mqtt3SubAckReturnCode;
 
-import net.xmeter.samplers.mqtt.MQTTClientException;
-import net.xmeter.samplers.mqtt.MQTTConnection;
-import net.xmeter.samplers.mqtt.MQTTPubResult;
-import net.xmeter.samplers.mqtt.MQTTQoS;
-import net.xmeter.samplers.mqtt.MQTTSubListener;
+import net.xmeter.samplers.mqtt.*;
 
 class HiveMQTTConnection implements MQTTConnection {
     private static final Logger logger = Logger.getLogger(HiveMQTTConnection.class.getCanonicalName());
@@ -56,7 +52,7 @@ class HiveMQTTConnection implements MQTTConnection {
     }
 
     @Override
-    public MQTTPubResult publish(String topicName, byte[] message, MQTTQoS qoS, boolean retained) {
+    public MQTTPubResult publish(String topicName, byte[] message, MQTTQoS qoS, boolean retained, MQTT5PublishReq req) {
         try {
             client.publishWith()
                     .topic(topicName)

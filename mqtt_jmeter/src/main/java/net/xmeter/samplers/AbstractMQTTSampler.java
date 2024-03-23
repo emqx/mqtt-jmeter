@@ -72,6 +72,14 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 		setProperty(WS_PATH, wsPath);
 	}
 
+	public String getWsHeader() {
+		return getPropertyAsString(WS_HEADER, "{}");
+	}
+
+	public void setWsHeader(String wsHeader) {
+		setProperty(WS_HEADER, wsHeader);
+	}
+
 	public boolean isDualSSLAuth() {
 		return getPropertyAsBoolean(DUAL_AUTH, false);
 	}
@@ -199,6 +207,70 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 
 	public void setMqttClientName(String mqttClientName) {
 		setProperty(MQTT_CLIENT_NAME, mqttClientName);
+	}
+
+	public void setConnCleanStart(String cleanStart) {
+		setProperty(CONN_CLEAN_START, cleanStart);
+	}
+
+	public String getConnCleanStart() {
+		return getPropertyAsString(CONN_CLEAN_START, "true");
+	}
+
+	public String getConnSessionExpiryInterval() {
+		return getPropertyAsString(CONN_SESSION_EXPIRY_INTERVAL, "0");
+	}
+
+	public void setConnSessionExpiryInterval(String sessionExpiryInterval) {
+		setProperty(CONN_SESSION_EXPIRY_INTERVAL, sessionExpiryInterval);
+	}
+
+	public String getConnUserProperty() {
+		return getPropertyAsString(CONN_USER_PROPERTY, "{}");
+	}
+
+	public void setConnUserProperty(String connUserProperty) {
+		setProperty(CONN_USER_PROPERTY, connUserProperty);
+	}
+
+	public String getCAFilePath() {
+		return getPropertyAsString("mqtt.ca_file_path", "");
+	}
+
+	public void setCAFilePath(String ca) {
+		setProperty("mqtt.ca_file_path", ca);
+	}
+
+	public String getClientCert2FilePath() {
+		return getPropertyAsString("mqtt.client_cert_file_path", "");
+	}
+
+	public void setClientCert2FilePath(String cert) {
+		setProperty("mqtt.client_cert_file_path", cert);
+	}
+
+	public String getClientPrivateKeyFilePath() {
+		return getPropertyAsString("mqtt.client_key_file_path", "");
+	}
+
+	public void setClientPrivateKeyFilePath(String key) {
+		setProperty("mqtt.client_key_file_path", key);
+	}
+
+	public String getAuthMethod() {
+		return getPropertyAsString(AUTH_METHOD, "");
+	}
+
+	public void setAuthMethod(String authMethod) {
+		setProperty(AUTH_METHOD, authMethod);
+	}
+
+	public String getAuthData() {
+		return getPropertyAsString(AUTH_DATA, "");
+	}
+
+	public void setAuthData(String authData) {
+		setProperty(AUTH_DATA, authData);
 	}
 
 //	public int getConCapacity() {
