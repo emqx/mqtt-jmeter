@@ -35,8 +35,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 	
 	private final JLabeledTextField userNameAuth = new JLabeledTextField("User name:");
 	private final JLabeledTextField passwordAuth = new JLabeledTextField("Password:");
-	private final JLabeledTextField authMethod = new JLabeledTextField("Auth Method:");
-	private final JLabeledTextField authData = new JLabeledTextField("Auth Data:");
 
 	private JLabeledChoice protocols;
 //	private JLabeledChoice clientNames;
@@ -142,13 +140,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		optsPanel.add(userNameAuth);
 		optsPanel.add(passwordAuth);
 		optsPanelCon.add(optsPanel);
-
-//		JPanel optsPanel1 = new HorizontalPanel();
-//		optsPanel1.add(authMethod);
-//		optsPanel1.add(authData);
-//		authMethod.setVisible(false);
-//		authData.setVisible(false);
-//		optsPanelCon.add(optsPanel1);
 		
 		return optsPanelCon;
 	}
@@ -350,8 +341,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 			connCleanStart.setVisible(isMqtt5);
 			connSessionExpiryInterval.setVisible(isMqtt5);
 			connCleanSession.setVisible(!isMqtt5);
-//			authMethod.setVisible(isMqtt5);
-//			authData.setVisible(isMqtt5);
 		}
 	}
 
@@ -403,8 +392,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 
 		userNameAuth.setText(sampler.getUserNameAuth());
 		passwordAuth.setText(sampler.getPasswordAuth());
-//		authMethod.setText(sampler.getAuthMethod());
-//		authData.setText(sampler.getAuthData());
 		
 		connNamePrefix.setText(sampler.getConnPrefix());
 		if (sampler.isClientIdSuffix()) {
@@ -447,8 +434,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 
 		sampler.setUserNameAuth(userNameAuth.getText());
 		sampler.setPasswordAuth(passwordAuth.getText());
-//		sampler.setAuthMethod(authMethod.getText());
-//		sampler.setAuthData(authData.getText());
 
 		sampler.setConnPrefix(connNamePrefix.getText());
 		sampler.setClientIdSuffix(connNameSuffix.isSelected());
@@ -495,8 +480,6 @@ public class CommonConnUI implements ChangeListener, ActionListener, Constants{
 		
 		userNameAuth.setText("");
 		passwordAuth.setText("");
-//		authMethod.setText("");
-//		authData.setText("");
 
 		connNamePrefix.setText(DEFAULT_CONN_PREFIX_FOR_CONN);
 		connNameSuffix.setSelected(true);

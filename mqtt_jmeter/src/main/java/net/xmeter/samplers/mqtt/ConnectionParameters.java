@@ -27,8 +27,6 @@ public class ConnectionParameters {
     private long sessionExpiryInterval;
     private Map<String, String> connUserProperty;
     private Map<String, String> connWsHeader;
-    private String authMethod;
-    private String authData;
 
     public MQTTSsl getSsl() {
         return ssl;
@@ -219,21 +217,5 @@ public class ConnectionParameters {
                 "cleanStart='" + cleanStart + '\'' +
                 "sessionExpiryInterval='" + sessionExpiryInterval + '\'' +
                 '}';
-    }
-
-    public String getAuthMethod() {
-        return authMethod;
-    }
-
-    public void setAuthMethod(String authMethod) {
-        this.authMethod = authMethod;
-    }
-
-    public String getAuthData() {
-        return authData;
-    }
-
-    public void setAuthData(String authData) {
-        this.authData = authData;
     }
 }

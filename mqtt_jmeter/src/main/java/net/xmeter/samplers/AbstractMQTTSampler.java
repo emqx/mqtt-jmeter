@@ -257,22 +257,6 @@ public abstract class AbstractMQTTSampler extends AbstractSampler implements Con
 		setProperty("mqtt.client_key_file_path", key);
 	}
 
-	public String getAuthMethod() {
-		return getPropertyAsString(AUTH_METHOD, "");
-	}
-
-	public void setAuthMethod(String authMethod) {
-		setProperty(AUTH_METHOD, authMethod);
-	}
-
-	public String getAuthData() {
-		return getPropertyAsString(AUTH_DATA, "");
-	}
-
-	public void setAuthData(String authData) {
-		setProperty(AUTH_DATA, authData);
-	}
-
 //	public int getConCapacity() {
 //		return conCapacity;
 //	}

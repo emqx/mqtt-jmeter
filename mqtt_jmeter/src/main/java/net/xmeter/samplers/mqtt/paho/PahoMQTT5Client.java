@@ -73,14 +73,6 @@ public class PahoMQTT5Client implements MQTTClient {
             connectOptions.setCustomWebSocketHeaders(parameters.getConnWsHeader());
         }
 
-//        if (parameters.getAuthMethod() != null && !parameters.getAuthMethod().isEmpty()) {
-//            connectOptions.setAuthMethod(parameters.getAuthMethod());
-//        }
-
-//        if (parameters.getAuthData() != null && !parameters.getAuthData().isEmpty()) {
-//            connectOptions.setAuthData(parameters.getAuthData().getBytes());
-//        }
-
         try {
             client.connect(connectOptions)
                     .waitForCompletion(parameters.getConnectTimeout() * 1000L);

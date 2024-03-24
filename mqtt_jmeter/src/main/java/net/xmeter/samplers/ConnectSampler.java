@@ -80,8 +80,6 @@ public class ConnectSampler extends AbstractMQTTSampler {
 			parameters.setCleanStart(Boolean.parseBoolean(getConnCleanStart()));
 			parameters.setSessionExpiryInterval(Long.parseLong(getConnSessionExpiryInterval()));
 			parameters.setConnWsHeader(getWsHeader());
-			parameters.setAuthMethod(getAuthMethod());
-			parameters.setAuthData(getAuthData());
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, "Failed to establish Connection " + connection , e);
 			result.setSuccessful(false);
