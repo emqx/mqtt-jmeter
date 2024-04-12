@@ -143,8 +143,7 @@ public class PubSampler extends AbstractMQTTSampler {
 				System.arraycopy(timePrefix, 0, toSend, 0, timePrefix.length);
 				System.arraycopy(tmp, 0, toSend, timePrefix.length , tmp.length);
 			} else {
-				toSend = new byte[tmp.length];
-				System.arraycopy(tmp, 0, toSend, 0 , tmp.length);
+				toSend = tmp;
 			}
 			
 			result.sampleStart();
@@ -155,7 +154,12 @@ public class PubSampler extends AbstractMQTTSampler {
 			MQTTPubResult pubResult = connection.publish(topicName, toSend, qos_enum, retainedMsg);
 			
 			result.sampleEnd();
-			result.setSamplerData(new String(toSend));
+			//only keep the first 1024 characters in sampler data
+			if (toSend.length <= 1024) {
+				result.setSamplerData(new String(toSend));
+			} else {
+				result.setSamplerData(new String(toSend).substring(0, 1024) + "...");
+			}
 			result.setSentBytes(toSend.length);
 			result.setLatency(result.getEndTime() - result.getStartTime());
 			result.setSuccessful(pubResult.isSuccessful());
@@ -169,8 +173,8 @@ public class PubSampler extends AbstractMQTTSampler {
 				result.setResponseMessage(MessageFormat.format("Publish failed for connection {0}.", connection));
 				result.setResponseData(MessageFormat.format("Client [{0}] publish failed: {1}", (clientId == null ? "null" : clientId), pubResult.getError().orElse("")).getBytes());
 				result.setResponseCode("501");
-				logger.info(MessageFormat.format("** [clientId: {0}, topic: {1}, payload: {2}] Publish failed for connection {3}.", (clientId == null ? "null" : clientId),
-						topicName, new String(toSend), connection));
+				logger.info(MessageFormat.format("** [clientId: {0}, topic: {1}] Publish failed for connection {2}.", (clientId == null ? "null" : clientId),
+						topicName, connection));
 				pubResult.getError().ifPresent(logger::info);
 			}
 		} catch (Exception ex) {
