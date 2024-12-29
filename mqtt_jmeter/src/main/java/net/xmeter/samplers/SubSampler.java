@@ -171,7 +171,7 @@ public class SubSampler extends AbstractMQTTSampler {
 							lockReleased = false;
 							long endtime = System.currentTimeMillis() + sampleCountTimeout;
 							long currenttime = 0;
-							while (!lockReleased || currenttime < endtime) {
+							while (!lockReleased && currenttime < endtime) {
 								dataLock.wait(sampleCountTimeout);
 								currenttime = System.currentTimeMillis();
 							}
