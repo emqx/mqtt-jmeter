@@ -16,7 +16,7 @@ jobs:
     permissions:
       issues: write # Grant permission to edit issues
     steps:
-    - uses: emqx/translate-issue-action@be39c04f87a06a4d773c582d1e23ecb3b118a404
+    - uses: emqx/translate-issue-action@f63fa743df6f60643e6bd13322e73e4bd7b1c678
       with:
         issue_number: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number || github.event.issue.number }}
         gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
