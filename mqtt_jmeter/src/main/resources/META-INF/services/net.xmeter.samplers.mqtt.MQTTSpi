@@ -1,2 +1,3 @@
 net.xmeter.samplers.mqtt.fuse.FuseMQTTSpi
 net.xmeter.samplers.mqtt.hivemq.HiveMQTTSpi
+net.xmeter.samplers.mqtt.paho.PahoMQTTSpi

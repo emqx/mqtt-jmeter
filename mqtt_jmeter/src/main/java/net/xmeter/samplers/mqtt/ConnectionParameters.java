@@ -1,6 +1,11 @@
 package net.xmeter.samplers.mqtt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.xmeter.Util;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ConnectionParameters {
     private MQTTSsl ssl;
@@ -17,6 +22,11 @@ public class ConnectionParameters {
     private String password;
     private boolean cleanSession;
     private String path;
+
+    private boolean cleanStart;
+    private long sessionExpiryInterval;
+    private Map<String, String> connUserProperty;
+    private Map<String, String> connWsHeader;
 
     public MQTTSsl getSsl() {
         return ssl;
@@ -137,5 +147,75 @@ public class ConnectionParameters {
 
     public boolean isWebSocketProtocol() {
         return Util.isWebSocketProtocol(getProtocol());
+    }
+
+    public boolean isCleanStart() {
+        return cleanStart;
+    }
+
+    public void setCleanStart(boolean cleanStart) {
+        this.cleanStart = cleanStart;
+    }
+
+    public long getSessionExpiryInterval() {
+        return sessionExpiryInterval;
+    }
+
+    public void setSessionExpiryInterval(long sessionExpiryInterval) {
+        this.sessionExpiryInterval = sessionExpiryInterval;
+    }
+
+    public Map<String, String> getConnUserProperty() {
+        return connUserProperty;
+    }
+
+    public void setConnUserProperty(String userPropertyJson) {
+        if (userPropertyJson == null || userPropertyJson.isEmpty()) {
+            this.connUserProperty = new HashMap<>();
+            return;
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        try{
+            this.connUserProperty = mapper.readValue(userPropertyJson, Map.class);
+        }catch (IOException e){
+            this.connUserProperty = new HashMap<>();
+            e.printStackTrace();
+        }
+    }
+
+    public Map<String, String> getConnWsHeader() {
+        return connWsHeader;
+    }
+
+    public void setConnWsHeader(String wsHeaderJson) {
+        if (wsHeaderJson == null || wsHeaderJson.isEmpty()) {
+            this.connWsHeader = new HashMap<>();
+            return;
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        try{
+            this.connWsHeader = mapper.readValue(wsHeaderJson, Map.class);
+        }catch (IOException e){
+            this.connWsHeader = new HashMap<>();
+            e.printStackTrace();
+        }
+    }
+
+    public boolean shouldAutomaticReconnectWithDefaultConfig(){
+        return reconnectMaxAttempts == -1 || reconnectMaxAttempts > 0;
+    }
+
+    @Override
+    public String toString() {
+        return "ConnectionParameters{" +
+                "host='" + host + '\'' +
+                "port='" + port + '\'' +
+                "version='" + version + '\'' +
+                "connUserProperty='" + connUserProperty + '\'' +
+                "cleanStart='" + cleanStart + '\'' +
+                "sessionExpiryInterval='" + sessionExpiryInterval + '\'' +
+                '}';
     }
 }
