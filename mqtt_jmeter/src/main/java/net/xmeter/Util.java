@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.SecureRandom;
+import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -18,9 +19,23 @@ import net.xmeter.samplers.AbstractMQTTSampler;
 
 public class Util implements Constants {
 	
-	private static SecureRandom random = new SecureRandom();
+	private static Random random = new Random();
     private static char[] seeds = "abcdefghijklmnopqrstuvwxmy0123456789".toCharArray();
     private static final Logger logger = Logger.getLogger(Util.class.getCanonicalName());
+    
+    private static String[] longChunks = new String[16];
+    private static final int PAYLOAD_CHUNK_SIZE = 4096;
+    
+    static {
+    	for (int i = 0; i < longChunks.length; i++) {
+    		StringBuffer res = new StringBuffer();
+    		for(int j = 0; j < 4096; j++) {
+    			res.append(seeds[random.nextInt(seeds.length - 1)]);
+    		}
+    		longChunks[i] = res.toString();
+    	}
+		
+    }
 
 	public static String generateClientId(String prefix) {
 		int leng = prefix.length();
@@ -37,12 +52,12 @@ public class Util implements Constants {
 
 	public static SSLContext getContext(AbstractMQTTSampler sampler) throws Exception {
 		if (!sampler.isDualSSLAuth()) {
-			logger.info("Configured with non-dual SSL.");
+			logger.fine("Configured with non-dual SSL.");
 			SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
 			sslContext.init(null, new TrustManager[] {new AcceptAllTrustManager()}, new SecureRandom());
 			return sslContext;
 		} else {
-			logger.info("Configured with dual SSL, trying to load client certification.");
+			logger.fine("Configured with dual SSL, trying to load client certification.");
 //			String KEYSTORE_PASS = sampler.getKeyStorePassword();
 			String CLIENTCERT_PASS = sampler.getClientCertPassword();
 
@@ -95,10 +110,39 @@ public class Util implements Constants {
 
 	public static String generatePayload(int size) {
 		StringBuffer res = new StringBuffer();
-		for(int i = 0; i < size; i++) {
-			res.append(seeds[random.nextInt(seeds.length - 1)]);
+		if (size <= PAYLOAD_CHUNK_SIZE) {
+			for(int i = 0; i < size; i++) {
+				res.append(seeds[random.nextInt(seeds.length - 1)]);
+			}
+		} else {
+			int block = size / PAYLOAD_CHUNK_SIZE;
+			int remainSize = size % PAYLOAD_CHUNK_SIZE;
+			int[] indices = randomIndices(longChunks.length);
+			for(int i=0; i<block; i++) {
+				int ind = block % 10;
+				res.append(longChunks[indices[ind]]);
+			}
+			res.append(randomChunkPiece(remainSize));
 		}
 		return res.toString();
+	}
+	
+	private static int[] randomIndices(int length) {
+		int[] indices = new int[10];
+		int val = random.nextInt(Integer.MAX_VALUE);
+		String str = String.format("%010d", val);
+		for (int i = 0; i < indices.length; i++) {
+			int intVal = Character.getNumericValue(str.charAt(i)) % length;
+			indices[i] = intVal;
+		}
+		return indices;
+	}
+	
+	private static String randomChunkPiece(int remainSize) {
+		int start = random.nextInt(PAYLOAD_CHUNK_SIZE - remainSize + 1);
+		int end = start + remainSize;
+		int randomInd = random.nextInt(longChunks.length);
+		return longChunks[randomInd].substring(start, end);
 	}
 
 	public static boolean isSecureProtocol(String protocol) {
