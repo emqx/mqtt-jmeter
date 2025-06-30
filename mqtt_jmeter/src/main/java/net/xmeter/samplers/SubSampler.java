@@ -1,5 +1,13 @@
 package net.xmeter.samplers;
 
+import net.xmeter.SubBean;
+import net.xmeter.samplers.mqtt.MQTTConnection;
+import net.xmeter.samplers.mqtt.MQTTQoS;
+import org.apache.jmeter.samplers.Entry;
+import org.apache.jmeter.samplers.SampleResult;
+import org.apache.jmeter.threads.JMeterContextService;
+import org.apache.jmeter.threads.JMeterVariables;
+
 import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.List;
@@ -8,15 +16,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.apache.jmeter.samplers.Entry;
-import org.apache.jmeter.samplers.SampleResult;
-import org.apache.jmeter.threads.JMeterContextService;
-import org.apache.jmeter.threads.JMeterVariables;
-
-import net.xmeter.SubBean;
-import net.xmeter.samplers.mqtt.MQTTConnection;
-import net.xmeter.samplers.mqtt.MQTTQoS;
 
 @SuppressWarnings("deprecation")
 public class SubSampler extends AbstractMQTTSampler {
@@ -28,11 +27,12 @@ public class SubSampler extends AbstractMQTTSampler {
 	private boolean subFailed = false;
 	
 	private boolean sampleByTime = true; // initial values
-	private int sampleElapsedTime = 1000; 
+	private int sampleElapsedTime = 1000;
 	private int sampleCount = 1;
 
 	private transient ConcurrentLinkedQueue<SubBean> batches = new ConcurrentLinkedQueue<>();
 	private boolean printFlag = false;
+	private boolean asyncActive = false;
 
 	private transient Object dataLock = new Object();
 
@@ -92,6 +92,14 @@ public class SubSampler extends AbstractMQTTSampler {
 		setProperty(DEBUG_RESPONSE, debugResponse);
 	}
 
+	public boolean isAsync() {
+		return getPropertyAsBoolean(SUB_ASYNC, false);
+	}
+
+	public void setAsync(boolean debugResponse) {
+		setProperty(SUB_ASYNC, debugResponse);
+	}
+
 	@Override
 	public SampleResult sample(Entry arg0) {
 		SampleResult result = new SampleResult();
@@ -142,12 +150,25 @@ public class SubSampler extends AbstractMQTTSampler {
 		if (subFailed) {
 			return fillFailedResult(result, "501", "Failed to subscribe to topic(s):" + topicsName);
 		}
-		
-		if(sampleByTime) {
+
+		return doSample(result);
+	}
+
+	private SampleResult doSample(SampleResult result) {
+		JMeterVariables vars = JMeterContextService.getContext().getVariables();
+		final String topicsName= getTopics();
+
+		if (isAsync() && !asyncActive) {
+			asyncActive = true;
+			vars.putObject("sub", this); // save this sampler as thread local variable for response sampler
+			result.sampleStart();
+			return fillOKResult(result, 0, null, "");
+		} else if (sampleByTime) {
 			try {
 				TimeUnit.MILLISECONDS.sleep(sampleElapsedTime);
 			} catch (InterruptedException e) {
 				logger.log(Level.INFO, "Received exception when waiting for notification signal", e);
+				return fillFailedResult(result, "500", "Interrupted");
 			}
 			synchronized (dataLock) {
 				result.sampleStart();
@@ -155,17 +176,20 @@ public class SubSampler extends AbstractMQTTSampler {
 			}
 		} else {
 			synchronized (dataLock) {
-				int receivedCount1 = (batches.isEmpty() ? 0 : batches.element().getReceivedCount());;
+				int receivedCount1 = (batches.isEmpty() ? 0 : batches.element().getReceivedCount());
 				boolean needWait = false;
 				if(receivedCount1 < sampleCount) {
 					needWait = true;
 				}
-				
+
+				logger.fine("Count = " + receivedCount1 + ", Expected = " + sampleCount + ", wait = " + needWait);
+
 				if(needWait) {
 					try {
 						dataLock.wait();
 					} catch (InterruptedException e) {
 						logger.log(Level.INFO, "Received exception when waiting for notification signal", e);
+						return fillFailedResult(result, "500", "Interrupted");
 					}
 				}
 				result.sampleStart();
@@ -173,7 +197,17 @@ public class SubSampler extends AbstractMQTTSampler {
 			}
 		}
 	}
-	
+
+	protected SampleResult produceAsyncResult(SampleResult result, boolean clearResponses) {
+		synchronized (dataLock) {
+			SampleResult result1 = doSample(result);
+			if (result1.isSuccessful() && clearResponses) {
+				batches.clear();
+			}
+			return result1;
+		}
+	}
+
 	private SampleResult produceResult(SampleResult result, String topicName) {
 		SubBean bean = batches.poll();
 		if(bean == null) { // In "elapsed time" mode, return "dummy" when time is reached
